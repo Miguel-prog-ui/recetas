@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recetas</title>
+</head>
+<body>
+    <h1>Lista de Recetas</h1>
+
+    <form method="POST">
+        <label for="ingredientes">Buscar por ingredientes (separados por coma):</label>
+        <input type="text" id="ingredientes" name="ingredientes" value="{{ ingredientes }}">
+        <button type="submit">Buscar</button>
+    </form>
+
+    {% if recetas %}
+        {% for receta in recetas %}
+            <div style="margin-bottom:20px;">
+                <h2>{{ receta.title }}</h2>
+                <p><strong>URL:</strong> <a href="{{ receta.url }}">{{ receta.url }}</a></p>
+                <p><strong>Ingredientes:</strong> {{ receta.ingredients }}</p>
+                <p><strong>Pasos:</strong> {{ receta.steps }}</p>
+                <p><strong>UUID:</strong> {{ receta.uuid }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No se encontraron recetas con esos ingredientes.</p>
+    {% endif %}
+</body>
+</html>
