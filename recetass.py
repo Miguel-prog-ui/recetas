@@ -13,15 +13,14 @@ app.config['MYSQL_DB'] = 'recetas'
 
 mysql = MySQL(app)
 
-# Función para cargar recetas
+# Función para cargar recetas desde la tabla recetass
 def cargar_recetas():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT title, url, ingredients, steps, uuid FROM recetas")
+    cur.execute("SELECT title, url, ingredients, steps, uuid FROM recetass")
     columnas = [desc[0] for desc in cur.description]
     recetas = [dict(zip(columnas, fila)) for fila in cur.fetchall()]
     cur.close()
     return recetas
-
 
 # Página principal: login y registro
 @app.route('/')
@@ -81,7 +80,6 @@ def mostrar_recetas():
             if all(ing in r['ingredients'].lower() for ing in lista_ingredientes)
         ]
     return render_template('recetas.html', recetas=recetas, ingredientes=ingredientes, usuario=session['usuario'])
-
 
 # Cerrar sesión
 @app.route('/logout')
