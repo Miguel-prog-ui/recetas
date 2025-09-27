@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postres - Dulces Tentaciones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #FFF8F0;
+            color: #8B4513;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #D2691E, #FF69B4);
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 20px;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            background-color: #8B4513 !important;
+            color: white !important;
+            padding: 12px 25px !important;
+            border-radius: 25px !important;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            background-color: #654321 !important;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+            background: rgba(255, 255, 255, 0.7);
+            margin: 40px 0;
+            border-radius: 20px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: #D2691E;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: #8B4513;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Filter Section */
+        .filters {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin: 40px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            color: #8B4513;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #FF69B4;
+            background: white;
+            color: #8B4513;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #FF69B4;
+            color: white;
+        }
+
+        .search-section {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .search-section input {
+            padding: 12px 20px;
+            border: 2px solid #FF69B4;
+            border-radius: 25px;
+            font-size: 1rem;
+            width: 250px;
+        }
+
+        .search-section button {
+            padding: 12px 20px;
+            background-color: #D2691E;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .search-section button:hover {
+            background-color: #B8860B;
+        }
+
+        /* Desserts Grid */
+        .desserts-section {
+            padding: 40px 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: #D2691E;
+        }
+
+        .results-count {
+            color: #8B4513;
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+
+        .desserts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .dessert-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dessert-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .dessert-image {
+            height: 220px;
+            background: linear-gradient(135deg, #D2691E, #FF69B4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: white;
+            position: relative;
+        }
+
+        .difficulty-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.9);
+            color: #8B4513;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .dessert-content {
+            padding: 25px;
+        }
+
+        .dessert-card h3 {
+            font-size: 1.4rem;
+            color: #8B4513;
+            margin-bottom: 15px;
+        }
+
+        .dessert-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #D2691E;
+            font-size: 0.95rem;
+        }
+
+        .dessert-description {
+            color: #8B4513;
+            opacity: 0.8;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .dessert-ingredients {
+            background: #FFF8F0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .dessert-ingredients h4 {
+            color: #D2691E;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .ingredients-list {
+            font-size: 0.9rem;
+            color: #8B4513;
+        }
+
+        .dessert-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 12px;
+            background: #D2691E;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #B8860B;
+        }
+
+        .btn-secondary {
+            padding: 12px;
+            background: white;
+            color: #D2691E;
+            border: 2px solid #D2691E;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #D2691E;
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #D2691E;
+        }
+
+        .modal h2 {
+            color: #D2691E;
+            margin-bottom: 20px;
+        }
+
+        .modal-ingredients, .modal-instructions {
+            margin-bottom: 25px;
+        }
+
+        .modal-ingredients h3, .modal-instructions h3 {
+            color: #8B4513;
+            margin-bottom: 15px;
+        }
+
+        .modal-ingredients ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .modal-ingredients li {
+            padding: 8px 0;
+            border-bottom: 1px solid #FFF8F0;
+        }
+
+        .modal-instructions ol {
+            padding-left: 20px;
+        }
+
+        .modal-instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 12px 16px;
+            border: 2px solid #FF69B4;
+            background: white;
+            color: #8B4513;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 45px;
+        }
+
+        .pagination button:hover {
+            background: #FF69B4;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .pagination button.active {
+            background: #D2691E;
+            border-color: #D2691E;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pagination button:disabled:hover {
+            background: white;
+            color: #8B4513;
+            transform: none;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #8B4513;
+            color: white;
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            border-top: 1px solid rgba(255, 248, 240, 0.2);
+            padding-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-section {
+                flex-direction: column;
+            }
+
+            .search-section input {
+                width: 100%;
+            }
+
+            .desserts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" onclick="goHome()">🍰 Dulces Tentaciones</div>
+                <nav class="nav-links">
+                    <a href="#" onclick="goHome()" class="back-btn">← Volver al Inicio</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <span class="hero-icon">🍰</span>
+            <h1>Postres Irresistibles</h1>
+            <p>Descubre una colección exquisita de postres que endulzarán cualquier momento. Desde clásicas tartas hasta innovadores helados, encuentra la receta perfecta para satisfacer tu antojo dulce.</p>
+        </section>
+
+        <section class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Tipo:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterByType('todos')">Todos</button>
+                        <button class="filter-btn" onclick="filterByType('tartas')">Tartas</button>
+                        <button class="filter-btn" onclick="filterByType('pasteles')">Pasteles</button>
+                        <button class="filter-btn" onclick="filterByType('helados')">Helados</button>
+                        <button class="filter-btn" onclick="filterByType('chocolates')">Chocolates</button>
+                        <button class="filter-btn" onclick="filterByType('galletas')">Galletas</button>
+                        <button class="filter-btn" onclick="filterByType('postres-frios')">Postres Fríos</button>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Dificultad:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterByDifficulty('todas')">Todas</button>
+                        <button class="filter-btn" onclick="filterByDifficulty('Fácil')">Fácil</button>
+                        <button class="filter-btn" onclick="filterByDifficulty('Medio')">Medio</button>
+                        <button class="filter-btn" onclick="filterByDifficulty('Difícil')">Difícil</button>
+                    </div>
+                </div>
+
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label>Buscar por nombre:</label>
+                        <input type="text" placeholder="Buscar postres..." id="searchInput">
+                    </div>
+                    <button onclick="searchDesserts()">Buscar</button>
+                </div>
+                
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label>Buscar por ingredientes:</label>
+                        <input type="text" placeholder="Ej: chocolate, vainilla, fresa..." id="ingredientSearch">
+                    </div>
+                    <button onclick="searchByIngredients()">Buscar</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="desserts-section">
+            <div class="section-header">
+                <h2 class="section-title">Nuestros Postres</h2>
+                <span class="results-count" id="resultsCount">24 postres encontrados</span>
+            </div>
+            
+            <div class="desserts-grid" id="dessertsGrid">
+                <!-- Los postres se cargarán dinámicamente -->
+            </div>
+            
+            <!-- Paginación -->
+            <div class="pagination" id="pagination">
+                <!-- Los controles de paginación se cargarán dinámicamente -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para postre completo -->
+    <div id="dessertModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalContent">
+                <!-- Contenido del modal se carga dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Dulces Tentaciones - Sección Postres. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const desserts = [
+            {
+                id: 1,
+                name: "Tarta de Manzana Clásica",
+                type: "tartas",
+                time: "75 min",
+                difficulty: "Medio",
+                icon: "🥧",
+                description: "La clásica tarta de manzana con masa quebrada crujiente y canela aromática",
+                ingredients: ["6 manzanas verdes", "300g harina", "150g mantequilla", "100g azúcar", "1 huevo", "Canela molida", "Azúcar morena", "Limón"],
+                instructions: [
+                    "Prepara masa quebrada mezclando harina, mantequilla fría y huevo",
+                    "Refrigera la masa 30 minutos",
+                    "Pela y corta manzanas en láminas finas",
+                    "Mezcla manzanas con azúcar, canela y jugo de limón",
+                    "Extiende masa en molde engrasado",
+                    "Rellena con manzanas y espolvorea azúcar morena",
+                    "Hornea 45 minutos a 180°C hasta dorar",
+                    "Deja enfriar antes de desmoldar y sirve tibia"
+                ]
+            },
+            {
+                id: 2,
+                name: "Cheesecake de Frutos Rojos",
+                type: "tartas",
+                time: "90 min",
+                difficulty: "Medio",
+                icon: "🍰",
+                description: "Cremoso cheesecake con base de galletas y coulis de frutos rojos frescos",
+                ingredients: ["500g queso crema", "200g galletas digestivas", "100g mantequilla", "3 huevos", "150g azúcar", "300g frutos rojos mixtos", "Gelatina sin sabor", "Vainilla"],
+                instructions: [
+                    "Tritura galletas y mezcla con mantequilla derretida",
+                    "Forma base compacta en molde desmontable",
+                    "Bate queso crema hasta suavizar",
+                    "Incorpora azúcar, huevos y vainilla gradualmente",
+                    "Vierte mezcla sobre la base",
+                    "Hornea 45 minutos a 160°C en baño maría",
+                    "Prepara coulis con frutos rojos y azúcar",
+                    "Refrigera 4 horas y decora con coulis antes de servir"
+                ]
+            },
+            {
+                id: 3,
+                name: "Red Velvet Cake",
+                type: "pasteles",
+                time: "60 min",
+                difficulty: "Difícil",
+                icon: "🎂",
+                description: "Espectacular pastel rojo aterciopelado con frosting de queso crema",
+                ingredients: ["300g harina", "300g azúcar", "250ml buttermilk", "2 huevos", "125ml aceite", "Colorante rojo", "Cacao en polvo", "500g queso crema", "Azúcar glass"],
+                instructions: [
+                    "Precalienta horno a 180°C",
+                    "Mezcla ingredientes secos en un bowl",
+                    "Combina líquidos con colorante rojo",
+                    "Integra ambas mezclas suavemente",
+                    "Divide en dos moldes engrasados",
+                    "Hornea 25-30 minutos hasta que al insertar palillo salga limpio",
+                    "Prepara frosting batiendo queso crema con azúcar glass",
+                    "Arma pastel alternando capas de bizcocho y frosting"
+                ]
+            },
+            {
+                id: 4,
+                name: "Helado de Vainilla Artesanal",
+                type: "helados",
+                time: "45 min + congelado",
+                difficulty: "Medio",
+                icon: "🍦",
+                description: "Cremoso helado de vainilla natural hecho en casa con ingredientes premium",
+                ingredients: ["500ml crema de leche", "250ml leche entera", "150g azúcar", "6 yemas de huevo", "2 vainas de vainilla", "Pizca de sal"],
+                instructions: [
+                    "Calienta leche y crema con vainas de vainilla abiertas",
+                    "Bate yemas con azúcar hasta blanquear",
+                    "Templa yemas con leche caliente gradualmente",
+                    "Cocina a fuego bajo hasta que cubra cuchara (85°C)",
+                    "Cuela y enfría completamente",
+                    "Procesa en heladera según instrucciones del fabricante",
+                    "Si no tienes heladera, congela batiendo cada 30 minutos",
+                    "Sirve en copas o conos decorados"
+                ]
+            },
+            {
+                id: 5,
+                name: "Brownies de Chocolate Intenso",
+                type: "chocolates",
+                time: "35 min",
+                difficulty: "Fácil",
+                icon: "🍫",
+                description: "Brownies húmedos y chocolatosos con trozos de chocolate y nueces",
+                ingredients: ["200g chocolate negro 70%", "150g mantequilla", "200g azúcar morena", "3 huevos", "100g harina", "50g cacao", "100g nueces", "Sal"],
+                instructions: [
+                    "Precalienta horno a 180°C",
+                    "Derrite chocolate con mantequilla al baño maría",
+                    "Bate huevos con azúcar hasta espumar",
+                    "Incorpora chocolate derretido tibio",
+                    "Añade harina tamizada con cacao y sal",
+                    "Agrega nueces picadas",
+                    "Vierte en molde cuadrado engrasado",
+                    "Hornea 25 minutos, debe quedar húmedo en el centro"
+                ]
+            },
+            {
+                id: 6,
+                name: "Galletas Chocolate Chip",
+                type: "galletas",
+                time: "25 min",
+                difficulty: "Fácil",
+                icon: "🍪",
+                description: "Clásicas galletas americanas con chips de chocolate, crujientes por fuera y suaves por dentro",
+                ingredients: ["250g harina", "125g mantequilla", "100g azúcar blanca", "100g azúcar morena", "1 huevo", "200g chips chocolate", "Vainilla", "Bicarbonato"],
+                instructions: [
+                    "Precalienta horno a 190°C",
+                    "Bate mantequilla con ambos azúcares hasta cremar",
+                    "Añade huevo y vainilla",
+                    "Incorpora harina tamizada con bicarbonato",
+                    "Agrega chips de chocolate",
+                    "Forma bolitas y coloca en bandeja con papel",
+                    "Hornea 10-12 minutos hasta dorar bordes",
+                    "Deja enfriar en rejilla"
+                ]
+            },
+            {
+                id: 7,
+                name: "Panna Cotta de Fresa",
+                type: "postres-frios",
+                time: "30 min + refrigerado",
+                difficulty: "Medio",
+                icon: "🍓",
+                description: "Sedoso postre italiano con sabor a fresa y textura aterciopelada",
+                ingredients: ["500ml crema de leche", "100g azúcar", "7g gelatina sin sabor", "300g fresas frescas", "Jugo de limón", "Menta fresca"],
+                instructions: [
+                    "Hidrata gelatina en agua fría",
+                    "Calienta 200ml de crema con azúcar",
+                    "Disuelve gelatina en crema caliente",
+                    "Añade crema restante fría",
+                    "Licúa mitad de fresas con azúcar",
+                    "Mezcla puré de fresas con crema",
+                    "Vierte en moldes individuales",
+                    "Refrigera 4 horas y decora con fresas y menta"
+                ]
+            },
+            {
+                id: 8,
+                name: "Tiramisú Clásico",
+                type: "postres-frios",
+                time: "45 min + refrigerado",
+                difficulty: "Difícil",
+                icon: "☕",
+                description: "El auténtico tiramisú italiano con capas de café, mascarpone y cacao",
+                ingredients: ["500g mascarpone", "6 huevos", "100g azúcar", "300ml café espresso fuerte", "2 cdas licor de café", "300g bizcochos savoiardi", "Cacao en polvo amargo"],
+                instructions: [
+                    "Separa yemas de claras de huevo",
+                    "Bate yemas con azúcar hasta blanquear",
+                    "Incorpora mascarpone suavemente",
+                    "Monta claras a punto de nieve firme",
+                    "Mezcla con movimientos envolventes",
+                    "Combina café frío con licor",
+                    "Remoja bizcochos rápidamente y coloca en molde",
+                    "Alterna capas de bizcocho y crema, refrigera 6 horas y espolvorea cacao"
+                ]
+            },
+            {
+                id: 9,
+                name: "Tarta de Chocolate y Caramelo",
+                type: "tartas",
+                time: "90 min",
+                difficulty: "Difícil",
+                icon: "🍫",
+                description: "Lujosa tarta con base de chocolate, caramelo salado y ganache brillante",
+                ingredients: ["300g chocolate negro", "200g mantequilla", "150g azúcar", "3 huevos", "100g harina", "200ml crema", "150g azúcar para caramelo", "Sal marina"],
+                instructions: [
+                    "Prepara base de chocolate mezclando chocolate derretido con mantequilla",
+                    "Añade azúcar, huevos y harina",
+                    "Hornea base 20 minutos a 180°C",
+                    "Prepara caramelo con azúcar hasta color ámbar",
+                    "Añade crema caliente cuidadosamente",
+                    "Agrega sal marina y deja enfriar",
+                    "Vierte caramelo sobre base fría",
+                    "Cubre con ganache de chocolate y refrigera 2 horas"
+                ]
+            },
+            {
+                id: 10,
+                name: "Helado de Chocolate Belga",
+                type: "helados",
+                time: "50 min + congelado",
+                difficulty: "Medio",
+                icon: "🍨",
+                description: "Rico helado de chocolate belga con textura cremosa y sabor intenso",
+                ingredients: ["400ml leche", "300ml crema", "200g chocolate belga", "150g azúcar", "6 yemas", "2 cdas cacao puro", "Vainilla"],
+                instructions: [
+                    "Calienta leche con crema y cacao",
+                    "Derrite chocolate en la mezcla caliente",
+                    "Bate yemas con azúcar hasta espumar",
+                    "Templa yemas con mezcla de chocolate",
+                    "Cocina hasta que espese sin hervir",
+                    "Cuela y añade vainilla",
+                    "Enfría completamente",
+                    "Procesa en heladera o congela batiendo frecuentemente"
+                ]
+            },
+            {
+                id: 11,
+                name: "Pastel Tres Leches",
+                type: "pasteles",
+                time: "70 min + refrigerado",
+                difficulty: "Medio",
+                icon: "🥛",
+                description: "Esponjoso pastel empapado en mezcla de tres leches con merengue suave",
+                ingredients: ["200g harina", "200g azúcar", "5 huevos", "1 taza leche evaporada", "1 taza leche condensada", "200ml crema", "3 claras", "Canela"],
+                instructions: [
+                    "Bate huevos con azúcar hasta triplicar volumen",
+                    "Incorpora harina tamizada suavemente",
+                    "Hornea en molde engrasado 25 min a 180°C",
+                    "Mezcla las tres leches",
+                    "Perfora bizcocho con tenedor",
+                    "Vierte mezcla de leches lentamente",
+                    "Prepara merengue con claras y azúcar",
+                    "Cubre pastel y refrigera toda la noche"
+                ]
+            },
+            {
+                id: 12,
+                name: "Mousse de Chocolate Negro",
+                type: "chocolates",
+                time: "30 min + refrigerado",
+                difficulty: "Medio",
+                icon: "🍫",
+                description: "Aéreo mousse de chocolate negro con textura sedosa y sabor profundo",
+                ingredients: ["200g chocolate negro 70%", "6 huevos", "50g azúcar", "200ml crema para batir", "1 cda licor (opcional)", "Cacao para decorar"],
+                instructions: [
+                    "Derrite chocolate al baño maría",
+                    "Separa yemas de claras",
+                    "Bate yemas con azúcar hasta blanquear",
+                    "Incorpora chocolate tibio y licor",
+                    "Monta claras a punto de nieve",
+                    "Bate crema hasta formar picos",
+                    "Mezcla todo con movimientos envolventes",
+                    "Refrigera 3 horas en copas individuales"
+                ]
+            },
+            {
+                id: 13,
+                name: "Helado de Fresa Natural",
+                type: "helados",
+                time: "40 min + congelado",
+                difficulty: "Fácil",
+                icon: "🍓",
+                description: "Refrescante helado de fresas naturales con trozos de fruta",
+                ingredients: ["500g fresas maduras", "150g azúcar", "300ml crema", "200ml leche", "Jugo de 1 limón", "2 cdas miel"],
+                instructions: [
+                    "Lava y corta fresas en trozos",
+                    "Macera con azúcar y limón 30 minutos",
+                    "Licúa 3/4 de las fresas hasta suavizar",
+                    "Mezcla puré con leche, crema y miel",
+                    "Añade fresas restantes en trozos",
+                    "Procesa en heladera según instrucciones",
+                    "Si no tienes heladera, congela batiendo cada hora",
+                    "Sirve decorado con fresas frescas"
+                ]
+            },
+            {
+                id: 14,
+                name: "Galletas de Avena y Pasas",
+                type: "galletas",
+                time: "30 min",
+                difficulty: "Fácil",
+                icon: "🍪",
+                description: "Saludables galletas de avena con pasas, canela y textura rústica",
+                ingredients: ["200g avena", "150g harina integral", "100g mantequilla", "100g azúcar morena", "1 huevo", "100g pasas", "Canela", "Bicarbonato"],
+                instructions: [
+                    "Precalienta horno a 180°C",
+                    "Mezcla avena, harina, canela y bicarbonato",
+                    "Bate mantequilla con azúcar morena",
+                    "Añade huevo y mezcla",
+                    "Incorpora ingredientes secos",
+                    "Agrega pasas hidratadas",
+                    "Forma galletas en bandeja con papel",
+                    "Hornea 15 minutos hasta dorar"
+                ]
+            },
+            {
+                id: 15,
+                name: "Flan de Vainilla Casero",
+                type: "postres-frios",
+                time: "60 min + refrigerado",
+                difficulty: "Medio",
+                icon: "🍮",
+                description: "Clásico flan de vainilla con caramelo dorado y textura sedosa",
+                ingredients: ["6 huevos enteros", "500ml leche entera", "150g azúcar", "2 cdas esencia vainilla", "100g azúcar para caramelo"],
+                instructions: [
+                    "Prepara caramelo con azúcar hasta color ámbar",
+                    "Vierte caramelo en moldes individuales",
+                    "Calienta leche con vainilla sin hervir",
+                    "Bate huevos con azúcar suavemente",
+                    "Incorpora leche tibia a huevos",
+                    "Cuela mezcla para eliminar grumos",
+                    "Vierte sobre caramelo en moldes",
+                    "Cocina al baño maría 45 minutos hasta cuajar"
+                ]
+            },
+            {
+                id: 16,
+                name: "Tarta de Limón Merengada",
+                type: "tartas",
+                time: "80 min",
+                difficulty: "Difícil",
+                icon: "🍋",
+                description: "Refrescante tarta de limón con crema cítrica y merengue dorado",
+                ingredients: ["300g harina", "150g mantequilla", "4 limones", "4 huevos", "200g azúcar", "100g maicena", "3 claras extra", "Ralladura de limón"],
+                instructions: [
+                    "Prepara masa quebrada y hornea base ciega",
+                    "Exprime limones y ralla cáscara",
+                    "Bate yemas con 150g azúcar",
+                    "Añade jugo, ralladura y maicena",
+                    "Cocina hasta espesar removiendo constantemente",
+                    "Vierte crema sobre base horneada",
+                    "Prepara merengue con claras y azúcar restante",
+                    "Cubre tarta y dora merengue en horno"
+                ]
+            },
+            {
+                id: 17,
+                name: "Carrot Cake con Frosting",
+                type: "pasteles",
+                time: "65 min",
+                difficulty: "Medio",
+                icon: "🥕",
+                description: "Húmedo pastel de zanahoria con especias y frosting de queso crema",
+                ingredients: ["300g zanahorias ralladas", "250g harina", "200g azúcar morena", "3 huevos", "200ml aceite", "Canela", "Nuez moscada", "500g queso crema", "Nueces"],
+                instructions: [
+                    "Precalienta horno a 180°C",
+                    "Mezcla harina con especias",
+                    "Bate huevos con azúcar y aceite",
+                    "Incorpora zanahoria rallada",
+                    "Añade harina y nueces picadas",
+                    "Hornea en molde engrasado 45 minutos",
+                    "Prepara frosting con queso crema y azúcar glass",
+                    "Decora pastel frío con frosting y nueces"
+                ]
+            },
+            {
+                id: 18,
+                name: "Trufas de Chocolate",
+                type: "chocolates",
+                time: "40 min + refrigerado",
+                difficulty: "Medio",
+                icon: "🍫",
+                description: "Elegantes trufas de chocolate con ganache cremoso y cobertura de cacao",
+                ingredients: ["300g chocolate negro", "200ml crema", "2 cdas mantequilla", "2 cdas licor", "Cacao en polvo", "Coco rallado", "Almendras picadas"],
+                instructions: [
+                    "Pica chocolate finamente",
+                    "Calienta crema sin hervir",
+                    "Vierte sobre chocolate y mezcla hasta derretir",
+                    "Añade mantequilla y licor",
+                    "Refrigera ganache 2 horas hasta firmar",
+                    "Forma bolitas con las manos",
+                    "Rueda en cacao, coco o almendras",
+                    "Conserva refrigerado hasta servir"
+                ]
+            },
+            {
+                id: 19,
+                name: "Gelatina de Frutas Mixtas",
+                type: "postres-frios",
+                time: "25 min + refrigerado",
+                difficulty: "Fácil",
+                icon: "🍇",
+                description: "Colorida gelatina con frutas frescas en capas transparentes",
+                ingredients: ["20g gelatina sin sabor", "500ml agua", "150g azúcar", "Jugo de limón", "200g frutas mixtas", "Menta fresca"],
+                instructions: [
+                    "Hidrata gelatina en agua fría",
+                    "Calienta parte del agua con azúcar",
+                    "Disuelve gelatina en agua caliente",
+                    "Añade agua restante y jugo de limón",
+                    "Deja enfriar hasta temperatura ambiente",
+                    "Distribuye frutas en moldes",
+                    "Vierte gelatina sobre frutas",
+                    "Refrigera 4 horas hasta cuajar completamente"
+                ]
+            },
+            {
+                id: 20,
+                name: "Galletas Alfajores",
+                type: "galletas",
+                time: "50 min",
+                difficulty: "Medio",
+                icon: "🍪",
+                description: "Tradicionales alfajores con dulce de leche y coco rallado",
+                ingredients: ["300g harina", "100g maicena", "200g mantequilla", "100g azúcar glass", "3 yemas", "Dulce de leche", "Coco rallado", "Ralladura limón"],
+                instructions: [
+                    "Mezcla harinas tamizadas",
+                    "Bate mantequilla con azúcar glass",
+                    "Añade yemas y ralladura de limón",
+                    "Incorpora harinas hasta formar masa",
+                    "Refrigera masa 30 minutos",
+                    "Estira y corta círculos",
+                    "Hornea 12 minutos a 180°C",
+                    "Arma alfajores con dulce de leche y coco"
+                ]
+            },
+            {
+                id: 21,
+                name: "Helado de Dulce de Leche",
+                type: "helados",
+                time: "45 min + congelado",
+                difficulty: "Medio",
+                icon: "🍦",
+                description: "Cremoso helado argentino con auténtico dulce de leche",
+                ingredients: ["400ml leche", "300ml crema", "200g dulce de leche", "6 yemas", "100g azúcar", "Vainilla", "Pizca de sal"],
+                instructions: [
+                    "Calienta leche con crema",
+                    "Bate yemas con azúcar hasta blanquear",
+                    "Templa yemas con leche caliente",
+                    "Cocina hasta que cubra cuchara",
+                    "Incorpora dulce de leche tibio",
+                    "Añade vainilla y sal",
+                    "Enfría completamente",
+                    "Procesa en heladera hasta obtener textura cremosa"
+                ]
+            },
+            {
+                id: 22,
+                name: "Tarta de Queso y Arándanos",
+                type: "tartas",
+                time: "85 min",
+                difficulty: "Medio",
+                icon: "🫐",
+                description: "Delicada tarta de queso con arándanos frescos y base crujiente",
+                ingredients: ["400g queso crema", "200g galletas", "100g mantequilla", "3 huevos", "150g azúcar", "200g arándanos", "Ralladura limón", "Mermelada"],
+                instructions: [
+                    "Tritura galletas y mezcla con mantequilla",
+                    "Forma base en molde desmontable",
+                    "Bate queso crema hasta suavizar",
+                    "Añade azúcar, huevos y ralladura",
+                    "Incorpora arándanos suavemente",
+                    "Vierte sobre base y alisa superficie",
+                    "Hornea 50 minutos a 160°C",
+                    "Decora con mermelada de arándanos tibia"
+                ]
+            },
+            {
+                id: 23,
+                name: "Profiteroles con Crema",
+                type: "pasteles",
+                time: "90 min",
+                difficulty: "Difícil",
+                icon: "🧁",
+                description: "Elegantes profiteroles rellenos de crema pastelera y bañados en chocolate",
+                ingredients: ["250ml agua", "125g mantequilla", "150g harina", "4 huevos", "500ml leche", "4 yemas", "100g azúcar", "Maicena", "200g chocolate"],
+                instructions: [
+                    "Hierve agua con mantequilla",
+                    "Añade harina de golpe y mezcla vigorosamente",
+                    "Incorpora huevos de a uno hasta masa lisa",
+                    "Forma bolitas en bandeja con manga",
+                    "Hornea 25 min a 200°C sin abrir horno",
+                    "Prepara crema pastelera con leche, yemas y azúcar",
+                    "Rellena profiteroles fríos con crema",
+                    "Baña con chocolate derretido antes de servir"
+                ]
+            },
+            {
+                id: 24,
+                name: "Crème Brûlée",
+                type: "postres-frios",
+                time: "60 min + refrigerado",
+                difficulty: "Difícil",
+                icon: "🔥",
+                description: "Sofisticado postre francés con crema de vainilla y azúcar caramelizada",
+                ingredients: ["500ml crema espesa", "6 yemas", "100g azúcar", "2 vainas vainilla", "Azúcar extra para caramelizar"],
+                instructions: [
+                    "Calienta crema con vainas de vainilla abiertas",
+                    "Bate yemas con azúcar suavemente",
+                    "Templa yemas con crema caliente",
+                    "Cuela mezcla para eliminar grumos",
+                    "Vierte en moldes individuales",
+                    "Cocina al baño maría 40 min hasta cuajar",
+                    "Refrigera mínimo 4 horas",
+                    "Espolvorea azúcar y carameliza con soplete antes de servir"
+                ]
+            }
+        ];
+
+        let filteredDesserts = [...desserts];
+        let currentTypeFilter = 'todos';
+        let currentDifficultyFilter = 'todas';
+        let currentPage = 1;
+        const itemsPerPage = 8;
+
+        function loadDesserts(dessertsToShow = filteredDesserts) {
+            const dessertsGrid = document.getElementById('dessertsGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            // Calcular paginación
+            const totalItems = dessertsToShow.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentItems = dessertsToShow.slice(startIndex, endIndex);
+            
+            resultsCount.textContent = `${totalItems} postres encontrados`;
+            
+            dessertsGrid.innerHTML = currentItems.map(dessert => `
+                <div class="dessert-card">
+                    <div class="dessert-image">
+                        ${dessert.icon}
+                        <div class="difficulty-badge">${dessert.difficulty}</div>
+                    </div>
+                    <div class="dessert-content">
+                        <h3>${dessert.name}</h3>
+                        <div class="dessert-meta">
+                            <span>⏱️ ${dessert.time}</span>
+                            <span>🍰 ${dessert.type.charAt(0).toUpperCase() + dessert.type.slice(1)}</span>
+                        </div>
+                        <p class="dessert-description">${dessert.description}</p>
+                        <div class="dessert-ingredients">
+                            <h4>Ingredientes principales:</h4>
+                            <div class="ingredients-list">
+                                ${dessert.ingredients.slice(0, 3).join(', ')}...
+                            </div>
+                        </div>
+                        <div class="dessert-actions">
+                            <button class="btn-primary" onclick="viewFullRecipe(${dessert.id})">Ver Receta</button>
+                            <button class="btn-secondary" onclick="addToFavorites(${dessert.id})">❤️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Actualizar paginación
+            updatePagination(totalPages, totalItems);
+        }
+
+        function filterByType(type) {
+            currentTypeFilter = type;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            applyFilters();
+        }
+
+        function filterByDifficulty(difficulty) {
+            currentDifficultyFilter = difficulty;
+            
+            // Actualizar botones activos en el grupo de dificultad
+            const difficultyButtons = document.querySelectorAll('.filter-group')[1].querySelectorAll('.filter-btn');
+            difficultyButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            applyFilters();
+        }
+
+        function updatePagination(totalPages, totalItems) {
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'flex';
+            
+            let paginationHTML = '';
+            
+            // Botón anterior
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    ← Anterior
+                </button>
+            `;
+            
+            // Números de página (siempre del 1 al 10)
+            const maxPages = Math.min(10, totalPages);
+            for (let i = 1; i <= maxPages; i++) {
+                paginationHTML += `
+                    <button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Botón siguiente
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Siguiente →
+                </button>
+            `;
+            
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadDesserts(filteredDesserts);
+            
+            // Scroll suave hacia arriba
+            document.querySelector('.desserts-section').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        function applyFilters() {
+            filteredDesserts = desserts.filter(dessert => {
+                const typeMatch = currentTypeFilter === 'todos' || dessert.type === currentTypeFilter;
+                const difficultyMatch = currentDifficultyFilter === 'todas' || dessert.difficulty === currentDifficultyFilter;
+                return typeMatch && difficultyMatch;
+            });
+            
+            // Resetear a la primera página cuando se aplican filtros
+            currentPage = 1;
+            loadDesserts(filteredDesserts);
+        }
+
+        function searchDesserts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                currentPage = 1;
+                loadDesserts(filteredDesserts);
+                return;
+            }
+            
+            const searchResults = filteredDesserts.filter(dessert => 
+                dessert.name.toLowerCase().includes(searchTerm) ||
+                dessert.description.toLowerCase().includes(searchTerm)
+            );
+            
+            currentPage = 1;
+            loadDesserts(searchResults);
+        }
+
+        function searchByIngredients() {
+            const ingredientSearch = document.getElementById('ingredientSearch').value.toLowerCase();
+            
+            if (!ingredientSearch) {
+                currentPage = 1;
+                loadDesserts(filteredDesserts);
+                return;
+            }
+            
+            // Dividir la búsqueda por comas para buscar múltiples ingredientes
+            const searchIngredients = ingredientSearch.split(',').map(ing => ing.trim());
+            
+            const searchResults = filteredDesserts.filter(dessert => {
+                return searchIngredients.some(searchIng => 
+                    dessert.ingredients.some(ingredient => 
+                        ingredient.toLowerCase().includes(searchIng)
+                    )
+                );
+            });
+            
+            // Ordenar por relevancia (más ingredientes coincidentes primero)
+            searchResults.sort((a, b) => {
+                const aMatches = searchIngredients.filter(searchIng => 
+                    a.ingredients.some(ingredient => 
+                        ingredient.toLowerCase().includes(searchIng)
+                    )
+                ).length;
+                
+                const bMatches = searchIngredients.filter(searchIng => 
+                    b.ingredients.some(ingredient => 
+                        ingredient.toLowerCase().includes(searchIng)
+                    )
+                ).length;
+                
+                return bMatches - aMatches;
+            });
+            
+            currentPage = 1;
+            loadDesserts(searchResults);
+            
+            if (searchResults.length === 0) {
+                alert('No se encontraron postres con esos ingredientes. Intenta con otros como: chocolate, vainilla, fresa, huevo, etc.');
+            }
+        }
+
+        function viewFullRecipe(dessertId) {
+            const dessert = desserts.find(d => d.id === dessertId);
+            const modal = document.getElementById('dessertModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <h2>${dessert.icon} ${dessert.name}</h2>
+                <p style="margin-bottom: 20px; color: #8B4513; opacity: 0.8;">${dessert.description}</p>
+                
+                <div style="display: flex; gap: 20px; margin-bottom: 25px; color: #D2691E;">
+                    <span>⏱️ Tiempo: ${dessert.time}</span>
+                    <span>📊 Dificultad: ${dessert.difficulty}</span>
+                    <span>🍰 Tipo: ${dessert.type.charAt(0).toUpperCase() + dessert.type.slice(1)}</span>
+                </div>
+                
+                <div class="modal-ingredients">
+                    <h3>Ingredientes:</h3>
+                    <ul>
+                        ${dessert.ingredients.map(ingredient => `<li>• ${ingredient}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="modal-instructions">
+                    <h3>Instrucciones:</h3>
+                    <ol>
+                        ${dessert.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
+                    </ol>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn-primary" style="margin-right: 10px;" onclick="addToFavorites(${dessert.id})">Agregar a Favoritos ❤️</button>
+                    <button class="btn-secondary" onclick="shareRecipe(${dessert.id})">Compartir 📤</button>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('dessertModal').style.display = 'none';
+        }
+
+        function addToFavorites(dessertId) {
+            const dessert = desserts.find(d => d.id === dessertId);
+            alert(`¡${dessert.name} agregado a tus favoritos! 💖`);
+        }
+
+        function shareRecipe(dessertId) {
+            const dessert = desserts.find(d => d.id === dessertId);
+            alert(`¡Compartiendo la receta de ${dessert.name}! 📤`);
+        }
+
+        function goHome() {
+            alert('Regresando a la página principal...');
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('dessertModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Permitir búsqueda con Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchDesserts();
+            }
+        });
+
+        document.getElementById('ingredientSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchByIngredients();
+            }
+        });
+
+        // Cargar postres al iniciar
+        window.addEventListener('load', () => {
+            loadDesserts();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9846e692716723ca',t:'MTc1ODc2NTM0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
