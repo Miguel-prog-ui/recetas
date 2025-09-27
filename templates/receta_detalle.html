@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>{{ receta.title if receta else 'Receta no encontrada' }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; background-color: #f4f4f4; }
+        .receta-detalle { background: white; padding: 2em; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .volver { display: inline-block; margin-bottom: 1em; color: #2980b9; text-decoration: none; }
+        .volver:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <a href="/" class="volver">← Volver al buscador</a>
+    
+    {% if receta %}
+    <div class="receta-detalle">
+        <h1>{{ receta.title }}</h1>
+        
+        <h2>🍳 Ingredientes:</h2>
+        <p style="white-space: pre-wrap;">{{ receta.ingredients }}</p>
+        
+        <h2>👩‍🍳 Preparación:</h2>
+        <p style="white-space: pre-wrap;">{{ receta.steps }}</p>
+        
+        {% if receta.url %}
+        <h2>🔗 Fuente original:</h2>
+        <a href="{{ receta.url }}" target="_blank">{{ receta.url }}</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="receta-detalle">
+        <h1>Receta no encontrada</h1>
+        <p>La receta que buscas no existe en nuestra base de datos.</p>
+    </div>
+    {% endif %}
+</body>
+</html>
