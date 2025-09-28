@@ -4,517 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bebidas - Recetas Deliciosas</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Georgia', serif;
-            background-color: #F5F5DC;
-            color: #4A3C38;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header */
-        header {
-            background: linear-gradient(135deg, #E27D60, #FFB347);
-            padding: 20px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            cursor: pointer;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            padding: 10px 15px;
-            border-radius: 20px;
-        }
-
-        .nav-links a:hover {
-            background-color: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
-        }
-
-        .back-btn {
-            background-color: #4A3C38 !important;
-            color: white !important;
-            padding: 12px 25px !important;
-            border-radius: 25px !important;
-            font-weight: bold;
-        }
-
-        .back-btn:hover {
-            background-color: #2d2520 !important;
-        }
-
-        /* Hero Section */
-        .hero {
-            text-align: center;
-            padding: 60px 0;
-            background: rgba(255, 255, 255, 0.5);
-            margin: 40px 0;
-            border-radius: 20px;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            color: #E27D60;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .hero-icon {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            display: block;
-        }
-
-        .hero p {
-            font-size: 1.3rem;
-            color: #4A3C38;
-            opacity: 0.8;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Filter Section */
-        .filters {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            margin: 40px 0;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .filter-row {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .filter-group label {
-            font-weight: bold;
-            color: #4A3C38;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            border: 2px solid #FFB347;
-            background: white;
-            color: #4A3C38;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .filter-btn:hover, .filter-btn.active {
-            background: #FFB347;
-            color: white;
-        }
-
-        .search-section {
-            display: flex;
-            gap: 15px;
-            align-items: end;
-        }
-
-        .search-section input {
-            padding: 12px 20px;
-            border: 2px solid #FFB347;
-            border-radius: 25px;
-            font-size: 1rem;
-            width: 250px;
-        }
-
-        .search-section button {
-            padding: 12px 20px;
-            background-color: #E27D60;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .search-section button:hover {
-            background-color: #d16749;
-        }
-
-        /* Recipes Grid */
-        .recipes-section {
-            padding: 40px 0;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            color: #E27D60;
-        }
-
-        .results-count {
-            color: #4A3C38;
-            opacity: 0.7;
-            font-size: 1.1rem;
-        }
-
-        .recipes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-        }
-
-        .recipe-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .recipe-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-        }
-
-        .recipe-image {
-            height: 220px;
-            background: linear-gradient(135deg, #E27D60, #FFB347);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5rem;
-            color: white;
-            position: relative;
-        }
-
-        .difficulty-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255,255,255,0.9);
-            color: #4A3C38;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .recipe-content {
-            padding: 25px;
-        }
-
-        .recipe-card h3 {
-            font-size: 1.4rem;
-            color: #4A3C38;
-            margin-bottom: 15px;
-        }
-
-        .recipe-meta {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            color: #E27D60;
-            font-size: 0.95rem;
-        }
-
-        .recipe-description {
-            color: #4A3C38;
-            opacity: 0.8;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-        }
-
-        .recipe-ingredients {
-            background: #F5F5DC;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .recipe-ingredients h4 {
-            color: #E27D60;
-            margin-bottom: 10px;
-            font-size: 1rem;
-        }
-
-        .ingredients-list {
-            font-size: 0.9rem;
-            color: #4A3C38;
-        }
-
-        .recipe-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-primary {
-            flex: 1;
-            padding: 12px;
-            background: #E27D60;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: #d16749;
-        }
-
-        .btn-secondary {
-            padding: 12px;
-            background: white;
-            color: #E27D60;
-            border: 2px solid #E27D60;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background: #E27D60;
-            color: white;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 40px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #E27D60;
-        }
-
-        .modal h2 {
-            color: #E27D60;
-            margin-bottom: 20px;
-        }
-
-        .modal-ingredients, .modal-instructions {
-            margin-bottom: 25px;
-        }
-
-        .modal-ingredients h3, .modal-instructions h3 {
-            color: #4A3C38;
-            margin-bottom: 15px;
-        }
-
-        .modal-ingredients ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-
-        .modal-ingredients li {
-            padding: 8px 0;
-            border-bottom: 1px solid #F5F5DC;
-        }
-
-        .modal-instructions ol {
-            padding-left: 20px;
-        }
-
-        .modal-instructions li {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin: 40px 0;
-            flex-wrap: wrap;
-        }
-
-        .pagination button {
-            padding: 12px 16px;
-            border: 2px solid #FFB347;
-            background: white;
-            color: #4A3C38;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            min-width: 45px;
-        }
-
-        .pagination button:hover {
-            background: #FFB347;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .pagination button.active {
-            background: #E27D60;
-            border-color: #E27D60;
-            color: white;
-        }
-
-        .pagination button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .pagination button:disabled:hover {
-            background: white;
-            color: #4A3C38;
-            transform: none;
-        }
-
-        .pagination-info {
-            color: #4A3C38;
-            opacity: 0.7;
-            font-size: 0.95rem;
-            margin: 0 15px;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #4A3C38;
-            color: white;
-            text-align: center;
-            padding: 40px 0;
-            margin-top: 60px;
-        }
-
-        .footer-content {
-            border-top: 1px solid rgba(245, 245, 220, 0.2);
-            padding-top: 20px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .nav-links {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .filter-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-section {
-                flex-direction: column;
-            }
-
-            .search-section input {
-                width: 100%;
-            }
-
-            .recipes-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .section-header {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bebidas.css') }}">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo" onclick="goHome()">🍽️ Recetas Deliciosas</div>
-                <nav class="nav-links">
-                    <a href="#" onclick="goHome()" class="back-btn">← Volver al Inicio</a>
-                </nav>
+                <div class="logo-section">
+                    <!-- Botón de home con icono -->
+                    <a href="/" class="home-btn" onclick="handleHomeClick(event)">
+                        <span class="home-icon">🏠</span>
+                    </a>
+                    <!-- Texto del logo separado -->
+                    <div class="logo-text">Recetas Deliciosas</div>
+                </div>
+                <div class="user-info">
+                    {% if session.usuario %}
+                    <span class="user-name">👤 {{ session.usuario }}</span>
+                    {% else %}
+                    <span class="user-name">👤 Usuario sin registrar</span>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </header>
@@ -815,6 +325,44 @@
         let currentPage = 1;
         const itemsPerPage = 8;
 
+        // 🔥 NUEVA FUNCIÓN: Manejar clic en el botón de home
+        function handleHomeClick(event) {
+            // Si hay búsqueda activa, limpiar antes de redirigir
+            if (hasActiveSearch()) {
+                event.preventDefault();
+                clearActiveSearch();
+            }
+            // Si no hay búsqueda activa, dejar que el enlace funcione normalmente (ir a /)
+        }
+
+        // Función para verificar si hay búsqueda activa
+        function hasActiveSearch() {
+            return filteredDrinks.length !== drinks.length || 
+                   document.getElementById('searchInput').value !== '' ||
+                   document.getElementById('ingredientSearch').value !== '';
+        }
+
+        // Función para limpiar búsqueda activa
+        function clearActiveSearch() {
+            filteredDrinks = [...drinks];
+            currentTypeFilter = 'todos';
+            currentDifficultyFilter = 'todas';
+            currentPage = 1;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('ingredientSearch').value = '';
+            
+            // Resetear botones de filtro
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.textContent === 'Todos' || btn.textContent === 'Todas') {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            loadDrinks();
+        }
+
         function loadDrinks(drinksToShow = filteredDrinks) {
             const recipesGrid = document.getElementById('recipesGrid');
             const resultsCount = document.getElementById('resultsCount');
@@ -1058,10 +606,6 @@
             alert(`¡Compartiendo la receta de ${drink.name}! 📤`);
         }
 
-        function goHome() {
-            alert('Regresando a la página principal...');
-        }
-
         // Cerrar modal al hacer clic fuera
         window.onclick = function(event) {
             const modal = document.getElementById('recipeModal');
@@ -1088,5 +632,5 @@
             loadDrinks();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9846d780975078f6',t:'MTc1ODc2NDcyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

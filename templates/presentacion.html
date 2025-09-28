@@ -10,7 +10,14 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">🍽️ Recetas Deliciosas</div>
+                <div class="logo-section">
+                    <!-- Botón de home con icono -->
+                    <a href="/" class="home-btn" onclick="handleHomeClick(event)">
+                        <span class="home-icon">🏠</span>
+                    </a>
+                    <!-- Texto del logo separado -->
+                    <div class="logo-text">Recetas Deliciosas</div>
+                </div>
                 <div class="header-right">
                     <div class="search-bar">
                         <input type="text" placeholder="Buscar recetas..." id="searchInput">
@@ -19,10 +26,10 @@
                     {% if session.usuario %}
                     <div class="user-section">
                         <span class="user-name">{{ session.usuario }}</span>
-                        <a href="{{ url_for('logout') }}" class="logout-btn">Cerrar sesión</a>
+                        <a href="{{ url_for('logout') }}" class="logout-btn" onclick="handleSessionAction(event)">Cerrar sesión</a>
                     </div>
                     {% else %}
-                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn" onclick="handleSessionAction(event)">Iniciar sesión</a>
                     {% endif %}
                 </div>
             </div>
@@ -30,11 +37,32 @@
     </header>
 
     <main class="container">
+        <!-- Sección Hero -->
         <section class="hero">
             <h1>Descubre Sabores Únicos</h1>
             <p>Explora nuestra colección de recetas cuidadosamente seleccionadas, desde bebidas refrescantes hasta platos de alta cocina que deleitarán tu paladar.</p>
         </section>
 
+        <!-- =========================================== -->
+        <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
+        <!-- Se mostrará aquí, después del Hero y antes de las Categorías -->
+        <!-- =========================================== -->
+        <section id="searchResultsSection" class="search-results-section" style="display: none;">
+            <div class="container">
+                <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
+                <div class="recipes-grid" id="searchResultsGrid"></div>
+            </div>
+        </section>
+
+        <!-- Sección de detalle de receta (oculta inicialmente) -->
+        <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
+            <div class="container">
+                <button onclick="hideRecipeDetail()" class="back-btn">← Volver a los resultados</button>
+                <div id="recipeDetailContent"></div>
+            </div>
+        </section>
+
+        <!-- Sección de Categorías -->
         <section class="categories">
             <h2>Categorías</h2>
             <div class="category-grid">
@@ -70,6 +98,7 @@
             </div>
         </section>
 
+        <!-- Sección de Recetas Destacadas -->
         <section class="recipes-section">
             <div class="container">
                 <h2 class="section-title">Recetas Destacadas</h2>
@@ -122,8 +151,65 @@
         };
 
         let currentCategory = null;
+        let currentSearchResults = [];
+
+        // 🔥 NUEVA FUNCIÓN: Manejar clic en el botón de home
+        function handleHomeClick(event) {
+            // Si hay búsqueda activa, limpiar antes de redirigir
+            if (hasActiveSearch()) {
+                event.preventDefault(); // Prevenir la navegación inmediata
+                clearActiveSearch();
+            }
+            // Si no hay búsqueda activa, dejar que el enlace funcione normalmente (ir a /)
+        }
+
+        // Función para manejar acciones de sesión
+        function handleSessionAction(event) {
+            // Si hay búsqueda activa, limpiar antes de redirigir
+            if (hasActiveSearch()) {
+                event.preventDefault(); // Prevenir la navegación inmediata
+                
+                // Limpiar búsqueda activa
+                clearActiveSearch();
+                
+                // Esperar un momento para que se limpie la interfaz y luego redirigir
+                setTimeout(() => {
+                    // Usar la URL del enlace para la redirección
+                    window.location.href = event.target.href;
+                }, 100);
+            }
+            // Si no hay búsqueda activa, dejar que el enlace funcione normalmente
+        }
+
+        // Función para limpiar búsqueda activa
+        function clearActiveSearch() {
+            hideSearchResults();
+            hideRecipeDetail();
+            document.getElementById('searchInput').value = '';
+            currentSearchResults = [];
+            
+            // Mostrar contenido principal
+            document.querySelector('.categories').style.display = 'block';
+            document.querySelector('.recipes-section').style.display = 'block';
+            
+            // Recargar recetas destacadas
+            const firstCategory = document.querySelector('.category-card');
+            if (firstCategory) {
+                selectCategory('bebidas', firstCategory);
+            }
+            
+            // Desplazar hacia arriba
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
 
         function selectCategory(category, element) {
+            // Ocultar resultados de búsqueda y mostrar contenido principal
+            hideSearchResults();
+            hideRecipeDetail();
+            
             document.querySelectorAll('.category-card').forEach(card => {
                 card.classList.remove('active');
             });
@@ -153,6 +239,8 @@
                     </div>
                 </div>
             `).join('');
+            
+            document.querySelector('.section-title').textContent = 'Recetas Destacadas';
         }
 
         function viewRecipe(recipeName) {
@@ -160,51 +248,219 @@
         }
 
         function searchRecipes() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            
             if (!searchTerm) {
                 alert('Por favor, ingresa un término de búsqueda');
                 return;
             }
             
-            let foundRecipes = [];
-            Object.keys(recipes).forEach(category => {
-                recipes[category].forEach(recipe => {
-                    if (recipe.name.toLowerCase().includes(searchTerm) || 
-                        recipe.description.toLowerCase().includes(searchTerm)) {
-                        foundRecipes.push(recipe);
-                    }
+            // Hacer petición al servidor para buscar en la base de datos
+            fetch(`/buscar_recetas?q=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    currentSearchResults = data.recetas;
+                    displaySearchResults(data.recetas, searchTerm);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al buscar recetas');
                 });
-            });
+        }
+
+        function displaySearchResults(recetas, searchTerm) {
+            const searchResultsGrid = document.getElementById('searchResultsGrid');
+            const searchResultsTitle = document.getElementById('searchResultsTitle');
+            const searchResultsSection = document.getElementById('searchResultsSection');
             
-            if (foundRecipes.length > 0) {
-                const recipesGrid = document.getElementById('recipesGrid');
-                recipesGrid.innerHTML = foundRecipes.map(recipe => `
-                    <div class="recipe-card" onclick="viewRecipe('${recipe.name}')">
+            // Ocultar detalle de receta si está visible
+            hideRecipeDetail();
+            
+            if (recetas.length > 0) {
+                searchResultsGrid.innerHTML = recetas.map(receta => `
+                    <div class="recipe-card" onclick="showRecipeDetail(${receta.id})">
                         <div class="recipe-image">
-                            ${recipe.icon}
+                            <!-- =============================== -->
+                            <!-- AQUÍ SE INSERTARÁ LA IMAGEN DE LA RECETA EN UN FUTURO -->
+                            <!-- La imagen vendrá de: ${receta.imagen || 'No hay imagen disponible'} -->
+                            <!-- =============================== -->
+                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.title}" style="width:100%;height:100%;object-fit:cover;">` : '🍽️'}
                         </div>
                         <div class="recipe-content">
-                            <h4>${recipe.name}</h4>
+                            <h4>${receta.title}</h4>
                             <div class="recipe-meta">
-                                <span>⏱️ ${recipe.time}</span>
-                                <span>📊 ${recipe.difficulty}</span>
+                                <span>📁 ${receta.categoria || 'General'}</span>
                             </div>
-                            <p class="recipe-description">${recipe.description}</p>
+                            <div class="recipe-section">
+                                <h5>📋 Ingredientes:</h5>
+                                <p>${receta.ingredients.substring(0, 100)}${receta.ingredients.length > 100 ? '...' : ''}</p>
+                            </div>
+                            <div class="recipe-section">
+                                <h5>👨‍🍳 Preparación:</h5>
+                                <p>${receta.steps.substring(0, 150)}${receta.steps.length > 150 ? '...' : ''}</p>
+                            </div>
                         </div>
                     </div>
                 `).join('');
                 
-                document.querySelectorAll('.category-card').forEach(card => {
-                    card.classList.remove('active');
-                });
+                // Actualizar el título de la sección
+                searchResultsTitle.textContent = `Resultados para: "${searchTerm}" (${recetas.length} encontrados)`;
+                
             } else {
-                alert('No se encontraron recetas con ese término de búsqueda');
+                searchResultsGrid.innerHTML = `
+                    <div class="no-results-message">
+                        <div class="no-results-icon">🔍</div>
+                        <h3>No se encontraron recetas</h3>
+                        <p>No hay recetas que coincidan con "${searchTerm}"</p>
+                    </div>
+                `;
             }
+            
+            // Mostrar sección de resultados (después del Hero y antes de las Categorías)
+            searchResultsSection.style.display = 'block';
+            
+            // Desplazar hacia arriba al mostrar resultados
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        function hideSearchResults() {
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            searchResultsSection.style.display = 'none';
+            currentSearchResults = [];
+            document.getElementById('searchInput').value = '';
+        }
+
+        function showRecipeDetail(recipeId) {
+            // Buscar la receta en los resultados actuales
+            const receta = currentSearchResults.find(r => r.id === recipeId);
+            
+            if (!receta) return;
+            
+            const recipeDetailContent = document.getElementById('recipeDetailContent');
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            // Ocultar resultados y mostrar detalle
+            searchResultsSection.style.display = 'none';
+            recipeDetailSection.style.display = 'block';
+            
+            // Procesar los pasos para quitar la numeración duplicada
+            const pasosProcesados = procesarPasos(receta.steps);
+            
+            recipeDetailContent.innerHTML = `
+                <div class="recipe-detail-card">
+                    <div class="recipe-detail-header">
+                        <h2>${receta.title}</h2>
+                        ${receta.categoria ? `<span class="recipe-category-badge">${receta.categoria}</span>` : ''}
+                    </div>
+                    
+                    <!-- =============================== -->
+                    <!-- AQUÍ SE INSERTARÁ LA IMAGEN DE LA RECETA EN UN FUTURO -->
+                    <!-- Imagen URL: ${receta.imagen || 'No disponible'} -->
+                    <!-- =============================== -->
+                    ${receta.imagen ? `
+                    <div class="recipe-detail-image">
+                        <img src="${receta.imagen}" alt="${receta.title}">
+                    </div>
+                    ` : '<div class="recipe-detail-image" style="background: linear-gradient(135deg, #E27D60, #FFB347); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">🍽️</div>'}
+                    
+                    <div class="recipe-detail-content">
+                        <div class="recipe-detail-section">
+                            <h3>📋 Ingredientes</h3>
+                            <div class="ingredients-list">
+                                ${receta.ingredients.split('\n').map(ingredient => 
+                                    ingredient.trim() ? `<p>• ${ingredient}</p>` : ''
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="recipe-detail-section">
+                            <h3>👨‍🍳 Preparación</h3>
+                            <div class="steps-list">
+                                ${pasosProcesados}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Desplazar la página hacia arriba
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Función: Procesar los pasos para manejar diferentes formatos
+        function procesarPasos(steps) {
+            if (!steps) return '<p>No hay instrucciones disponibles.</p>';
+            
+            const lineas = steps.split('\n');
+            let pasosHTML = '';
+            let numeroPaso = 1;
+            
+            lineas.forEach(linea => {
+                linea = linea.trim();
+                if (linea) {
+                    // Detectar si la línea ya tiene numeración
+                    const tieneNumeracion = /^\d+[\.:\s]/.test(linea) || /^Paso\s*\d+/i.test(linea);
+                    
+                    let textoLimpio = linea;
+                    
+                    if (tieneNumeracion) {
+                        // Si ya tiene numeración, limpiarla
+                        textoLimpio = linea.replace(/^\d+[\.:\s]*/, '')
+                                          .replace(/^Paso\s*\d+[\.:\s]*/i, '')
+                                          .trim();
+                    }
+                    
+                    // Si después de limpiar queda texto vacío, usar el original
+                    if (!textoLimpio) {
+                        textoLimpio = linea;
+                    }
+                    
+                    // Agregar el paso con numeración consistente
+                    pasosHTML += `<p><strong>${numeroPaso}.</strong> ${textoLimpio}</p>`;
+                    numeroPaso++;
+                }
+            });
+            
+            return pasosHTML || '<p>No hay instrucciones disponibles.</p>';
+        }
+
+        function hideRecipeDetail() {
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            recipeDetailSection.style.display = 'none';
+            
+            // Mostrar resultados de búsqueda nuevamente si hay resultados
+            if (currentSearchResults.length > 0) {
+                searchResultsSection.style.display = 'block';
+                
+                // Desplazar hacia arriba al volver a los resultados
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // Función para verificar si hay búsqueda activa
+        function hasActiveSearch() {
+            return currentSearchResults.length > 0 || 
+                   document.getElementById('searchResultsSection').style.display !== 'none' ||
+                   document.getElementById('recipeDetailSection').style.display !== 'none';
         }
 
         window.addEventListener('load', () => {
             const firstCategory = document.querySelector('.category-card');
-            selectCategory('bebidas', firstCategory);
+            if (firstCategory) {
+                selectCategory('bebidas', firstCategory);
+            }
         });
 
         document.getElementById('searchInput').addEventListener('keypress', function(e) {

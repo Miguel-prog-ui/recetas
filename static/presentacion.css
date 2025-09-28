@@ -35,6 +35,12 @@ header {
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
 }
 
 .header-right {
@@ -111,6 +117,41 @@ header {
     opacity: 0.8;
     max-width: 600px;
     margin: 0 auto;
+}
+
+/* =========================================== */
+/* SECCIÓN DE RESULTADOS DE BÚSQUEDA */
+/* Se muestra después del Hero y antes de las Categorías */
+/* =========================================== */
+.search-results-section {
+    padding: 40px 0;
+    background: rgba(255, 255, 255, 0.7);
+    margin: 20px 0;
+    border-radius: 20px;
+    border: 2px solid #FFB347;
+}
+
+.recipe-detail-section {
+    padding: 40px 0;
+}
+
+.back-btn {
+    padding: 12px 25px;
+    background-color: #E27D60;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-bottom: 30px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.back-btn:hover {
+    background-color: #d2694d;
+    transform: translateY(-2px);
 }
 
 /* Categories Section */
@@ -216,6 +257,10 @@ header {
     justify-content: center;
     font-size: 4rem;
     color: white;
+    /* =============================== */
+    /* AQUÍ SE MOSTRARÁN LAS IMÁGENES DE LAS RECETAS */
+    /* Las imágenes se cargarán dinámicamente desde la base de datos */
+    /* =============================== */
 }
 
 .recipe-content {
@@ -273,6 +318,121 @@ footer {
     color: #E27D60;
 }
 
+/* ESTILOS PARA BÚSQUEDA Y DETALLES */
+.recipe-section {
+    margin: 10px 0;
+}
+
+.recipe-section h5 {
+    color: #E27D60;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.recipe-section p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #666;
+}
+
+.no-results-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.no-results-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.no-results-message h3 {
+    color: #E27D60;
+    margin-bottom: 10px;
+}
+
+.no-results-message p {
+    color: #4A3C38;
+    margin-bottom: 20px;
+}
+
+/* Estilos para detalle de receta */
+.recipe-detail-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.recipe-detail-header {
+    padding: 40px;
+    background: linear-gradient(135deg, #E27D60, #FFB347);
+    color: white;
+    text-align: center;
+}
+
+.recipe-detail-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.recipe-category-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 1rem;
+}
+
+.recipe-detail-image {
+    height: 400px;
+    overflow: hidden;
+    /* =============================== */
+    /* AQUÍ SE MOSTRARÁ LA IMAGEN GRANDE DE LA RECETA */
+    /* La imagen se cargará desde la URL de la base de datos */
+    /* =============================== */
+}
+
+.recipe-detail-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recipe-detail-content {
+    padding: 40px;
+}
+
+.recipe-detail-section {
+    margin-bottom: 40px;
+}
+
+.recipe-detail-section h3 {
+    color: #E27D60;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #FFB347;
+    padding-bottom: 10px;
+}
+
+.ingredients-list p, .steps-list p {
+    padding: 8px 0;
+    margin: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 1.1rem;
+}
+
+.steps-list p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.steps-list strong {
+    color: #E27D60;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .header-content {
@@ -311,4 +471,64 @@ footer {
         flex-direction: column;
         gap: 15px;
     }
+
+    .recipe-detail-header h2 {
+        font-size: 2rem;
+    }
+
+    .recipe-detail-image {
+        height: 250px;
+    }
+
+    .recipe-detail-content {
+        padding: 20px;
+    }
+    
+    .search-results-section {
+        margin: 10px 0;
+        padding: 20px 0;
+    }
+}
+/* 🔥 NUEVOS ESTILOS PARA LA SECCIÓN DEL LOGO CON CASA */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.home-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.home-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.home-icon {
+    font-size: 1.8rem;
+    color: white;
+}
+
+.logo-text {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Ajustar el header-content para el nuevo layout */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
 }

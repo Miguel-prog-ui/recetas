@@ -17,6 +17,7 @@ from rutas_auth import (
     crear_cuenta as func_crear_cuenta,
     acceso_login as func_acceso_login
 )
+from rutas_recetas import buscar_recetas_api as func_buscar_recetas_api
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'
@@ -70,9 +71,9 @@ def crear_cuenta():
 def acceso_login():
     return func_acceso_login(mysql)
 
-@app.route('/buscar')
-def buscar_recetas():
-    return "Funcionalidad de búsqueda en desarrollo"
+@app.route('/buscar_recetas')
+def buscar_recetas_api():
+    return func_buscar_recetas_api(mysql)
 
 if __name__ == '__main__':
     app.run(debug=True)
