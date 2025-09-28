@@ -21,3 +21,7 @@ def mostrar_alta_cocina():
 
 def mostrar_login():
     return render_template('login.html')
+
+# NUEVA FUNCIÓN: Recetas de la Comunidad
+def mostrar_comunidad():
+    return render_template('comunidad.html')

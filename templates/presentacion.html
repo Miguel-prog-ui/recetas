@@ -95,6 +95,13 @@
                     <h3>Alta Cocina</h3>
                     <p>Recetas gourmet y técnicas culinarias para los más exigentes</p>
                 </a>
+
+                <!-- En la sección de categorías, cambia esta línea: -->
+                <a href="{{ url_for('mostrar_comunidad') }}" class="category-card" onclick="selectCategory('comunidad', this)">
+                    <span class="category-icon">👥</span>
+                    <h3>Recetas de la Comunidad</h3>
+                    <p>Recetas compartidas por nuestros usuarios, con sabores auténticos y creativos</p>
+                </a>
             </div>
         </section>
 
@@ -147,6 +154,11 @@
                 { name: "Foie Gras Sellado", time: "30 min", difficulty: "Difícil", icon: "🦆", description: "Hígado de pato con reducción de oporto" },
                 { name: "Risotto de Trufa", time: "35 min", difficulty: "Difícil", icon: "🍄", description: "Arroz cremoso con trufa negra y parmesano" },
                 { name: "Beef Wellington", time: "120 min", difficulty: "Muy Difícil", icon: "🥩", description: "Solomillo envuelto en hojaldre con duxelles" }
+            ],
+            comunidad: [
+                { name: "Ensalada de la Abuela", time: "20 min", difficulty: "Fácil", icon: "🥗", description: "Receta familiar con ingredientes frescos de la huerta" },
+                { name: "Pastel de Papa Casero", time: "60 min", difficulty: "Medio", icon: "🥔", description: "Comida reconfortante compartida por nuestra comunidad" },
+                { name: "Sopa de Calabaza", time: "40 min", difficulty: "Fácil", icon: "🎃", description: "Receta vegana compartida por nuestros usuarios" }
             ]
         };
 

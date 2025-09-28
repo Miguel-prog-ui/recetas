@@ -10,7 +10,8 @@ from rutas_simples import (
     mostrar_postres as func_postres,
     mostrar_comidas as func_comidas,
     mostrar_alta_cocina as func_alta_cocina,
-    mostrar_login as func_login
+    mostrar_login as func_login,
+    mostrar_comunidad as func_comunidad  # NUEVA IMPORTACIÓN
 )
 from rutas_auth import (
     logout as func_logout,
@@ -20,7 +21,6 @@ from rutas_auth import (
 from rutas_recetas import buscar_recetas_api as func_buscar_recetas_api
 from rutas_recetas import buscar_recetas_palabra_api as func_buscar_recetas_palabra_api
 from rutas_recetas import buscar_por_ingredientes_api
-
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'
@@ -58,6 +58,10 @@ def mostrar_comidas():
 def mostrar_alta_cocina():
     return func_alta_cocina()
 
+@app.route('/comunidad')  # NUEVA RUTA
+def mostrar_comunidad():
+    return func_comunidad()
+
 @app.route('/login')
 def mostrar_login():
     return func_login()
@@ -78,16 +82,9 @@ def acceso_login():
 def buscar_recetas_api():
     return func_buscar_recetas_api(mysql)
 
-
-
-# ... después de las otras rutas ...
-
 @app.route('/buscar_recetas_palabra')
 def buscar_recetas_palabra_api():
     return func_buscar_recetas_palabra_api(mysql)
-
-
-# ... (código existente) ...
 
 @app.route('/buscar_por_ingredientes')
 def buscar_por_ingredientes():
