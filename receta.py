@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, session
-from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
-app.secret_key = 'tu_clave_secreta'
+app.secret_key = 'tu_clave_secreta_aqui'
 
 # Configuración de MySQL
 app.config['MYSQL_HOST'] = 'localhost'
@@ -13,21 +13,39 @@ app.config['MYSQL_DB'] = 'recetas'
 
 mysql = MySQL(app)
 
-# Función para cargar recetas desde la tabla recetass
-def cargar_recetas():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT title, url, ingredients, steps, uuid FROM recetass")
-    columnas = [desc[0] for desc in cur.description]
-    recetas = [dict(zip(columnas, fila)) for fila in cur.fetchall()]
-    cur.close()
-    return recetas
-
-# Página principal: login y registro
 @app.route('/')
-def inicio():
+def mostrar_presentacion():
+    return render_template('presentacion.html')
+
+@app.route('/bebidas')
+def mostrar_bebidas():
+    return render_template('bebidas.html')
+
+@app.route('/bebidas_alcoholicas')
+def mostrar_bebidas_alcoholicas():
+    return render_template('bebidas_alcoholicas.html')
+
+@app.route('/postres')
+def mostrar_postres():
+    return render_template('postres.html')
+
+@app.route('/comidas')
+def mostrar_comidas():
+    return render_template('comidas.html')
+
+@app.route('/alta_cocina')
+def mostrar_alta_cocina():
+    return render_template('alta_cocina.html')
+
+@app.route('/login')
+def mostrar_login():
     return render_template('login.html')
 
-# Registro de usuario
+@app.route('/logout')
+def logout():
+    session.pop('usuario', None)
+    return redirect('/')
+
 @app.route('/crear_cuenta', methods=['POST'])
 def crear_cuenta():
     usuario = request.form['txt_usuario']
@@ -46,7 +64,6 @@ def crear_cuenta():
 
     return render_template('login.html', mensaje='Cuenta creada exitosamente')
 
-# Login de usuario
 @app.route('/acceso_login', methods=['POST'])
 def acceso_login():
     correo = request.form['txt_correo']
@@ -59,33 +76,13 @@ def acceso_login():
 
     if user and check_password_hash(user[2], password):
         session['usuario'] = user[1]
-        return redirect('/recetas')
+        return redirect('/')
     else:
         return render_template('login.html', mensaje_malo='Correo o contraseña incorrectos')
 
-# Página de recetas (protegida)
-@app.route('/recetas', methods=['GET', 'POST'])
-def mostrar_recetas():
-    if 'usuario' not in session:
-        return redirect('/')
-
-    recetas = []
-    ingredientes = ''
-    if request.method == 'POST':
-        ingredientes = request.form.get('ingredientes', '').lower()
-        lista_ingredientes = [i.strip() for i in ingredientes.split(',') if i.strip()]
-        todas = cargar_recetas()
-        recetas = [
-            r for r in todas
-            if all(ing in r['ingredients'].lower() for ing in lista_ingredientes)
-        ]
-    return render_template('recetas.html', recetas=recetas, ingredientes=ingredientes, usuario=session['usuario'])
-
-# Cerrar sesión
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/')
+@app.route('/buscar')
+def buscar_recetas():
+    return "Funcionalidad de búsqueda en desarrollo"
 
 if __name__ == '__main__':
     app.run(debug=True)

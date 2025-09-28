@@ -4,7 +4,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: "poppins", sans-serif;
-    color: #FFF;
+    color: #E27D60;
     list-style: none;
 
 
@@ -15,7 +15,7 @@ body{
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #1A2D42; 
+    background: #F5F5DC; 
 }
 .containerr{
     max-width: 1200px;
@@ -66,7 +66,7 @@ body{
 .menu .navbar ul li a{
     font-size: 10px;
     padding: 20px;
-    color: #fffdfc;
+    color: #E27D60;
     display: block;
     font-weight: 600;
     text-decoration: none;
@@ -86,12 +86,12 @@ body{
 /* de aca es todo lo de el login */
 .container{
     position: relative;
-    width: 750px;
-    height: 450px;
-    border: 2px solid #C0C8CA;
-    box-shadow: 0 0 25px #C0C8CA;
+    width: 800px;
+    height: 500px;
+    border: 2px solid #e8ba88;
+    box-shadow: 0 0 25px #FFB347;
     overflow: hidden;
-    background-color: #1A2D42;
+    background-color: #F5F5DC;
     border-radius: 20PX;
 }
 .container .form-box{
@@ -184,9 +184,9 @@ body{
     border: none;
     outline: none;
     font-size: 16px;
-    color: #fff;
+    color: #E27D60;
     font-weight: 600;
-    border-bottom: 2px solid #FFF;
+    border-bottom: 2px solid #E27D60;
     padding-right: 23px;
     transition: .5s;
 
@@ -201,13 +201,13 @@ body{
     left:0;
     transform: translateY(-50%);
     font-size: 16px;
-    color: #fff;
+    color: #E27D60;
     transition: .5s;
 }
 .input-box input:focus ~ label,
 .input-box input:valid ~ label{
     top: -5px;
-    color: #aAB7B7;
+    color: #E27D60;
 }
 .input-box i{
     position: absolute;
@@ -218,7 +218,7 @@ body{
 }
 .input-box input:focus ~ i,
 .input-box input:valid ~ i{
-    color: #aAB7B7;
+    color: #E27D60;
 }
 .btn{
     position: relative;
@@ -229,7 +229,7 @@ body{
     cursor:pointer;
     font-size: 16px;
     font-weight: 600;
-    border:2px solid #FFF;
+    border:2px solid #E27D60;
     overflow: hidden;
     z-index: 1;
 }
@@ -238,7 +238,7 @@ body{
     position: absolute;
     height: 300%;
     width: 100%;
-    background: linear-gradient(#2E4156,#1A2D42,#2E4156,#1A2D42);
+    background: linear-gradient(#f8f8b2,#e1a898,#f8f8b2,#e1a898);
     top:-100%;
     left:0;
     z-index: -1;
@@ -253,7 +253,7 @@ body{
     margin: 20px 0 10px;
 }
 .regi-link a{
-    color: #AAB7B7;
+    color: #E27D60;
     font-weight: 600;
 }
 .regi-link a:hover{
@@ -325,7 +325,7 @@ body{
     top: -5px;
     height: 600px;
     width: 850px;
-    background: linear-gradient(45deg,#1A2D42,#C0C8CA);
+    background: linear-gradient(45deg,#FFB347,#F5F5DC);
     transform: rotate(10deg) skewY(40deg);
     transform-origin: bottom right;
     transition: 1.5s ease;
@@ -343,7 +343,7 @@ body{
     top: 100%;
     height: 700px;
     width: 850px;
-    background: #1A2D42;
+    background: #F5F5DC;
     /* border-top: 3px solid #2E4156; */
     transform: rotate(0deg) skewY(0deg);
     transform-origin: bottom left;

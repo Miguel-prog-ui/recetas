@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetas Deliciosas</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='presentacion.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🍽️ Recetas Deliciosas</div>
+                <div class="header-right">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Buscar recetas..." id="searchInput">
+                        <button onclick="searchRecipes()">Buscar</button>
+                    </div>
+                    {% if session.usuario %}
+                    <div class="user-section">
+                        <span class="user-name">{{ session.usuario }}</span>
+                        <a href="{{ url_for('logout') }}" class="logout-btn">Cerrar sesión</a>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h1>Descubre Sabores Únicos</h1>
+            <p>Explora nuestra colección de recetas cuidadosamente seleccionadas, desde bebidas refrescantes hasta platos de alta cocina que deleitarán tu paladar.</p>
+        </section>
+
+        <section class="categories">
+            <h2>Categorías</h2>
+            <div class="category-grid">
+                <a href="{{ url_for('mostrar_bebidas') }}" class="category-card" onclick="selectCategory('bebidas', this)">
+                    <span class="category-icon">🥤</span>
+                    <h3>Bebidas</h3>
+                    <p>Refrescantes jugos, smoothies y bebidas saludables para cualquier momento del día</p>
+                </a>
+                
+                <a href="{{ url_for('mostrar_bebidas_alcoholicas') }}" class="category-card" onclick="selectCategory('alcoholicas', this)">
+                    <span class="category-icon">🍸</span>
+                    <h3>Bebidas Alcohólicas</h3>
+                    <p>Cócteles clásicos y modernos, vinos y licores para ocasiones especiales</p>
+                </a>
+                
+                <a href="{{ url_for('mostrar_postres') }}" class="category-card" onclick="selectCategory('postres', this)">
+                    <span class="category-icon">🍰</span>
+                    <h3>Postres</h3>
+                    <p>Dulces tentaciones, pasteles y desserts que endulzarán tu día</p>
+                </a>
+                
+                <a href="{{ url_for('mostrar_comidas') }}" class="category-card" onclick="selectCategory('comidas', this)">
+                    <span class="category-icon">🍽️</span>
+                    <h3>Comidas</h3>
+                    <p>Platos principales nutritivos y deliciosos para toda la familia</p>
+                </a>
+                
+                <a href="{{ url_for('mostrar_alta_cocina') }}" class="category-card" onclick="selectCategory('alta-cocina', this)">
+                    <span class="category-icon">👨‍🍳</span>
+                    <h3>Alta Cocina</h3>
+                    <p>Recetas gourmet y técnicas culinarias para los más exigentes</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="recipes-section">
+            <div class="container">
+                <h2 class="section-title">Recetas Destacadas</h2>
+                <div class="recipes-grid" id="recipesGrid"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
+                <p>&copy; 2024 Recetas Deliciosas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const recipes = {
+            bebidas: [
+                { name: "Smoothie de Mango", time: "5 min", difficulty: "Fácil", icon: "🥭", description: "Refrescante smoothie tropical con mango, yogurt y miel" },
+                { name: "Limonada de Menta", time: "10 min", difficulty: "Fácil", icon: "🍋", description: "Bebida refrescante con limón fresco y hojas de menta" },
+                { name: "Té Helado de Frutas", time: "15 min", difficulty: "Fácil", icon: "🧊", description: "Té negro con frutas frescas y hielo" }
+            ],
+            alcoholicas: [
+                { name: "Mojito Clásico", time: "8 min", difficulty: "Medio", icon: "🍸", description: "Cóctel cubano con ron blanco, menta y lima" },
+                { name: "Margarita de Fresa", time: "10 min", difficulty: "Medio", icon: "🍓", description: "Margarita refrescante con fresas naturales" },
+                { name: "Sangría Española", time: "20 min", difficulty: "Fácil", icon: "🍷", description: "Vino tinto con frutas frescas y especias" }
+            ],
+            postres: [
+                { name: "Tiramisú Clásico", time: "45 min", difficulty: "Medio", icon: "🍰", description: "Postre italiano con café, mascarpone y cacao" },
+                { name: "Cheesecake de Frutos Rojos", time: "60 min", difficulty: "Medio", icon: "🍓", description: "Tarta de queso cremosa con salsa de frutos rojos" },
+                { name: "Crème Brûlée", time: "40 min", difficulty: "Difícil", icon: "🔥", description: "Postre francés con crema y azúcar caramelizada" }
+            ],
+            comidas: [
+                { name: "Paella Valenciana", time: "45 min", difficulty: "Medio", icon: "🥘", description: "Arroz tradicional español con pollo y verduras" },
+                { name: "Lasaña Boloñesa", time: "90 min", difficulty: "Medio", icon: "🍝", description: "Pasta italiana en capas con carne y bechamel" },
+                { name: "Salmón a la Plancha", time: "25 min", difficulty: "Fácil", icon: "🐟", description: "Filete de salmón con hierbas y limón" }
+            ],
+            "alta-cocina": [
+                { name: "Foie Gras Sellado", time: "30 min", difficulty: "Difícil", icon: "🦆", description: "Hígado de pato con reducción de oporto" },
+                { name: "Risotto de Trufa", time: "35 min", difficulty: "Difícil", icon: "🍄", description: "Arroz cremoso con trufa negra y parmesano" },
+                { name: "Beef Wellington", time: "120 min", difficulty: "Muy Difícil", icon: "🥩", description: "Solomillo envuelto en hojaldre con duxelles" }
+            ]
+        };
+
+        let currentCategory = null;
+
+        function selectCategory(category, element) {
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            element.classList.add('active');
+            
+            currentCategory = category;
+            loadRecipes(category);
+        }
+
+        function loadRecipes(category) {
+            const recipesGrid = document.getElementById('recipesGrid');
+            const categoryRecipes = recipes[category] || [];
+            
+            recipesGrid.innerHTML = categoryRecipes.map(recipe => `
+                <div class="recipe-card" onclick="viewRecipe('${recipe.name}')">
+                    <div class="recipe-image">
+                        ${recipe.icon}
+                    </div>
+                    <div class="recipe-content">
+                        <h4>${recipe.name}</h4>
+                        <div class="recipe-meta">
+                            <span>⏱️ ${recipe.time}</span>
+                            <span>📊 ${recipe.difficulty}</span>
+                        </div>
+                        <p class="recipe-description">${recipe.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewRecipe(recipeName) {
+            alert(`¡Próximamente podrás ver la receta completa de: ${recipeName}!`);
+        }
+
+        function searchRecipes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (!searchTerm) {
+                alert('Por favor, ingresa un término de búsqueda');
+                return;
+            }
+            
+            let foundRecipes = [];
+            Object.keys(recipes).forEach(category => {
+                recipes[category].forEach(recipe => {
+                    if (recipe.name.toLowerCase().includes(searchTerm) || 
+                        recipe.description.toLowerCase().includes(searchTerm)) {
+                        foundRecipes.push(recipe);
+                    }
+                });
+            });
+            
+            if (foundRecipes.length > 0) {
+                const recipesGrid = document.getElementById('recipesGrid');
+                recipesGrid.innerHTML = foundRecipes.map(recipe => `
+                    <div class="recipe-card" onclick="viewRecipe('${recipe.name}')">
+                        <div class="recipe-image">
+                            ${recipe.icon}
+                        </div>
+                        <div class="recipe-content">
+                            <h4>${recipe.name}</h4>
+                            <div class="recipe-meta">
+                                <span>⏱️ ${recipe.time}</span>
+                                <span>📊 ${recipe.difficulty}</span>
+                            </div>
+                            <p class="recipe-description">${recipe.description}</p>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.category-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+            } else {
+                alert('No se encontraron recetas con ese término de búsqueda');
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const firstCategory = document.querySelector('.category-card');
+            selectCategory('bebidas', firstCategory);
+        });
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchRecipes();
+            }
+        });
+    </script>
+</body>
+</html>

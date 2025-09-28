@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alta Cocina - Gastronomía Gourmet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            color: #d4af37;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #8b4513, #d4af37);
+            padding: 20px 0;
+            box-shadow: 0 2px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 20px;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            background-color: #8b4513 !important;
+            color: white !important;
+            padding: 12px 25px !important;
+            border-radius: 25px !important;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            background-color: #654321 !important;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+            background: rgba(139, 69, 19, 0.8);
+            margin: 40px 0;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: #d4af37;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: #f5f5f5;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            font-style: italic;
+        }
+
+        /* Filter Section */
+        .filters {
+            background: rgba(139, 69, 19, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 40px 0;
+            box-shadow: 0 5px 25px rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            color: #f5f5f5;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #d4af37;
+            background: rgba(139, 69, 19, 0.8);
+            color: #f5f5f5;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #d4af37;
+            color: #1a1a1a;
+            transform: translateY(-2px);
+        }
+
+        .search-section {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .search-section input {
+            padding: 12px 20px;
+            border: 2px solid #d4af37;
+            border-radius: 25px;
+            font-size: 1rem;
+            width: 250px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .search-section input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .search-section button {
+            padding: 12px 20px;
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .search-section button:hover {
+            background-color: #654321;
+            transform: translateY(-2px);
+        }
+
+        /* Dishes Grid */
+        .dishes-section {
+            padding: 40px 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: #d4af37;
+        }
+
+        .results-count {
+            color: #f5f5f5;
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+
+        .dishes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .dish-card {
+            background: rgba(139, 69, 19, 0.9);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .dish-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.5);
+        }
+
+        .dish-image {
+            height: 220px;
+            background: linear-gradient(135deg, #d4af37, #8b4513);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: white;
+            position: relative;
+        }
+
+        .difficulty-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.8);
+            color: #d4af37;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .dish-content {
+            padding: 25px;
+        }
+
+        .dish-card h3 {
+            font-size: 1.4rem;
+            color: #f5f5f5;
+            margin-bottom: 15px;
+        }
+
+        .dish-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #d4af37;
+            font-size: 0.95rem;
+        }
+
+        .dish-description {
+            color: #f5f5f5;
+            opacity: 0.8;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .dish-ingredients {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .dish-ingredients h4 {
+            color: #d4af37;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .ingredients-list {
+            font-size: 0.9rem;
+            color: #f5f5f5;
+        }
+
+        .dish-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 12px;
+            background: #d4af37;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #b8941f;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            padding: 12px;
+            background: transparent;
+            color: #d4af37;
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #d4af37;
+            color: #1a1a1a;
+            transform: translateY(-2px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #d4af37;
+        }
+
+        .close {
+            color: #d4af37;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #b8941f;
+        }
+
+        .modal h2 {
+            color: #d4af37;
+            margin-bottom: 20px;
+        }
+
+        .modal-ingredients, .modal-instructions, .modal-techniques {
+            margin-bottom: 25px;
+        }
+
+        .modal-ingredients h3, .modal-instructions h3, .modal-techniques h3 {
+            color: #f5f5f5;
+            margin-bottom: 15px;
+        }
+
+        .modal-ingredients ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .modal-ingredients li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            color: #f5f5f5;
+        }
+
+        .modal-instructions ol, .modal-techniques ul {
+            padding-left: 20px;
+        }
+
+        .modal-instructions li, .modal-techniques li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+            color: #f5f5f5;
+        }
+
+        .technique-highlight {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 10px;
+            border-left: 3px solid #d4af37;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 12px 16px;
+            border: 2px solid #d4af37;
+            background: rgba(139, 69, 19, 0.8);
+            color: #f5f5f5;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 45px;
+        }
+
+        .pagination button:hover {
+            background: #d4af37;
+            color: #1a1a1a;
+            transform: translateY(-2px);
+        }
+
+        .pagination button.active {
+            background: #8b4513;
+            border-color: #8b4513;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pagination button:disabled:hover {
+            background: rgba(139, 69, 19, 0.8);
+            color: #f5f5f5;
+            transform: none;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #8b4513;
+            color: white;
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+            padding-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-section {
+                flex-direction: column;
+            }
+
+            .search-section input {
+                width: 100%;
+            }
+
+            .dishes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" onclick="goHome()">👨‍🍳 Alta Cocina</div>
+                <nav class="nav-links">
+                    <a href="#" onclick="goHome()" class="back-btn">← Volver al Inicio</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <span class="hero-icon">🍽️</span>
+            <h1>Gastronomía Gourmet</h1>
+            <p>Descubre el arte culinario en su máxima expresión. Técnicas refinadas, ingredientes premium y presentaciones espectaculares que transforman cada plato en una obra maestra gastronómica digna de los mejores restaurantes del mundo.</p>
+        </section>
+
+        <section class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Tipo:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterByType('todos')">Todos</button>
+                        <button class="filter-btn" onclick="filterByType('entrantes')">Entrantes</button>
+                        <button class="filter-btn" onclick="filterByType('principales')">Principales</button>
+                        <button class="filter-btn" onclick="filterByType('postres')">Postres</button>
+                        <button class="filter-btn" onclick="filterByType('mariscos')">Mariscos</button>
+                        <button class="filter-btn" onclick="filterByType('carnes')">Carnes</button>
+                        <button class="filter-btn" onclick="filterByType('vegetarianos')">Vegetarianos</button>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Dificultad:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterByDifficulty('todas')">Todas</button>
+                        <button class="filter-btn" onclick="filterByDifficulty('Intermedio')">Intermedio</button>
+                        <button class="filter-btn" onclick="filterByDifficulty('Avanzado')">Avanzado</button>
+                        <button class="filter-btn" onclick="filterByDifficulty('Chef')">Chef</button>
+                    </div>
+                </div>
+
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label>Buscar por nombre:</label>
+                        <input type="text" placeholder="Buscar platos..." id="searchInput">
+                    </div>
+                    <button onclick="searchDishes()">Buscar</button>
+                </div>
+                
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label>Buscar por ingredientes:</label>
+                        <input type="text" placeholder="Ej: trufa, foie, caviar..." id="ingredientSearch">
+                    </div>
+                    <button onclick="searchByIngredients()">Buscar</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="dishes-section">
+            <div class="section-header">
+                <h2 class="section-title">Nuestras Creaciones</h2>
+                <span class="results-count" id="resultsCount">24 platos encontrados</span>
+            </div>
+            
+            <div class="dishes-grid" id="dishesGrid">
+                <!-- Los platos se cargarán dinámicamente -->
+            </div>
+            
+            <!-- Paginación -->
+            <div class="pagination" id="pagination">
+                <!-- Los controles de paginación se cargarán dinámicamente -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para plato completo -->
+    <div id="dishModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalContent">
+                <!-- Contenido del modal se carga dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Alta Cocina - Gastronomía Gourmet. Todos los derechos reservados. El arte culinario en su máxima expresión.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const dishes = [
+            {
+                id: 1,
+                name: "Foie Gras Mi-Cuit",
+                type: "entrantes",
+                time: "45 min",
+                difficulty: "Chef",
+                icon: "🦆",
+                description: "Exquisito foie gras semicocido con reducción de oporto y brioche tostado, una delicadeza francesa clásica",
+                ingredients: ["200g Foie gras fresco", "50ml Oporto vintage", "2 rebanadas Brioche artesanal", "Flor de sal", "Pimienta blanca", "Higos frescos", "Microgreens"],
+                instructions: [
+                    "Desvenar cuidadosamente el foie gras con pinzas",
+                    "Sazonar con sal y pimienta, dejar reposar 30 min",
+                    "Cocinar en sartén caliente 2 min por lado",
+                    "Reducir oporto hasta consistencia de jarabe",
+                    "Tostar brioche hasta dorado perfecto",
+                    "Cortar higos en láminas finas",
+                    "Emplatar con técnica de puntos y líneas",
+                    "Decorar con microgreens y servir inmediatamente"
+                ],
+                techniques: [
+                    "Desvenado profesional del foie gras",
+                    "Control de temperatura preciso (55°C interno)",
+                    "Reducción de vinos fortificados",
+                    "Emplatado con técnicas de alta cocina"
+                ]
+            },
+            {
+                id: 2,
+                name: "Beef Wellington",
+                type: "principales",
+                time: "2 horas",
+                difficulty: "Chef",
+                icon: "🥩",
+                description: "Legendario solomillo envuelto en duxelles de champiñones y hojaldre, técnica británica de alta cocina",
+                ingredients: ["800g Solomillo de ternera", "300g Hojaldre", "200g Champiñones portobello", "100g Paté de hígado", "Prosciutto", "Mostaza Dijon", "Yema de huevo", "Tomillo fresco"],
+                instructions: [
+                    "Sellar solomillo en sartén muy caliente por todos lados",
+                    "Pincelar con mostaza Dijon y enfriar",
+                    "Preparar duxelles: picar finamente champiñones y cocinar hasta secar",
+                    "Extender prosciutto sobre film transparente",
+                    "Cubrir carne con paté y duxelles",
+                    "Envolver firmemente y refrigerar 30 min",
+                    "Forrar con hojaldre, pincelar con huevo",
+                    "Hornear a 200°C por 25-30 min hasta dorado"
+                ],
+                techniques: [
+                    "Sellado perfecto para mantener jugos",
+                    "Duxelles clásica francesa",
+                    "Técnica de envuelto en hojaldre",
+                    "Control de cocción interna (54°C para término medio)"
+                ]
+            },
+            {
+                id: 3,
+                name: "Caviar Ossetra Service",
+                type: "entrantes",
+                time: "15 min",
+                difficulty: "Intermedio",
+                icon: "🖤",
+                description: "Servicio tradicional de caviar Ossetra con blinis, crème fraîche y acompañamientos clásicos",
+                ingredients: ["50g Caviar Ossetra", "8 Blinis caseros", "100ml Crème fraîche", "2 Huevos cocidos", "Cebollino fresco", "Vodka premium", "Limón", "Mantequilla sin sal"],
+                instructions: [
+                    "Mantener caviar a 2°C hasta servir",
+                    "Calentar blinis suavemente en sartén seca",
+                    "Preparar crème fraîche a temperatura ambiente",
+                    "Picar finamente huevo cocido y cebollino",
+                    "Servir caviar con cuchara de nácar o madreperla",
+                    "Acompañar con vodka bien fría",
+                    "Presentar en plato de cristal sobre hielo",
+                    "Explicar al comensal la técnica de degustación"
+                ],
+                techniques: [
+                    "Conservación óptima del caviar",
+                    "Servicio tradicional ruso",
+                    "Maridaje clásico con vodka",
+                    "Protocolo de degustación profesional"
+                ]
+            },
+            {
+                id: 4,
+                name: "Soufflé Grand Marnier",
+                type: "postres",
+                time: "35 min",
+                difficulty: "Chef",
+                icon: "☁️",
+                description: "Etéreo soufflé de Grand Marnier con salsa inglesa, técnica francesa que requiere precisión absoluta",
+                ingredients: ["6 Yemas de huevo", "8 Claras de huevo", "100g Azúcar", "60ml Grand Marnier", "30g Harina", "250ml Leche", "Mantequilla", "Azúcar glass", "Vainilla"],
+                instructions: [
+                    "Preparar moldes con mantequilla y azúcar",
+                    "Hacer crema pastelera base con yemas",
+                    "Incorporar Grand Marnier a la crema tibia",
+                    "Montar claras a punto de nieve firme",
+                    "Incorporar 1/3 de claras a la base",
+                    "Añadir resto de claras con movimientos envolventes",
+                    "Llenar moldes hasta 3/4 de altura",
+                    "Hornear a 190°C por 12-15 min sin abrir"
+                ],
+                techniques: [
+                    "Montado perfecto de claras",
+                    "Incorporación sin perder aire",
+                    "Control de temperatura del horno",
+                    "Timing preciso para servicio inmediato"
+                ]
+            },
+            {
+                id: 5,
+                name: "Langosta Thermidor",
+                type: "mariscos",
+                time: "50 min",
+                difficulty: "Avanzado",
+                icon: "🦞",
+                description: "Clásico francés de langosta gratinada con salsa mornay y mostaza, presentación en su propio caparazón",
+                ingredients: ["2 Langostas vivas (500g c/u)", "100ml Coñac", "200ml Nata líquida", "50g Mantequilla", "2 Yemas de huevo", "Mostaza Dijon", "Gruyère rallado", "Estragón", "Chalota"],
+                instructions: [
+                    "Cocer langostas en agua hirviendo 8 minutos",
+                    "Extraer carne y reservar caparazones",
+                    "Saltear chalota picada en mantequilla",
+                    "Flambear con coñac y reducir",
+                    "Añadir nata y reducir a la mitad",
+                    "Incorporar yemas y mostaza fuera del fuego",
+                    "Mezclar carne de langosta con salsa",
+                    "Rellenar caparazones y gratinar con queso"
+                ],
+                techniques: [
+                    "Cocción perfecta de crustáceos",
+                    "Técnica de flambeado seguro",
+                    "Salsa mornay clásica",
+                    "Gratinado profesional"
+                ]
+            },
+            {
+                id: 6,
+                name: "Risotto de Trufa Negra",
+                type: "principales",
+                time: "40 min",
+                difficulty: "Avanzado",
+                icon: "🍄",
+                description: "Cremoso risotto con trufa negra del Périgord, parmesano añejo y mantequilla montada",
+                ingredients: ["300g Arroz Carnaroli", "100g Trufa negra", "1L Caldo de pollo", "150ml Vino blanco", "100g Parmesano 24 meses", "80g Mantequilla", "1 Chalota", "Aceite de trufa"],
+                instructions: [
+                    "Calentar caldo y mantener a fuego lento",
+                    "Sofreír chalota picada hasta transparente",
+                    "Tostar arroz hasta nacarado (2 min)",
+                    "Añadir vino blanco y reducir",
+                    "Incorporar caldo caliente cucharón a cucharón",
+                    "Remover constantemente durante 18 minutos",
+                    "Mantear con mantequilla y parmesano",
+                    "Laminar trufa generosamente por encima"
+                ],
+                techniques: [
+                    "Tostado perfecto del arroz",
+                    "Técnica del mantecato italiano",
+                    "Laminado de trufa con mandolina",
+                    "Control de textura cremosa"
+                ]
+            },
+            {
+                id: 7,
+                name: "Pato Confitado",
+                type: "carnes",
+                time: "4 horas",
+                difficulty: "Avanzado",
+                icon: "🦆",
+                description: "Muslos de pato confitados en su propia grasa, técnica ancestral francesa de conservación",
+                ingredients: ["4 Muslos de pato", "500g Grasa de pato", "Sal gruesa", "Tomillo", "Laurel", "Ajo", "Pimienta negra", "Romero", "Naranja"],
+                instructions: [
+                    "Curar muslos con sal y hierbas 24 horas",
+                    "Enjuagar y secar completamente",
+                    "Sumergir en grasa de pato a 65°C",
+                    "Confitar durante 3 horas a temperatura constante",
+                    "Conservar en la grasa hasta servir",
+                    "Para servir, dorar piel en sartén caliente",
+                    "Acompañar con patatas sarladaises",
+                    "Decorar con cáscara de naranja confitada"
+                ],
+                techniques: [
+                    "Curado con sal y especias",
+                    "Confitado a baja temperatura",
+                    "Control termométrico preciso",
+                    "Conservación tradicional en grasa"
+                ]
+            },
+            {
+                id: 8,
+                name: "Crème Brûlée Vainilla",
+                type: "postres",
+                time: "3 horas",
+                difficulty: "Intermedio",
+                icon: "🔥",
+                description: "Sedosa crema catalana con vainilla de Madagascar y azúcar caramelizado al soplete",
+                ingredients: ["500ml Nata líquida", "6 Yemas de huevo", "100g Azúcar", "2 Vainas de vainilla", "Azúcar moreno", "Sal marina"],
+                instructions: [
+                    "Infusionar nata con vainilla a fuego lento",
+                    "Batir yemas con azúcar hasta blanquear",
+                    "Incorporar nata caliente gradualmente",
+                    "Colar mezcla para eliminar grumos",
+                    "Verter en moldes individuales",
+                    "Cocer al baño maría a 160°C por 35 min",
+                    "Refrigerar mínimo 2 horas",
+                    "Espolvorear azúcar y caramelizar con soplete"
+                ],
+                techniques: [
+                    "Infusión perfecta de vainilla",
+                    "Cocción al baño maría",
+                    "Caramelización con soplete",
+                    "Textura sedosa sin grumos"
+                ]
+            },
+            {
+                id: 9,
+                name: "Tartar de Atún Rojo",
+                type: "entrantes",
+                time: "25 min",
+                difficulty: "Avanzado",
+                icon: "🍣",
+                description: "Atún rojo de almadraba cortado a cuchillo con aguacate, sésamo y vinagreta de soja",
+                ingredients: ["300g Atún rojo sashimi", "1 Aguacate maduro", "Sésamo negro", "Salsa soja", "Aceite de sésamo", "Lima", "Jengibre", "Wasabi", "Cebollino"],
+                instructions: [
+                    "Cortar atún en dados perfectos de 5mm",
+                    "Preparar brunoise de aguacate del mismo tamaño",
+                    "Rallar jengibre finamente",
+                    "Mezclar soja, aceite de sésamo y lima",
+                    "Combinar atún con vinagreta suavemente",
+                    "Moldear con aro en el plato",
+                    "Decorar con aguacate y sésamo",
+                    "Servir inmediatamente bien frío"
+                ],
+                techniques: [
+                    "Corte profesional de pescado crudo",
+                    "Brunoise perfecta y uniforme",
+                    "Marinado rápido sin cocinar",
+                    "Presentación con moldes"
+                ]
+            },
+            {
+                id: 10,
+                name: "Cordero en Costra",
+                type: "carnes",
+                time: "1.5 horas",
+                difficulty: "Chef",
+                icon: "🐑",
+                description: "Carré de cordero envuelto en costra de hierbas y mostaza, cocción rosa perfecta",
+                ingredients: ["1 Carré de cordero (8 costillas)", "Pan rallado", "Perejil", "Romero", "Tomillo", "Ajo", "Mostaza Dijon", "Aceite de oliva", "Sal Maldon"],
+                instructions: [
+                    "Limpiar carré eliminando grasa excesiva",
+                    "Sellar en sartén muy caliente por todos lados",
+                    "Pincelar con mostaza Dijon generosamente",
+                    "Mezclar pan rallado con hierbas picadas",
+                    "Cubrir cordero con mezcla de hierbas",
+                    "Hornear a 180°C por 15-20 minutos",
+                    "Reposar 10 minutos antes de trinchar",
+                    "Cortar entre costillas para servir"
+                ],
+                techniques: [
+                    "Limpieza profesional del carré",
+                    "Sellado para conservar jugos",
+                    "Costra aromática adherente",
+                    "Control de punto de cocción (55°C interno)"
+                ]
+            },
+            {
+                id: 11,
+                name: "Vieiras a la Plancha",
+                type: "mariscos",
+                time: "20 min",
+                difficulty: "Intermedio",
+                icon: "🐚",
+                description: "Vieiras gallegas marcadas con puré de coliflor y aceite de perejil, simplicidad elegante",
+                ingredients: ["12 Vieiras frescas", "1 Coliflor", "Perejil fresco", "Mantequilla", "Nata líquida", "Aceite de oliva virgen", "Limón", "Sal marina"],
+                instructions: [
+                    "Limpiar vieiras retirando músculo lateral",
+                    "Cocer coliflor hasta muy tierna",
+                    "Triturar con nata hasta textura sedosa",
+                    "Preparar aceite verde con perejil",
+                    "Calentar plancha hasta humeante",
+                    "Marcar vieiras 90 segundos por lado",
+                    "Sazonar con sal marina al final",
+                    "Emplatar sobre puré tibio con aceite verde"
+                ],
+                techniques: [
+                    "Limpieza correcta de moluscos",
+                    "Puré sedoso sin grumos",
+                    "Marcado perfecto en plancha",
+                    "Aceite aromático de hierbas"
+                ]
+            },
+            {
+                id: 12,
+                name: "Tarta Tatin",
+                type: "postres",
+                time: "1 hora",
+                difficulty: "Avanzado",
+                icon: "🍎",
+                description: "Clásica tarta invertida francesa con manzanas caramelizadas y hojaldre crujiente",
+                ingredients: ["6 Manzanas reineta", "200g Hojaldre", "150g Azúcar", "50g Mantequilla", "Canela", "Vainilla", "Helado de vainilla"],
+                instructions: [
+                    "Pelar y cortar manzanas en cuartos",
+                    "Hacer caramelo rubio en molde tatin",
+                    "Colocar manzanas sobre caramelo caliente",
+                    "Cocinar manzanas 10 min hasta tiernas",
+                    "Cubrir con hojaldre bien estirado",
+                    "Meter bordes hacia dentro del molde",
+                    "Hornear a 200°C por 25 minutos",
+                    "Desmoldar inmediatamente sobre fuente"
+                ],
+                techniques: [
+                    "Caramelo perfecto sin cristalizar",
+                    "Cocción previa de manzanas",
+                    "Técnica de desmoldado en caliente",
+                    "Hojaldre crujiente y dorado"
+                ]
+            },
+            {
+                id: 13,
+                name: "Salmón Sous Vide",
+                type: "mariscos",
+                time: "1 hora",
+                difficulty: "Avanzado",
+                icon: "🐟",
+                description: "Salmón cocido a baja temperatura con precisión, textura sedosa y sabor concentrado",
+                ingredients: ["4 Lomos de salmón", "Aceite de oliva", "Eneldo fresco", "Limón", "Sal marina", "Pimienta blanca", "Mantequilla", "Espárragos verdes"],
+                instructions: [
+                    "Sazonar salmón con sal y pimienta",
+                    "Envasar al vacío con aceite y eneldo",
+                    "Cocinar en baño maría a 52°C por 45 min",
+                    "Saltear espárragos hasta al dente",
+                    "Sacar salmón del envase y secar",
+                    "Dorar piel en sartén caliente 30 segundos",
+                    "Montar salsa con mantequilla y limón",
+                    "Servir inmediatamente sobre espárragos"
+                ],
+                techniques: [
+                    "Cocción sous vide de precisión",
+                    "Envasado al vacío correcto",
+                    "Control de temperatura exacto",
+                    "Acabado en sartén para textura"
+                ]
+            },
+            {
+                id: 14,
+                name: "Ratatouille Confit",
+                type: "vegetarianos",
+                time: "2 horas",
+                difficulty: "Intermedio",
+                icon: "🍆",
+                description: "Verduras mediterráneas confitadas individualmente y montadas en espiral, técnica de Thomas Keller",
+                ingredients: ["2 Berenjenas", "2 Calabacines", "4 Tomates", "1 Pimiento rojo", "Tomillo", "Romero", "Aceite de oliva", "Ajo", "Cebolla"],
+                instructions: [
+                    "Cortar todas las verduras en rodajas finas",
+                    "Confitar cada verdura por separado en aceite",
+                    "Preparar base de cebolla y tomate",
+                    "Montar verduras en espiral alternando colores",
+                    "Sazonar cada capa con hierbas",
+                    "Hornear a 180°C por 45 minutos",
+                    "Cubrir con papel aluminio si se dora mucho",
+                    "Servir caliente como guarnición gourmet"
+                ],
+                techniques: [
+                    "Confitado individual de verduras",
+                    "Corte uniforme con mandolina",
+                    "Montaje artístico en espiral",
+                    "Cocción lenta para concentrar sabores"
+                ]
+            },
+            {
+                id: 15,
+                name: "Magret de Pato",
+                type: "carnes",
+                time: "30 min",
+                difficulty: "Avanzado",
+                icon: "🦆",
+                description: "Pechuga de pato marcada con piel crujiente, salsa de cerezas y puré de boniato",
+                ingredients: ["2 Magrets de pato", "200g Cerezas", "1 Boniato grande", "Vino tinto", "Miel", "Mantequilla", "Tomillo", "Vinagre balsámico"],
+                instructions: [
+                    "Marcar piel del magret en cuadrícula",
+                    "Cocinar piel hacia abajo 8 minutos",
+                    "Voltear y cocinar 4 minutos más",
+                    "Reposar envuelto en papel 10 minutos",
+                    "Cocer boniato y hacer puré sedoso",
+                    "Reducir vino con cerezas y miel",
+                    "Cortar magret en láminas diagonales",
+                    "Emplatar con puré y salsa de cerezas"
+                ],
+                techniques: [
+                    "Marcado de piel para grasa crujiente",
+                    "Control de cocción rosa",
+                    "Reposo para redistribuir jugos",
+                    "Reducción de frutas con vino"
+                ]
+            },
+            {
+                id: 16,
+                name: "Gazpacho Esférico",
+                type: "entrantes",
+                time: "4 horas",
+                difficulty: "Chef",
+                icon: "🍅",
+                description: "Gazpacho tradicional transformado en esferas mediante esferificación, técnica de vanguardia",
+                ingredients: ["500ml Gazpacho tradicional", "Agar agar", "Cloruro cálcico", "Alginato sódico", "Aceite de oliva", "Pan tostado", "Microgreens"],
+                instructions: [
+                    "Preparar gazpacho tradicional y colar finamente",
+                    "Mezclar con cloruro cálcico al 0.5%",
+                    "Preparar baño de alginato sódico al 0.5%",
+                    "Formar esferas con cuchara hemisférica",
+                    "Sumergir en baño de alginato 2 minutos",
+                    "Enjuagar en agua limpia",
+                    "Servir inmediatamente sobre pan tostado",
+                    "Decorar con aceite de oliva y microgreens"
+                ],
+                techniques: [
+                    "Esferificación básica",
+                    "Control de concentraciones químicas",
+                    "Timing preciso de reacción",
+                    "Presentación de vanguardia"
+                ]
+            },
+            {
+                id: 17,
+                name: "Chocolate Soufflé",
+                type: "postres",
+                time: "45 min",
+                difficulty: "Chef",
+                icon: "🍫",
+                description: "Soufflé de chocolate negro 70% con corazón fundido y helado de vainilla bourbon",
+                ingredients: ["200g Chocolate negro 70%", "6 Huevos", "100g Azúcar", "50g Mantequilla", "30ml Ron", "Helado de vainilla", "Cacao en polvo"],
+                instructions: [
+                    "Derretir chocolate con mantequilla al baño maría",
+                    "Separar yemas de claras",
+                    "Batir yemas con la mitad del azúcar",
+                    "Incorporar chocolate tibio a las yemas",
+                    "Montar claras con resto de azúcar",
+                    "Incorporar claras en tres veces",
+                    "Llenar moldes hasta 3/4 de altura",
+                    "Hornear a 180°C por 12-14 minutos"
+                ],
+                techniques: [
+                    "Derretido perfecto del chocolate",
+                    "Montado de claras a punto de nieve",
+                    "Incorporación sin perder volumen",
+                    "Cocción con corazón fundido"
+                ]
+            },
+            {
+                id: 18,
+                name: "Pulpo a la Gallega Gourmet",
+                type: "mariscos",
+                time: "1.5 horas",
+                difficulty: "Avanzado",
+                icon: "🐙",
+                description: "Pulpo cocido tradicionalmente con patatas confitadas y pimentón de La Vera",
+                ingredients: ["1 Pulpo fresco (1.5kg)", "Patatas nuevas", "Pimentón dulce de La Vera", "Aceite de oliva virgen extra", "Sal gruesa", "Laurel"],
+                instructions: [
+                    "Congelar pulpo 24h para ablandar fibras",
+                    "Cocer en agua con laurel sin sal",
+                    "Introducir y sacar 3 veces antes de cocer",
+                    "Cocinar 45-60 min hasta tierno",
+                    "Confitar patatas en aceite a baja temperatura",
+                    "Cortar pulpo con tijeras en rodajas",
+                    "Servir sobre patatas calientes",
+                    "Aliñar con aceite, sal gruesa y pimentón"
+                ],
+                techniques: [
+                    "Técnica tradicional gallega",
+                    "Congelado previo para textura",
+                    "Confitado de patatas",
+                    "Corte con tijeras para no desgarrar"
+                ]
+            },
+            {
+                id: 19,
+                name: "Ensalada de Quinoa",
+                type: "vegetarianos",
+                time: "30 min",
+                difficulty: "Intermedio",
+                icon: "🥗",
+                description: "Quinoa tricolor con verduras asadas, queso de cabra y vinagreta de granada",
+                ingredients: ["200g Quinoa tricolor", "Calabacín", "Pimiento rojo", "Berenjena", "Queso de cabra", "Granada", "Rúcula", "Vinagre de Jerez", "Aceite de oliva"],
+                instructions: [
+                    "Cocer quinoa en caldo de verduras",
+                    "Asar verduras cortadas en dados",
+                    "Preparar vinagreta con granada",
+                    "Enfriar quinoa completamente",
+                    "Mezclar con verduras asadas",
+                    "Añadir rúcula fresca",
+                    "Aliñar con vinagreta de granada",
+                    "Decorar con queso de cabra desmenuzado"
+                ],
+                techniques: [
+                    "Cocción perfecta de quinoa",
+                    "Asado de verduras al punto",
+                    "Vinagreta emulsionada",
+                    "Montaje de ensalada gourmet"
+                ]
+            },
+            {
+                id: 20,
+                name: "Lubina en Sal",
+                type: "mariscos",
+                time: "1 hora",
+                difficulty: "Intermedio",
+                icon: "🐟",
+                description: "Lubina entera cocida en costra de sal con hierbas aromáticas, técnica mediterránea",
+                ingredients: ["1 Lubina entera (1.2kg)", "2kg Sal gruesa", "4 Claras de huevo", "Tomillo", "Romero", "Laurel", "Limón", "Aceite de oliva"],
+                instructions: [
+                    "Limpiar lubina sin escamar",
+                    "Rellenar cavidad con hierbas aromáticas",
+                    "Mezclar sal con claras de huevo",
+                    "Cubrir pescado completamente con sal",
+                    "Hornear a 200°C por 35-40 minutos",
+                    "Romper costra de sal al servir",
+                    "Retirar piel y espinas cuidadosamente",
+                    "Servir con aceite de oliva y limón"
+                ],
+                techniques: [
+                    "Preparación de costra de sal",
+                    "Cocción uniforme sin secar",
+                    "Técnica de desespinado",
+                    "Presentación en mesa"
+                ]
+            },
+            {
+                id: 21,
+                name: "Mousse de Chocolate",
+                type: "postres",
+                time: "3 horas",
+                difficulty: "Avanzado",
+                icon: "🍮",
+                description: "Mousse aérea de chocolate Valrhona con crujiente de cacao y oro comestible",
+                ingredients: ["250g Chocolate Valrhona 64%", "6 Huevos", "50g Azúcar", "200ml Nata líquida", "Cacao en polvo", "Oro comestible", "Frambuesas"],
+                instructions: [
+                    "Derretir chocolate al baño maría",
+                    "Separar yemas de claras",
+                    "Batir yemas con chocolate tibio",
+                    "Montar nata a punto de chantilly",
+                    "Montar claras con azúcar",
+                    "Incorporar nata al chocolate",
+                    "Añadir claras en movimientos envolventes",
+                    "Refrigerar 3 horas antes de servir"
+                ],
+                techniques: [
+                    "Derretido suave del chocolate",
+                    "Montado perfecto de nata",
+                    "Incorporación sin perder aire",
+                    "Decoración con oro comestible"
+                ]
+            },
+            {
+                id: 22,
+                name: "Carpaccio de Ternera",
+                type: "entrantes",
+                time: "20 min",
+                difficulty: "Intermedio",
+                icon: "🥩",
+                description: "Finas láminas de solomillo con rúcula, parmesano y vinagreta de mostaza antigua",
+                ingredients: ["300g Solomillo de ternera", "Rúcula salvaje", "Parmesano 24 meses", "Mostaza antigua", "Aceite de oliva", "Limón", "Alcaparras", "Pimienta negra"],
+                instructions: [
+                    "Congelar solomillo 30 min para facilitar corte",
+                    "Cortar en láminas transparentes",
+                    "Extender sobre platos fríos",
+                    "Preparar vinagreta con mostaza y limón",
+                    "Distribuir rúcula sobre carne",
+                    "Laminar parmesano con pelador",
+                    "Aliñar con vinagreta",
+                    "Decorar con alcaparras y pimienta"
+                ],
+                techniques: [
+                    "Corte ultra fino con cuchillo afilado",
+                    "Congelado parcial para textura",
+                    "Laminado de queso curado",
+                    "Vinagreta emulsionada"
+                ]
+            },
+            {
+                id: 23,
+                name: "Paella de Mariscos",
+                type: "principales",
+                time: "45 min",
+                difficulty: "Avanzado",
+                icon: "🥘",
+                description: "Auténtica paella valenciana de mariscos con sofrito tradicional y azafrán de La Mancha",
+                ingredients: ["400g Arroz bomba", "Langostinos", "Mejillones", "Calamares", "Azafrán", "Tomate", "Pimiento rojo", "Judía verde", "Caldo de pescado", "Aceite de oliva"],
+                instructions: [
+                    "Preparar sofrito con tomate y pimiento",
+                    "Añadir mariscos y dorar ligeramente",
+                    "Incorporar arroz y tostar 2 minutos",
+                    "Añadir caldo caliente con azafrán",
+                    "Cocinar a fuego fuerte 10 minutos",
+                    "Reducir fuego y cocinar 10 min más",
+                    "Reposar 5 minutos tapada",
+                    "Decorar con limón y perejil"
+                ],
+                techniques: [
+                    "Sofrito tradicional valenciano",
+                    "Tostado del arroz",
+                    "Control de fuego y líquido",
+                    "Socarrat perfecto"
+                ]
+            },
+            {
+                id: 24,
+                name: "Millefeuille Clásico",
+                type: "postres",
+                time: "2 horas",
+                difficulty: "Chef",
+                icon: "🥧",
+                description: "Hojaldre crujiente con crema pastelera de vainilla y fondant, técnica francesa tradicional",
+                ingredients: ["300g Hojaldre", "500ml Leche", "6 Yemas", "100g Azúcar", "50g Maizena", "Vainilla", "Fondant blanco", "Chocolate negro"],
+                instructions: [
+                    "Estirar hojaldre en rectángulos finos",
+                    "Hornear entre bandejas para evitar subida",
+                    "Preparar crema pastelera espesa",
+                    "Enfriar crema con film contacto",
+                    "Cortar hojaldre en rectángulos perfectos",
+                    "Montar alternando hojaldre y crema",
+                    "Cubrir con fondant alisado",
+                    "Decorar con líneas de chocolate"
+                ],
+                techniques: [
+                    "Horneado controlado del hojaldre",
+                    "Crema pastelera sin grumos",
+                    "Montaje preciso y nivelado",
+                    "Decoración con peines de chocolate"
+                ]
+            }
+        ];
+
+        let filteredDishes = [...dishes];
+        let currentTypeFilter = 'todos';
+        let currentDifficultyFilter = 'todas';
+        let currentPage = 1;
+        const itemsPerPage = 8;
+
+        function loadDishes(dishesToShow = filteredDishes) {
+            const dishesGrid = document.getElementById('dishesGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            // Calcular paginación
+            const totalItems = dishesToShow.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentItems = dishesToShow.slice(startIndex, endIndex);
+            
+            resultsCount.textContent = `${totalItems} platos encontrados`;
+            
+            dishesGrid.innerHTML = currentItems.map(dish => `
+                <div class="dish-card">
+                    <div class="dish-image">
+                        ${dish.icon}
+                        <div class="difficulty-badge">${dish.difficulty}</div>
+                    </div>
+                    <div class="dish-content">
+                        <h3>${dish.name}</h3>
+                        <div class="dish-meta">
+                            <span>⏱️ ${dish.time}</span>
+                            <span>🍽️ ${dish.type.charAt(0).toUpperCase() + dish.type.slice(1)}</span>
+                        </div>
+                        <p class="dish-description">${dish.description}</p>
+                        <div class="dish-ingredients">
+                            <h4>Ingredientes principales:</h4>
+                            <div class="ingredients-list">
+                                ${dish.ingredients.slice(0, 3).join(', ')}...
+                            </div>
+                        </div>
+                        <div class="dish-actions">
+                            <button class="btn-primary" onclick="viewFullRecipe(${dish.id})">Ver Receta</button>
+                            <button class="btn-secondary" onclick="addToFavorites(${dish.id})">⭐</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Actualizar paginación
+            updatePagination(totalPages, totalItems);
+        }
+
+        function filterByType(type) {
+            currentTypeFilter = type;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            applyFilters();
+        }
+
+        function filterByDifficulty(difficulty) {
+            currentDifficultyFilter = difficulty;
+            
+            // Actualizar botones activos en el grupo de dificultad
+            const difficultyButtons = document.querySelectorAll('.filter-group')[1].querySelectorAll('.filter-btn');
+            difficultyButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            applyFilters();
+        }
+
+        function updatePagination(totalPages, totalItems) {
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'flex';
+            
+            let paginationHTML = '';
+            
+            // Botón anterior
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    ← Anterior
+                </button>
+            `;
+            
+            // Números de página (siempre del 1 al 10)
+            const maxPages = Math.min(10, totalPages);
+            for (let i = 1; i <= maxPages; i++) {
+                paginationHTML += `
+                    <button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Botón siguiente
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Siguiente →
+                </button>
+            `;
+            
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadDishes(filteredDishes);
+            
+            // Scroll suave hacia arriba
+            document.querySelector('.dishes-section').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        function applyFilters() {
+            filteredDishes = dishes.filter(dish => {
+                const typeMatch = currentTypeFilter === 'todos' || dish.type === currentTypeFilter;
+                const difficultyMatch = currentDifficultyFilter === 'todas' || dish.difficulty === currentDifficultyFilter;
+                return typeMatch && difficultyMatch;
+            });
+            
+            // Resetear a la primera página cuando se aplican filtros
+            currentPage = 1;
+            loadDishes(filteredDishes);
+        }
+
+        function searchDishes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                currentPage = 1;
+                loadDishes(filteredDishes);
+                return;
+            }
+            
+            const searchResults = filteredDishes.filter(dish => 
+                dish.name.toLowerCase().includes(searchTerm) ||
+                dish.description.toLowerCase().includes(searchTerm)
+            );
+            
+            currentPage = 1;
+            loadDishes(searchResults);
+        }
+
+        function searchByIngredients() {
+            const ingredientSearch = document.getElementById('ingredientSearch').value.toLowerCase();
+            
+            if (!ingredientSearch) {
+                currentPage = 1;
+                loadDishes(filteredDishes);
+                return;
+            }
+            
+            // Dividir la búsqueda por comas para buscar múltiples ingredientes
+            const searchIngredients = ingredientSearch.split(',').map(ing => ing.trim());
+            
+            const searchResults = filteredDishes.filter(dish => {
+                return searchIngredients.some(searchIng => 
+                    dish.ingredients.some(ingredient => 
+                        ingredient.toLowerCase().includes(searchIng)
+                    )
+                );
+            });
+            
+            // Ordenar por relevancia (más ingredientes coincidentes primero)
+            searchResults.sort((a, b) => {
+                const aMatches = searchIngredients.filter(searchIng => 
+                    a.ingredients.some(ingredient => 
+                        ingredient.toLowerCase().includes(searchIng)
+                    )
+                ).length;
+                
+                const bMatches = searchIngredients.filter(searchIng => 
+                    b.ingredients.some(ingredient => 
+                        ingredient.toLowerCase().includes(searchIng)
+                    )
+                ).length;
+                
+                return bMatches - aMatches;
+            });
+            
+            currentPage = 1;
+            loadDishes(searchResults);
+            
+            if (searchResults.length === 0) {
+                alert('No se encontraron platos con esos ingredientes. Intenta con otros como: trufa, foie, caviar, salmón, etc.');
+            }
+        }
+
+        function viewFullRecipe(dishId) {
+            const dish = dishes.find(d => d.id === dishId);
+            const modal = document.getElementById('dishModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <h2>${dish.icon} ${dish.name}</h2>
+                <p style="margin-bottom: 20px; color: #f5f5f5; opacity: 0.8; font-style: italic;">${dish.description}</p>
+                
+                <div style="display: flex; gap: 20px; margin-bottom: 25px; color: #d4af37;">
+                    <span>⏱️ Tiempo: ${dish.time}</span>
+                    <span>👨‍🍳 Dificultad: ${dish.difficulty}</span>
+                    <span>🍽️ Tipo: ${dish.type.charAt(0).toUpperCase() + dish.type.slice(1)}</span>
+                </div>
+                
+                <div class="modal-ingredients">
+                    <h3>Ingredientes:</h3>
+                    <ul>
+                        ${dish.ingredients.map(ingredient => `<li>• ${ingredient}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="modal-instructions">
+                    <h3>Preparación:</h3>
+                    <ol>
+                        ${dish.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
+                    </ol>
+                </div>
+                
+                <div class="modal-techniques">
+                    <h3>Técnicas Culinarias:</h3>
+                    <ul>
+                        ${dish.techniques.map(technique => `<li class="technique-highlight">🎯 ${technique}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(212, 175, 55, 0.1); border-radius: 10px;">
+                    <p style="color: #d4af37; font-weight: bold; margin-bottom: 15px;">👨‍🍳 Nivel de Alta Cocina</p>
+                    <button class="btn-primary" style="margin-right: 10px;" onclick="addToFavorites(${dish.id})">Agregar a Favoritos ⭐</button>
+                    <button class="btn-secondary" onclick="shareRecipe(${dish.id})">Compartir 📤</button>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('dishModal').style.display = 'none';
+        }
+
+        function addToFavorites(dishId) {
+            const dish = dishes.find(d => d.id === dishId);
+            alert(`¡${dish.name} agregado a tus favoritos! ⭐`);
+        }
+
+        function shareRecipe(dishId) {
+            const dish = dishes.find(d => d.id === dishId);
+            alert(`¡Compartiendo la receta de ${dish.name}! 📤`);
+        }
+
+        function goHome() {
+            alert('Regresando a la página principal...');
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('dishModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Permitir búsqueda con Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchDishes();
+            }
+        });
+
+        document.getElementById('ingredientSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchByIngredients();
+            }
+        });
+
+        // Cargar platos al iniciar
+        window.addEventListener('load', () => {
+            loadDishes();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985b76d9e1ab336e',t:'MTc1ODk4MDk2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
