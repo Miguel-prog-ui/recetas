@@ -18,6 +18,9 @@ from rutas_auth import (
     acceso_login as func_acceso_login
 )
 from rutas_recetas import buscar_recetas_api as func_buscar_recetas_api
+from rutas_recetas import buscar_recetas_palabra_api as func_buscar_recetas_palabra_api
+from rutas_recetas import buscar_por_ingredientes_api
+
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'
@@ -74,6 +77,21 @@ def acceso_login():
 @app.route('/buscar_recetas')
 def buscar_recetas_api():
     return func_buscar_recetas_api(mysql)
+
+
+
+# ... después de las otras rutas ...
+
+@app.route('/buscar_recetas_palabra')
+def buscar_recetas_palabra_api():
+    return func_buscar_recetas_palabra_api(mysql)
+
+
+# ... (código existente) ...
+
+@app.route('/buscar_por_ingredientes')
+def buscar_por_ingredientes():
+    return buscar_por_ingredientes_api(mysql)
 
 if __name__ == '__main__':
     app.run(debug=True)

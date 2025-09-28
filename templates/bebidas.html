@@ -12,7 +12,7 @@
             <div class="header-content">
                 <div class="logo-section">
                     <!-- Botón de home con icono -->
-                    <a href="/" class="home-btn" onclick="handleHomeClick(event)">
+                    <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
                         <span class="home-icon">🏠</span>
                     </a>
                     <!-- Texto del logo separado -->
@@ -36,6 +36,7 @@
             <p>Descubre una amplia variedad de bebidas deliciosas y refrescantes. Desde smoothies nutritivos hasta aguas saborizadas, encuentra la bebida perfecta para cada momento del día.</p>
         </section>
 
+        <!-- Sección de Filtros y Búsqueda - SIEMPRE VISIBLE -->
         <section class="filters">
             <div class="filter-row">
                 <div class="filter-group">
@@ -69,21 +70,39 @@
                 <div class="search-section">
                     <div class="filter-group">
                         <label>Buscar por ingredientes:</label>
-                        <input type="text" placeholder="Ej: mango, leche de coco, miel..." id="ingredientSearch">
+                        <input type="text" placeholder="Ej: mango, leche de coco, miel, menta..." id="ingredientSearch">
+                        
                     </div>
-                    <button onclick="searchByIngredients()">Buscar</button>
+                    <button onclick="searchByIngredients()">Buscar Ingredientes</button>
                 </div>
             </div>
         </section>
 
-        <section class="recipes-section">
+        <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
+        <section id="searchResultsSection" class="search-results-section" style="display: none;">
+            <div class="container">
+                <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
+                <div class="recipes-grid" id="searchResultsGrid"></div>
+            </div>
+        </section>
+
+        <!-- Sección de detalle de receta (oculta inicialmente) -->
+        <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
+            <div class="container">
+                <button onclick="hideRecipeDetail()" class="back-btn">← Volver a los resultados</button>
+                <div id="recipeDetailContent"></div>
+            </div>
+        </section>
+
+        <!-- Sección principal de bebidas -->
+        <section class="recipes-section" id="recipesMainSection">
             <div class="section-header">
                 <h2 class="section-title">Nuestras Bebidas</h2>
-                <span class="results-count" id="resultsCount">12 recetas encontradas</span>
+                <span class="results-count" id="resultsCount">Cargando recetas...</span>
             </div>
             
             <div class="recipes-grid" id="recipesGrid">
-                <!-- Las recetas se cargarán dinámicamente -->
+                <!-- Las recetas se cargarán dinámicamente desde la base de datos -->
             </div>
             
             <!-- Paginación -->
@@ -92,16 +111,6 @@
             </div>
         </section>
     </main>
-
-    <!-- Modal para receta completa -->
-    <div id="recipeModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div id="modalContent">
-                <!-- Contenido del modal se carga dinámicamente -->
-            </div>
-        </div>
-    </div>
 
     <footer>
         <div class="container">
@@ -112,274 +121,520 @@
     </footer>
 
     <script>
-        const drinks = [
-            {
-                id: 1,
-                name: "Smoothie de Mango y Coco",
-                type: "smoothies",
-                time: "5 min",
-                difficulty: "Fácil",
-                icon: "🥭",
-                description: "Cremoso smoothie tropical con mango fresco, leche de coco y un toque de miel",
-                ingredients: ["1 mango maduro", "200ml leche de coco", "1 cucharada de miel", "Hielo al gusto", "Hojas de menta"],
-                instructions: [
-                    "Pela y corta el mango en trozos",
-                    "Agrega todos los ingredientes a la licuadora",
-                    "Licúa por 2 minutos hasta obtener consistencia cremosa",
-                    "Sirve inmediatamente con hielo",
-                    "Decora con hojas de menta fresca"
-                ]
-            },
-            {
-                id: 2,
-                name: "Limonada de Menta Fresca",
-                type: "aguas",
-                time: "10 min",
-                difficulty: "Fácil",
-                icon: "🍋",
-                description: "Refrescante limonada con menta fresca, perfecta para días calurosos",
-                ingredients: ["4 limones grandes", "1 litro de agua", "3 cucharadas de azúcar", "20 hojas de menta", "Hielo"],
-                instructions: [
-                    "Exprime los limones y reserva el jugo",
-                    "Machaca ligeramente las hojas de menta",
-                    "Mezcla el jugo de limón con agua y azúcar",
-                    "Agrega la menta y deja reposar 5 minutos",
-                    "Sirve con hielo y decora con rodajas de limón"
-                ]
-            },
-            {
-                id: 3,
-                name: "Té Helado de Frutas del Bosque",
-                type: "tés",
-                time: "15 min",
-                difficulty: "Medio",
-                icon: "🫐",
-                description: "Té negro aromático con frutas del bosque y un toque cítrico",
-                ingredients: ["4 bolsitas de té negro", "500ml agua caliente", "200g frutas del bosque", "2 cucharadas miel", "Jugo de 1 limón"],
-                instructions: [
-                    "Prepara el té con agua caliente y deja reposar 5 minutos",
-                    "Retira las bolsitas y deja enfriar",
-                    "Machaca ligeramente las frutas del bosque",
-                    "Mezcla el té frío con frutas, miel y jugo de limón",
-                    "Refrigera por 30 minutos antes de servir"
-                ]
-            },
-            {
-                id: 4,
-                name: "Agua de Pepino y Limón",
-                type: "aguas",
-                time: "8 min",
-                difficulty: "Fácil",
-                icon: "🥒",
-                description: "Agua detox refrescante con pepino, limón y hierbas aromáticas",
-                ingredients: ["1 pepino grande", "2 limones", "1 litro agua", "Hojas de albahaca", "Hielo"],
-                instructions: [
-                    "Corta el pepino en rodajas finas",
-                    "Corta el limón en rodajas",
-                    "Agrega pepino y limón al agua",
-                    "Añade hojas de albahaca",
-                    "Refrigera por 2 horas antes de servir"
-                ]
-            },
-            {
-                id: 5,
-                name: "Smoothie Verde Energizante",
-                type: "smoothies",
-                time: "7 min",
-                difficulty: "Fácil",
-                icon: "🥬",
-                description: "Smoothie nutritivo con espinacas, manzana verde y jengibre",
-                ingredients: ["2 tazas espinacas frescas", "1 manzana verde", "1 plátano", "1cm jengibre", "250ml agua de coco"],
-                instructions: [
-                    "Lava bien las espinacas",
-                    "Pela y corta la manzana y plátano",
-                    "Pela el jengibre",
-                    "Licúa todos los ingredientes por 2 minutos",
-                    "Sirve inmediatamente para conservar nutrientes"
-                ]
-            },
-            {
-                id: 6,
-                name: "Jugo de Naranja y Zanahoria",
-                type: "jugos",
-                time: "12 min",
-                difficulty: "Medio",
-                icon: "🥕",
-                description: "Jugo natural rico en vitaminas con naranja fresca y zanahoria",
-                ingredients: ["4 naranjas grandes", "3 zanahorias medianas", "1cm jengibre", "1 cucharadita miel"],
-                instructions: [
-                    "Pela las naranjas y córtalas en gajos",
-                    "Pela y corta las zanahorias",
-                    "Extrae el jugo con un extractor",
-                    "Agrega jengibre y miel al gusto",
-                    "Mezcla bien y sirve fresco"
-                ]
-            },
-            {
-                id: 7,
-                name: "Té Verde con Jazmín",
-                type: "tés",
-                time: "6 min",
-                difficulty: "Fácil",
-                icon: "🍃",
-                description: "Té verde aromático con flores de jazmín, relajante y antioxidante",
-                ingredients: ["2 cucharaditas té verde", "Flores de jazmín", "500ml agua a 80°C", "Miel opcional"],
-                instructions: [
-                    "Calienta el agua a 80°C (no hirviendo)",
-                    "Agrega el té verde y jazmín",
-                    "Deja reposar 3-4 minutos",
-                    "Cuela y endulza si deseas",
-                    "Sirve caliente o frío"
-                ]
-            },
-            {
-                id: 8,
-                name: "Smoothie de Fresa y Plátano",
-                type: "smoothies",
-                time: "5 min",
-                difficulty: "Fácil",
-                icon: "🍓",
-                description: "Clásico smoothie cremoso con fresas frescas y plátano maduro",
-                ingredients: ["200g fresas frescas", "1 plátano maduro", "200ml leche", "1 cucharada miel", "Hielo"],
-                instructions: [
-                    "Lava y desinfecta las fresas",
-                    "Pela el plátano y córtalo",
-                    "Agrega todos los ingredientes a la licuadora",
-                    "Licúa hasta obtener consistencia suave",
-                    "Sirve inmediatamente con fresas de decoración"
-                ]
-            },
-            {
-                id: 9,
-                name: "Agua de Jamaica con Canela",
-                type: "aguas",
-                time: "20 min",
-                difficulty: "Fácil",
-                icon: "🌺",
-                description: "Refrescante agua de jamaica con un toque de canela y limón",
-                ingredients: ["100g flores de jamaica", "1 litro agua", "1 raja de canela", "Azúcar al gusto", "Jugo de limón"],
-                instructions: [
-                    "Hierve el agua con la canela",
-                    "Agrega las flores de jamaica",
-                    "Deja reposar 15 minutos",
-                    "Cuela y endulza al gusto",
-                    "Agrega jugo de limón y sirve frío"
-                ]
-            },
-            {
-                id: 10,
-                name: "Jugo Verde Detox",
-                type: "jugos",
-                time: "10 min",
-                difficulty: "Medio",
-                icon: "🥒",
-                description: "Jugo verde purificante con apio, pepino, manzana verde y limón",
-                ingredients: ["2 tallos de apio", "1 pepino", "2 manzanas verdes", "Jugo de 1 limón", "Jengibre al gusto"],
-                instructions: [
-                    "Lava todos los vegetales y frutas",
-                    "Corta en trozos para el extractor",
-                    "Extrae el jugo de todos los ingredientes",
-                    "Agrega jugo de limón y jengibre",
-                    "Mezcla y sirve inmediatamente"
-                ]
-            },
-            {
-                id: 11,
-                name: "Té de Manzanilla con Miel",
-                type: "tés",
-                time: "8 min",
-                difficulty: "Fácil",
-                icon: "🌼",
-                description: "Té relajante de manzanilla con miel natural, perfecto para la noche",
-                ingredients: ["2 cucharaditas manzanilla seca", "500ml agua", "2 cucharadas miel", "Rodaja de limón"],
-                instructions: [
-                    "Hierve el agua",
-                    "Agrega la manzanilla y deja reposar 5 minutos",
-                    "Cuela el té",
-                    "Endulza con miel",
-                    "Sirve caliente con rodaja de limón"
-                ]
-            },
-            {
-                id: 12,
-                name: "Smoothie de Chocolate y Plátano",
-                type: "smoothies",
-                time: "6 min",
-                difficulty: "Fácil",
-                icon: "🍫",
-                description: "Smoothie indulgente con cacao, plátano y leche de almendras",
-                ingredients: ["2 plátanos maduros", "2 cucharadas cacao en polvo", "300ml leche de almendras", "1 cucharada miel", "Hielo"],
-                instructions: [
-                    "Pela y corta los plátanos",
-                    "Agrega todos los ingredientes a la licuadora",
-                    "Licúa por 2 minutos hasta obtener cremosidad",
-                    "Ajusta dulzor con más miel si es necesario",
-                    "Sirve con cacao en polvo espolvoreado"
-                ]
-            }
-        ];
-
-        let filteredDrinks = [...drinks];
+        let allDrinks = [];
+        let filteredDrinks = [];
         let currentTypeFilter = 'todos';
         let currentDifficultyFilter = 'todas';
         let currentPage = 1;
         const itemsPerPage = 8;
+        let currentSearchResults = [];
 
-        // 🔥 NUEVA FUNCIÓN: Manejar clic en el botón de home
-        function handleHomeClick(event) {
-            // Si hay búsqueda activa, limpiar antes de redirigir
-            if (hasActiveSearch()) {
-                event.preventDefault();
-                clearActiveSearch();
+        // Cargar bebidas desde la base de datos
+        function loadDrinksFromDatabase() {
+            fetch('/buscar_recetas?categoria=bebida')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.recetas && data.recetas.length > 0) {
+                        allDrinks = data.recetas.map(receta => ({
+                            id: receta.id,
+                            name: receta.title,
+                            type: getDrinkType(receta.title, receta.ingredients),
+                            time: "10 min",
+                            difficulty: "Fácil",
+                            icon: getDrinkIcon(receta.title),
+                            description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                            imagen: receta.imagen || ''
+                        }));
+                        
+                        filteredDrinks = [...allDrinks];
+                        loadDrinks();
+                        updateResultsCount();
+                    } else {
+                        document.getElementById('resultsCount').textContent = 'No se encontraron recetas de bebidas';
+                        document.getElementById('recipesGrid').innerHTML = `
+                            <div class="no-results-message">
+                                <div class="no-results-icon">🥤</div>
+                                <h3>No hay bebidas disponibles</h3>
+                                <p>No se encontraron recetas de bebidas en la base de datos.</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('resultsCount').textContent = 'Error cargando recetas';
+                });
+        }
+
+        // Determinar tipo de bebida basado en título e ingredientes
+        function getDrinkType(title, ingredients) {
+            const titleLower = title.toLowerCase();
+            const ingredientsLower = ingredients ? ingredients.toLowerCase() : '';
+            
+            if (titleLower.includes('smoothie') || ingredientsLower.includes('licuadora')) {
+                return 'smoothies';
+            } else if (titleLower.includes('jugo') || titleLower.includes('zumo')) {
+                return 'jugos';
+            } else if (titleLower.includes('agua') || titleLower.includes('limonada')) {
+                return 'aguas';
+            } else if (titleLower.includes('té') || titleLower.includes('te') || titleLower.includes('infusión')) {
+                return 'tés';
+            } else {
+                return 'smoothies';
             }
-            // Si no hay búsqueda activa, dejar que el enlace funcione normalmente (ir a /)
         }
 
-        // Función para verificar si hay búsqueda activa
-        function hasActiveSearch() {
-            return filteredDrinks.length !== drinks.length || 
-                   document.getElementById('searchInput').value !== '' ||
-                   document.getElementById('ingredientSearch').value !== '';
+        // Obtener icono basado en el título
+        function getDrinkIcon(title) {
+            const titleLower = title.toLowerCase();
+            
+            if (titleLower.includes('mango')) return '🥭';
+            if (titleLower.includes('limón') || titleLower.includes('limon')) return '🍋';
+            if (titleLower.includes('fresa') || titleLower.includes('frutilla')) return '🍓';
+            if (titleLower.includes('naranja')) return '🍊';
+            if (titleLower.includes('manzana')) return '🍎';
+            if (titleLower.includes('plátano') || titleLower.includes('banana')) return '🍌';
+            if (titleLower.includes('piña')) return '🍍';
+            if (titleLower.includes('uva')) return '🍇';
+            if (titleLower.includes('sandía') || titleLower.includes('sandia')) return '🍉';
+            if (titleLower.includes('melón') || titleLower.includes('melon')) return '🍈';
+            if (titleLower.includes('coco')) return '🥥';
+            if (titleLower.includes('aguacate') || titleLower.includes('palta')) return '🥑';
+            if (titleLower.includes('zanahoria')) return '🥕';
+            if (titleLower.includes('pepino')) return '🥒';
+            if (titleLower.includes('té') || titleLower.includes('te')) return '🍵';
+            if (titleLower.includes('café') || titleLower.includes('cafe')) return '☕';
+            if (titleLower.includes('chocolate')) return '🍫';
+            
+            return '🥤';
         }
 
-        // Función para limpiar búsqueda activa
+        // Actualizar contador de resultados
+        function updateResultsCount() {
+            const resultsCount = document.getElementById('resultsCount');
+            resultsCount.textContent = `${filteredDrinks.length} recetas encontradas`;
+        }
+
+        // Limpiar búsqueda activa
         function clearActiveSearch() {
-            filteredDrinks = [...drinks];
-            currentTypeFilter = 'todos';
-            currentDifficultyFilter = 'todas';
-            currentPage = 1;
+            hideSearchResults();
+            hideRecipeDetail();
             document.getElementById('searchInput').value = '';
             document.getElementById('ingredientSearch').value = '';
+            currentSearchResults = [];
             
-            // Resetear botones de filtro
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                if (btn.textContent === 'Todos' || btn.textContent === 'Todas') {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
+            document.getElementById('recipesMainSection').style.display = 'block';
+            loadDrinks();
+            updateResultsCount();
+        }
+
+        // Ocultar resultados de búsqueda
+        function hideSearchResults() {
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            searchResultsSection.style.display = 'none';
+            currentSearchResults = [];
+        }
+
+        // Ocultar detalle de receta
+        function hideRecipeDetail() {
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            const recipesMainSection = document.getElementById('recipesMainSection');
+            
+            recipeDetailSection.style.display = 'none';
+            
+            if (currentSearchResults.length > 0) {
+                searchResultsSection.style.display = 'block';
+            } else {
+                recipesMainSection.style.display = 'block';
+            }
+        }
+
+        // Procesar los pasos para manejar diferentes formatos
+        function procesarPasos(instructions) {
+            if (!instructions || instructions.length === 0) return '<p>No hay instrucciones disponibles.</p>';
+            
+            let pasosHTML = '';
+            let numeroPaso = 1;
+            
+            instructions.forEach(instruccion => {
+                const instruccionLimpia = instruccion.trim();
+                if (instruccionLimpia) {
+                    pasosHTML += `<p><strong>${numeroPaso}.</strong> ${instruccionLimpia}</p>`;
+                    numeroPaso++;
                 }
             });
             
-            loadDrinks();
+            return pasosHTML || '<p>No hay instrucciones disponibles.</p>';
+        }
+
+        // Búsqueda por nombre
+        function searchDrinks() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            
+            if (!searchTerm) {
+                alert('Por favor, ingresa un término de búsqueda');
+                return;
+            }
+            
+            fetch(`/buscar_recetas_palabra?q=${encodeURIComponent(searchTerm)}&categoria=bebida`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.recetas && data.recetas.length > 0) {
+                        currentSearchResults = data.recetas.map(receta => ({
+                            id: receta.id,
+                            name: receta.title,
+                            type: getDrinkType(receta.title, receta.ingredients),
+                            time: "10 min",
+                            difficulty: "Fácil",
+                            icon: getDrinkIcon(receta.title),
+                            description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                            imagen: receta.imagen || ''
+                        }));
+                        displaySearchResults(currentSearchResults, searchTerm);
+                    } else {
+                        fetch(`/buscar_recetas?q=${encodeURIComponent(searchTerm)}&categoria=bebida`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.recetas && data.recetas.length > 0) {
+                                    currentSearchResults = data.recetas.map(receta => ({
+                                        id: receta.id,
+                                        name: receta.title,
+                                        type: getDrinkType(receta.title, receta.ingredients),
+                                        time: "10 min",
+                                        difficulty: "Fácil",
+                                        icon: getDrinkIcon(receta.title),
+                                        description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                                        ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                                        instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                                        imagen: receta.imagen || ''
+                                    }));
+                                    displaySearchResults(currentSearchResults, searchTerm);
+                                } else {
+                                    displaySearchResults([], searchTerm);
+                                }
+                            })
+                            .catch(error2 => {
+                                console.error('Error en búsqueda fallback:', error2);
+                                displaySearchResults([], searchTerm);
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displaySearchResults([], searchTerm);
+                });
+        }
+
+        // 🔥 BÚSQUEDA POR INGREDIENTES (LLAMADA AL BACKEND CON PLURALES)
+        function searchByIngredients() {
+            const ingredientSearch = document.getElementById('ingredientSearch').value.trim();
+            
+            if (!ingredientSearch) {
+                alert('Por favor, ingresa al menos un ingrediente');
+                return;
+            }
+            
+            // Mostrar loading
+            document.getElementById('resultsCount').textContent = 'Buscando recetas...';
+            
+            // Llamar al backend para búsqueda por ingredientes
+            fetch(`/buscar_por_ingredientes?ingredientes=${encodeURIComponent(ingredientSearch)}&categoria=bebida`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.recetas && data.recetas.length > 0) {
+                        currentSearchResults = data.recetas.map(receta => ({
+                            id: receta.id,
+                            name: receta.title,
+                            type: getDrinkType(receta.title, receta.ingredients),
+                            time: "10 min",
+                            difficulty: "Fácil",
+                            icon: getDrinkIcon(receta.title),
+                            description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                            imagen: receta.imagen || '',
+                            matchPercentage: receta.match_percentage || 0,
+                            matchedIngredients: receta.matched_ingredients || [],
+                            totalSearchIngredients: receta.total_search_ingredients || 0,
+                            matchedCount: receta.matched_count || 0
+                        }));
+                        displayIngredientSearchResults(currentSearchResults, ingredientSearch.split(',').map(i => i.trim()));
+                    } else {
+                        displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en búsqueda por ingredientes:', error);
+                    displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
+                });
+        }
+
+        // Mostrar resultados de búsqueda por nombre
+        function displaySearchResults(recetas, searchTerm) {
+            const searchResultsGrid = document.getElementById('searchResultsGrid');
+            const searchResultsTitle = document.getElementById('searchResultsTitle');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            hideRecipeDetail();
+            
+            if (recetas.length > 0) {
+                searchResultsGrid.innerHTML = recetas.map(receta => `
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.name}" style="width:100%;height:100%;object-fit:cover;">` : receta.icon}
+                            <div class="difficulty-badge">${receta.difficulty}</div>
+                        </div>
+                        <div class="recipe-content">
+                            <h3>${receta.name}</h3>
+                            <div class="recipe-meta">
+                                <span>⏱️ ${receta.time}</span>
+                                <span>🥤 ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                            </div>
+                            <p class="recipe-description">${receta.description}</p>
+                            <div class="recipe-ingredients">
+                                <h4>Ingredientes principales:</h4>
+                                <div class="ingredients-list">
+                                    ${receta.ingredients.slice(0, 3).join(', ')}...
+                                </div>
+                            </div>
+                            <div class="recipe-actions">
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})">Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})">❤️</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                searchResultsTitle.textContent = `Resultados para: "${searchTerm}" (${recetas.length} encontrados)`;
+                
+            } else {
+                searchResultsGrid.innerHTML = `
+                    <div class="no-results-message">
+                        <div class="no-results-icon">🔍</div>
+                        <h3>No se encontraron bebidas</h3>
+                        <p>No hay bebidas que coincidan con "${searchTerm}"</p>
+                    </div>
+                `;
+            }
+            
+            searchResultsSection.style.display = 'block';
+            document.getElementById('recipesMainSection').style.display = 'none';
+        }
+
+        // 🔥 MOSTRAR RESULTADOS DE BÚSQUEDA POR INGREDIENTES
+        function displayIngredientSearchResults(recipes, searchIngredients) {
+            const searchResultsGrid = document.getElementById('searchResultsGrid');
+            const searchResultsTitle = document.getElementById('searchResultsTitle');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            hideRecipeDetail();
+            
+            if (recipes.length > 0) {
+                searchResultsGrid.innerHTML = recipes.map(recipe => `
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}" style="width:100%;height:100%;object-fit:cover;">` : recipe.icon}
+                            <div class="difficulty-badge">${recipe.difficulty}</div>
+                            ${recipe.matchPercentage ? `<div class="match-badge">${Math.round(recipe.matchPercentage)}% match</div>` : ''}
+                        </div>
+                        <div class="recipe-content">
+                            <h3>${recipe.name}</h3>
+                            <div class="recipe-meta">
+                                <span>⏱️ ${recipe.time}</span>
+                                <span>🥤 ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                                ${recipe.matchedCount && recipe.totalSearchIngredients ? 
+                                    `<span>✅ ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
+                                    (recipe.matchPercentage ? `<span>✅ ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
+                                }
+                            </div>
+                            <p class="recipe-description">${recipe.description}</p>
+                            
+                            ${recipe.matchedIngredients && recipe.matchedIngredients.length > 0 ? `
+                            <div class="recipe-ingredients">
+                                <h4>🎯 Ingredientes encontrados:</h4>
+                                <div class="matched-ingredients">
+                                    ${recipe.matchedIngredients.slice(0, 3).map(ing => 
+                                        `<span>${ing}</span>`
+                                    ).join('')}
+                                    ${recipe.matchedIngredients.length > 3 ? '...' : ''}
+                                </div>
+                                <h4>📋 Ingredientes principales:</h4>
+                                <div class="ingredients-list">
+                                    ${recipe.ingredients.slice(0, 3).join(', ')}...
+                                </div>
+                            </div>
+                            ` : `
+                            <div class="recipe-ingredients">
+                                <h4>📋 Ingredientes principales:</h4>
+                                <div class="ingredients-list">
+                                    ${recipe.ingredients.slice(0, 3).join(', ')}...
+                                </div>
+                            </div>
+                            `}
+                            
+                            <div class="recipe-actions">
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})">Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Calcular estadísticas
+                const totalSearchIngredients = searchIngredients.length;
+                const avgMatch = recipes.reduce((sum, recipe) => sum + (recipe.matchedCount || 0), 0) / recipes.length;
+                
+                searchResultsTitle.innerHTML = `
+                    Resultados por ingredientes: "${searchIngredients.join(', ')}"
+                    <small style="display: block; font-size: 1rem; color: #666; margin-top: 5px;">
+                        ${recipes.length} recetas encontradas • ${avgMatch.toFixed(1)} ingredientes coincidentes en promedio
+                    </small>
+                `;
+                
+            } else {
+                searchResultsGrid.innerHTML = `
+                    <div class="no-results-message">
+                        <div class="no-results-icon">🔍</div>
+                        <h3>No se encontraron recetas</h3>
+                        <p>No hay bebidas que contengan los ingredientes: "${searchIngredients.join(', ')}"</p>
+                        <div style="margin-top: 20px;">
+                            <p><strong>Sugerencias:</strong></p>
+                            <ul style="text-align: left; display: inline-block;">
+                                <li>Verifica la ortografía de los ingredientes</li>
+                                <li>Intenta con términos más generales</li>
+                                <li>Prueba con menos ingredientes</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            searchResultsSection.style.display = 'block';
+            document.getElementById('recipesMainSection').style.display = 'none';
+        }
+
+        // Mostrar detalle desde búsqueda
+        function showRecipeDetailFromSearch(recipeId) {
+            const receta = currentSearchResults.find(r => r.id === recipeId);
+            
+            if (!receta) return;
+            
+            const recipeDetailContent = document.getElementById('recipeDetailContent');
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            searchResultsSection.style.display = 'none';
+            recipeDetailSection.style.display = 'block';
+            
+            const pasosProcesados = procesarPasos(receta.instructions);
+            
+            recipeDetailContent.innerHTML = `
+                <div class="recipe-detail-card">
+                    <div class="recipe-detail-header">
+                        <h2>${receta.icon} ${receta.name}</h2>
+                        <span class="recipe-category-badge">${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                    </div>
+                    
+                    ${receta.imagen ? `
+                    <div class="recipe-detail-image">
+                        <img src="${receta.imagen}" alt="${receta.name}">
+                    </div>
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #E27D60, #FFB347); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                        ${receta.icon}
+                    </div>`}
+                    
+                    <div class="recipe-detail-content">
+                        <div class="recipe-detail-section">
+                            <h3>📋 Ingredientes</h3>
+                            <div class="ingredients-list">
+                                ${receta.ingredients.map(ingredient => 
+                                    `<p>• ${ingredient}</p>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="recipe-detail-section">
+                            <h3>👨‍🍳 Preparación</h3>
+                            <div class="steps-list">
+                                ${pasosProcesados}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mostrar detalle desde sección principal
+        function showRecipeDetailFromMain(drinkId) {
+            const drink = allDrinks.find(d => d.id === drinkId);
+            
+            if (!drink) return;
+            
+            const recipeDetailContent = document.getElementById('recipeDetailContent');
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const recipesMainSection = document.getElementById('recipesMainSection');
+            
+            recipesMainSection.style.display = 'none';
+            recipeDetailSection.style.display = 'block';
+            
+            const pasosProcesados = procesarPasos(drink.instructions);
+            
+            recipeDetailContent.innerHTML = `
+                <div class="recipe-detail-card">
+                    <div class="recipe-detail-header">
+                        <h2>${drink.icon} ${drink.name}</h2>
+                        <span class="recipe-category-badge">${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
+                    </div>
+                    
+                    ${drink.imagen ? `
+                    <div class="recipe-detail-image">
+                        <img src="${drink.imagen}" alt="${drink.name}">
+                    </div>
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #E27D60, #FFB347); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                        ${drink.icon}
+                    </div>`}
+                    
+                    <div class="recipe-detail-content">
+                        <div class="recipe-detail-section">
+                            <h3>📋 Ingredientes</h3>
+                            <div class="ingredients-list">
+                                ${drink.ingredients.map(ingredient => 
+                                    `<p>• ${ingredient}</p>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="recipe-detail-section">
+                            <h3>👨‍🍳 Preparación</h3>
+                            <div class="steps-list">
+                                ${pasosProcesados}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            event.stopPropagation();
         }
 
         function loadDrinks(drinksToShow = filteredDrinks) {
             const recipesGrid = document.getElementById('recipesGrid');
-            const resultsCount = document.getElementById('resultsCount');
             
-            // Calcular paginación
             const totalItems = drinksToShow.length;
             const totalPages = Math.ceil(totalItems / itemsPerPage);
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const currentItems = drinksToShow.slice(startIndex, endIndex);
             
-            resultsCount.textContent = `${totalItems} recetas encontradas`;
-            
             recipesGrid.innerHTML = currentItems.map(drink => `
-                <div class="recipe-card">
+                <div class="recipe-card" onclick="showRecipeDetailFromMain(${drink.id})">
                     <div class="recipe-image">
-                        ${drink.icon}
+                        ${drink.imagen ? `<img src="${drink.imagen}" alt="${drink.name}" style="width:100%;height:100%;object-fit:cover;">` : drink.icon}
                         <div class="difficulty-badge">${drink.difficulty}</div>
                     </div>
                     <div class="recipe-content">
@@ -396,37 +651,30 @@
                             </div>
                         </div>
                         <div class="recipe-actions">
-                            <button class="btn-primary" onclick="viewFullRecipe(${drink.id})">Ver Receta</button>
+                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${drink.id})">Ver Receta</button>
                             <button class="btn-secondary" onclick="addToFavorites(${drink.id})">❤️</button>
                         </div>
                     </div>
                 </div>
             `).join('');
             
-            // Actualizar paginación
             updatePagination(totalPages, totalItems);
         }
 
         function filterByType(type) {
             currentTypeFilter = type;
-            
-            // Actualizar botones activos
             document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
-            
             applyFilters();
         }
 
         function filterByDifficulty(difficulty) {
             currentDifficultyFilter = difficulty;
-            
-            // Actualizar botones activos en el grupo de dificultad
             const difficultyButtons = document.querySelectorAll('.filter-group')[1].querySelectorAll('.filter-btn');
             difficultyButtons.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
             applyFilters();
         }
 
@@ -442,14 +690,12 @@
             
             let paginationHTML = '';
             
-            // Botón anterior
             paginationHTML += `
                 <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
                     ← Anterior
                 </button>
             `;
             
-            // Números de página (siempre del 1 al 10)
             const maxPages = Math.min(10, totalPages);
             for (let i = 1; i <= maxPages; i++) {
                 paginationHTML += `
@@ -459,7 +705,6 @@
                 `;
             }
             
-            // Botón siguiente
             paginationHTML += `
                 <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
                     Siguiente →
@@ -472,146 +717,24 @@
         function changePage(page) {
             currentPage = page;
             loadDrinks(filteredDrinks);
-            
-            // Scroll suave hacia arriba
-            document.querySelector('.recipes-section').scrollIntoView({ 
-                behavior: 'smooth' 
-            });
         }
 
         function applyFilters() {
-            filteredDrinks = drinks.filter(drink => {
+            filteredDrinks = allDrinks.filter(drink => {
                 const typeMatch = currentTypeFilter === 'todos' || drink.type === currentTypeFilter;
                 const difficultyMatch = currentDifficultyFilter === 'todas' || drink.difficulty === currentDifficultyFilter;
                 return typeMatch && difficultyMatch;
             });
             
-            // Resetear a la primera página cuando se aplican filtros
             currentPage = 1;
             loadDrinks(filteredDrinks);
-        }
-
-        function searchDrinks() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            
-            if (!searchTerm) {
-                currentPage = 1;
-                loadDrinks(filteredDrinks);
-                return;
-            }
-            
-            const searchResults = filteredDrinks.filter(drink => 
-                drink.name.toLowerCase().includes(searchTerm) ||
-                drink.description.toLowerCase().includes(searchTerm)
-            );
-            
-            currentPage = 1;
-            loadDrinks(searchResults);
-        }
-
-        function searchByIngredients() {
-            const ingredientSearch = document.getElementById('ingredientSearch').value.toLowerCase();
-            
-            if (!ingredientSearch) {
-                currentPage = 1;
-                loadDrinks(filteredDrinks);
-                return;
-            }
-            
-            // Dividir la búsqueda por comas para buscar múltiples ingredientes
-            const searchIngredients = ingredientSearch.split(',').map(ing => ing.trim());
-            
-            const searchResults = filteredDrinks.filter(drink => {
-                return searchIngredients.some(searchIng => 
-                    drink.ingredients.some(ingredient => 
-                        ingredient.toLowerCase().includes(searchIng)
-                    )
-                );
-            });
-            
-            // Ordenar por relevancia (más ingredientes coincidentes primero)
-            searchResults.sort((a, b) => {
-                const aMatches = searchIngredients.filter(searchIng => 
-                    a.ingredients.some(ingredient => 
-                        ingredient.toLowerCase().includes(searchIng)
-                    )
-                ).length;
-                
-                const bMatches = searchIngredients.filter(searchIng => 
-                    b.ingredients.some(ingredient => 
-                        ingredient.toLowerCase().includes(searchIng)
-                    )
-                ).length;
-                
-                return bMatches - aMatches;
-            });
-            
-            currentPage = 1;
-            loadDrinks(searchResults);
-            
-            if (searchResults.length === 0) {
-                alert('No se encontraron bebidas con esos ingredientes. Intenta con otros ingredientes como: mango, limón, menta, plátano, etc.');
-            }
-        }
-
-        function viewFullRecipe(drinkId) {
-            const drink = drinks.find(d => d.id === drinkId);
-            const modal = document.getElementById('recipeModal');
-            const modalContent = document.getElementById('modalContent');
-            
-            modalContent.innerHTML = `
-                <h2>${drink.icon} ${drink.name}</h2>
-                <p style="margin-bottom: 20px; color: #4A3C38; opacity: 0.8;">${drink.description}</p>
-                
-                <div style="display: flex; gap: 20px; margin-bottom: 25px; color: #E27D60;">
-                    <span>⏱️ Tiempo: ${drink.time}</span>
-                    <span>📊 Dificultad: ${drink.difficulty}</span>
-                    <span>🥤 Tipo: ${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
-                </div>
-                
-                <div class="modal-ingredients">
-                    <h3>Ingredientes:</h3>
-                    <ul>
-                        ${drink.ingredients.map(ingredient => `<li>• ${ingredient}</li>`).join('')}
-                    </ul>
-                </div>
-                
-                <div class="modal-instructions">
-                    <h3>Instrucciones:</h3>
-                    <ol>
-                        ${drink.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
-                    </ol>
-                </div>
-                
-                <div style="text-align: center; margin-top: 30px;">
-                    <button class="btn-primary" style="margin-right: 10px;" onclick="addToFavorites(${drink.id})">Agregar a Favoritos ❤️</button>
-                    <button class="btn-secondary" onclick="shareRecipe(${drink.id})">Compartir 📤</button>
-                </div>
-            `;
-            
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('recipeModal').style.display = 'none';
+            updateResultsCount();
         }
 
         function addToFavorites(drinkId) {
-            const drink = drinks.find(d => d.id === drinkId);
+            const drink = allDrinks.find(d => d.id === drinkId);
             alert(`¡${drink.name} agregada a tus favoritos! 💖`);
-        }
-
-        function shareRecipe(drinkId) {
-            const drink = drinks.find(d => d.id === drinkId);
-            alert(`¡Compartiendo la receta de ${drink.name}! 📤`);
-        }
-
-        // Cerrar modal al hacer clic fuera
-        window.onclick = function(event) {
-            const modal = document.getElementById('recipeModal');
-            if (event.target === modal) {
-                closeModal();
-            }
+            event.stopPropagation();
         }
 
         // Permitir búsqueda con Enter
@@ -627,9 +750,9 @@
             }
         });
 
-        // Cargar bebidas al iniciar
+        // Cargar bebidas desde la base de datos al iniciar
         window.addEventListener('load', () => {
-            loadDrinks();
+            loadDrinksFromDatabase();
         });
     </script>
 </body>
