@@ -11,16 +11,23 @@ from rutas_simples import (
     mostrar_comidas as func_comidas,
     mostrar_alta_cocina as func_alta_cocina,
     mostrar_login as func_login,
-    mostrar_comunidad as func_comunidad  # NUEVA IMPORTACIÓN
+    mostrar_comunidad as func_comunidad
 )
 from rutas_auth import (
     logout as func_logout,
     crear_cuenta as func_crear_cuenta,
     acceso_login as func_acceso_login
 )
-from rutas_recetas import buscar_recetas_api as func_buscar_recetas_api
-from rutas_recetas import buscar_recetas_palabra_api as func_buscar_recetas_palabra_api
-from rutas_recetas import buscar_por_ingredientes_api
+from rutas_recetas import (
+    buscar_recetas_api as func_buscar_recetas_api,
+    buscar_recetas_palabra_api as func_buscar_recetas_palabra_api,
+    buscar_por_ingredientes_api as func_buscar_por_ingredientes_api
+)
+from rutas_michelin import (
+    buscar_recetas_michelin as func_buscar_recetas_michelin,
+    buscar_michelin_ingredientes as func_buscar_michelin_ingredientes,
+    obtener_estadisticas as func_obtener_estadisticas
+)
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'
@@ -58,7 +65,7 @@ def mostrar_comidas():
 def mostrar_alta_cocina():
     return func_alta_cocina()
 
-@app.route('/comunidad')  # NUEVA RUTA
+@app.route('/comunidad')
 def mostrar_comunidad():
     return func_comunidad()
 
@@ -78,6 +85,7 @@ def crear_cuenta():
 def acceso_login():
     return func_acceso_login(mysql)
 
+# RUTAS PARA RECETAS NORMALES
 @app.route('/buscar_recetas')
 def buscar_recetas_api():
     return func_buscar_recetas_api(mysql)
@@ -88,7 +96,36 @@ def buscar_recetas_palabra_api():
 
 @app.route('/buscar_por_ingredientes')
 def buscar_por_ingredientes():
-    return buscar_por_ingredientes_api(mysql)
+    return func_buscar_por_ingredientes_api(mysql)
+
+# RUTAS ESPECÍFICAS PARA MICHELIN
+@app.route('/buscar_recetas_michelin')
+def buscar_recetas_michelin():
+    return func_buscar_recetas_michelin(mysql)
+
+@app.route('/buscar_michelin_ingredientes')
+def buscar_michelin_ingredientes():
+    return func_buscar_michelin_ingredientes(mysql)
+
+@app.route('/estadisticas')
+def obtener_estadisticas():
+    return func_obtener_estadisticas(mysql)
+
+# Manejo de errores
+@app.errorhandler(404)
+def pagina_no_encontrada(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def error_servidor(error):
+    return render_template('500.html'), 500
+
+# Middleware para verificar sesión en rutas protegidas
+@app.before_request
+def antes_de_peticion():
+    rutas_protegidas = ['/comunidad', '/favoritos']
+    if request.path in rutas_protegidas and 'usuario' not in session:
+        return redirect('/login')
 
 if __name__ == '__main__':
     app.run(debug=True)

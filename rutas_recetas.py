@@ -1,6 +1,5 @@
 from flask import jsonify, request, render_template
 
-
 def buscar_recetas_palabra_api(mysql):
     termino_busqueda = request.args.get('q', '').strip().lower()
     categoria = request.args.get('categoria', '').strip().lower()
@@ -156,14 +155,6 @@ def buscar_recetas_api(mysql):
         return jsonify({'recetas': []})
     finally:
         cur.close()
-
-
-# ... (las funciones existentes se mantienen) ...
-
-
-from flask import jsonify, request, render_template
-
-# ... (funciones existentes) ...
 
 def buscar_por_ingredientes_api(mysql):
     ingredientes = request.args.get('ingredientes', '').strip().lower()
