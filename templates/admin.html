@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Recetas Deliciosas</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='admin.css') }}">
+
+</head>
+<style>
+    
+</style>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <a href="/" class="home-btn">
+                        <span class="home-icon">🏠</span>
+                    </a>
+                    <div class="logo-text">Recetas Deliciosas</div>
+                </div>
+                <div class="header-right">
+                    <div class="admin-section">
+                        <span class="admin-name">Administrador</span>
+                        <a href="{{ url_for('logout') }}" class="logout-btn">Cerrar sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Sección Hero -->
+        <section class="hero">
+            <h1>Panel de Administración</h1>
+            <p>Gestiona todas las recetas de tu sitio web. Agrega nuevas recetas o elimina las existentes.</p>
+        </section>
+
+        <!-- Navegación de Administración -->
+        <div class="admin-nav">
+            <button class="nav-btn active" data-section="add-recipe">
+                <span class="nav-icon">➕</span> Agregar Receta
+            </button>
+            <button class="nav-btn" data-section="delete-recipe">
+                <span class="nav-icon">🗑️</span> Eliminar Receta
+            </button>
+        </div>
+
+        <!-- Sección Agregar Receta -->
+        <section id="add-recipe" class="admin-section-content active">
+            <h2 class="section-title">Agregar Nueva Receta</h2>
+            <form id="recipe-form" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="recipe-title">Título de la Receta</label>
+                        <input type="text" id="recipe-title" class="form-control" placeholder="Ej: Tiramisú Clásico" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="recipe-type">Tipo de Receta</label>
+                        <select id="recipe-type" class="form-control" required>
+                            <option value="">Selecciona una categoría</option>
+                            <option value="bebidas">Bebida</option>
+                            <option value="alcoholicas">Licor</option>
+                            <option value="postres">Postre</option>
+                            <option value="comidas">Comida</option>
+                            <option value="alta-cocina">Alta Cocina</option>
+                            <option value="comunidad">Comunidad</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="recipe-ingredients">Ingredientes</label>
+                    <textarea id="recipe-ingredients" class="form-control" placeholder="Lista los ingredientes, uno por línea:
+- 250g de queso mascarpone
+- 3 huevos
+- 200ml de café fuerte
+- ..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="recipe-steps">Pasos de Preparación</label>
+                    <textarea id="recipe-steps" class="form-control" placeholder="Describe los pasos para preparar la receta:
+1. Separar las yemas de las claras de huevo
+2. Batir las yemas con azúcar hasta que estén cremosas
+3. ..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="recipe-image">Imagen de la Receta</label>
+                    <div class="file-upload">
+                        <label for="recipe-image" class="file-upload-label">
+                            <span>Haz clic para subir una imagen</span>
+                            <span style="display:block; font-size:0.8rem; margin-top:5px;">Formatos: JPG, PNG, GIF (Máx. 5MB)</span>
+                        </label>
+                        <input type="file" id="recipe-image" class="file-upload-input" accept="image/*">
+                        <div class="file-name" id="file-name">No se ha seleccionado ningún archivo</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Subir Receta</button>
+            </form>
+        </section>
+
+        <!-- Sección Eliminar Receta -->
+        <section id="delete-recipe" class="admin-section-content">
+            <h2 class="section-title">Gestionar Recetas Existentes</h2>
+            
+            <div class="search-bar">
+                <input type="text" id="search-recipe" placeholder="Buscar recetas por nombre...">
+                <button id="search-btn">Buscar</button>
+                <button id="show-all-btn">Ver Todas</button>
+            </div>
+
+            <div class="recipes-grid" id="recipes-list">
+                <!-- Las recetas se cargarán aquí dinámicamente -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para Vista Previa -->
+    <div class="modal" id="recipe-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Título de la Receta</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-content">
+                    <!-- Contenido del modal se cargará aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
+                <p>&copy; 2024 Recetas Deliciosas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Datos de ejemplo para simular recetas existentes
+        const sampleRecipes = [
+            {
+                id: 1,
+                title: "Smoothie de Mango",
+                category: "bebidas",
+                ingredients: "- 1 mango maduro\n- 1 taza de yogurt natural\n- 1 cucharada de miel\n- Hielo al gusto",
+                steps: "1. Pelar y cortar el mango\n2. Agregar todos los ingredientes a la licuadora\n3. Licuar hasta obtener una consistencia suave\n4. Servir inmediatamente",
+                image: null
+            },
+            {
+                id: 2,
+                title: "Mojito Clásico",
+                category: "alcoholicas",
+                ingredients: "- 50ml de ron blanco\n- 8-10 hojas de menta\n- Media lima cortada en trozos\n- 2 cucharadas de azúcar\n- Soda agua\n- Hielo",
+                steps: "1. En un vaso, machacar la menta con el azúcar y la lima\n2. Agregar hielo hasta llenar el vaso\n3. Verter el ron y completar con soda agua\n4. Remover suavemente y decorar con una rama de menta",
+                image: null
+            },
+            {
+                id: 3,
+                title: "Tiramisú Clásico",
+                category: "postres",
+                ingredients: "- 250g de queso mascarpone\n- 3 huevos\n- 200ml de café fuerte\n- 4 cucharadas de azúcar\n- Bizcochos de soletilla\n- Cacao en polvo",
+                steps: "1. Separar las yemas de las claras\n2. Batir las yemas con el azúcar hasta que estén cremosas\n3. Añadir el mascarpone y mezclar bien\n4. Montar las claras a punto de nieve e incorporar\n5. Mojar los bizcochos en café y colocar en una fuente\n6. Cubrir con la crema de mascarpone y repetir las capas\n7. Refrigerar 4 horas y espolvorear con cacao antes de servir",
+                image: null
+            }
+        ];
+
+        // Variables globales
+        let currentRecipes = [...sampleRecipes];
+        let currentSection = 'add-recipe';
+
+        // Navegación entre secciones
+        document.querySelectorAll('.nav-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Actualizar botones activos
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Mostrar sección correspondiente
+                const sectionId = this.getAttribute('data-section');
+                document.querySelectorAll('.admin-section-content').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(sectionId).classList.add('active');
+                
+                currentSection = sectionId;
+                
+                // Si es la sección de eliminar, cargar recetas
+                if (sectionId === 'delete-recipe') {
+                    loadRecipes();
+                }
+            });
+        });
+
+        // Manejo de subida de archivos
+        document.getElementById('recipe-image').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No se ha seleccionado ningún archivo';
+            document.getElementById('file-name').textContent = fileName;
+        });
+
+        // Envío del formulario
+        document.getElementById('recipe-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Obtener datos del formulario
+            const title = document.getElementById('recipe-title').value;
+            const category = document.getElementById('recipe-type').value;
+            const ingredients = document.getElementById('recipe-ingredients').value;
+            const steps = document.getElementById('recipe-steps').value;
+            const imageFile = document.getElementById('recipe-image').files[0];
+            
+            // Validaciones básicas
+            if (!title || !category || !ingredients || !steps) {
+                alert('Por favor, completa todos los campos obligatorios.');
+                return;
+            }
+            
+            // Crear nueva receta
+            const newRecipe = {
+                id: Date.now(), // ID único basado en timestamp
+                title,
+                category,
+                ingredients,
+                steps,
+                image: imageFile ? URL.createObjectURL(imageFile) : null
+            };
+            
+            // Agregar a la lista de recetas
+            currentRecipes.push(newRecipe);
+            
+            // Mostrar mensaje de éxito
+            alert(`¡Receta "${title}" agregada exitosamente!`);
+            
+            // Limpiar formulario
+            this.reset();
+            document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
+            
+            // Si estamos en la sección de eliminar, actualizar la lista
+            if (currentSection === 'delete-recipe') {
+                loadRecipes();
+            }
+        });
+
+        // Cargar recetas en la sección de eliminar
+        function loadRecipes(filter = '') {
+            const recipesList = document.getElementById('recipes-list');
+            let filteredRecipes = currentRecipes;
+            
+            // Aplicar filtro si existe
+            if (filter) {
+                filteredRecipes = currentRecipes.filter(recipe => 
+                    recipe.title.toLowerCase().includes(filter.toLowerCase())
+                );
+            }
+            
+            // Mostrar mensaje si no hay recetas
+            if (filteredRecipes.length === 0) {
+                recipesList.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🔍</div>
+                        <h3 style="color: #E27D60; margin-bottom: 10px;">No se encontraron recetas</h3>
+                        <p style="color: #4A3C38;">${filter ? `No hay recetas que coincidan con "${filter}"` : 'No hay recetas disponibles'}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Generar HTML para las recetas
+            recipesList.innerHTML = filteredRecipes.map(recipe => `
+                <div class="recipe-card">
+                    <div class="recipe-image">
+                        ${recipe.image ? `<img src="${recipe.image}" alt="${recipe.title}">` : '🍽️'}
+                    </div>
+                    <div class="recipe-content">
+                        <h4>${recipe.title}</h4>
+                        <div class="recipe-meta">
+                            <span>📁 ${getCategoryName(recipe.category)}</span>
+                            <span>ID: ${recipe.id}</span>
+                        </div>
+                        <div class="recipe-description">
+                            <strong>Ingredientes:</strong> ${recipe.ingredients.split('\n')[0].replace('- ', '')}...
+                        </div>
+                        <div class="recipe-actions">
+                            <button class="action-btn view-btn" onclick="viewRecipe(${recipe.id})">Ver</button>
+                            <button class="action-btn delete-btn" onclick="deleteRecipe(${recipe.id})">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Obtener nombre de categoría
+        function getCategoryName(categoryKey) {
+            const categories = {
+                'bebidas': 'Bebida',
+                'alcoholicas': 'Licor',
+                'postres': 'Postre',
+                'comidas': 'Comida',
+                'alta-cocina': 'Alta Cocina',
+                'comunidad': 'Comunidad'
+            };
+            return categories[categoryKey] || 'General';
+        }
+
+        // Ver receta en modal
+        function viewRecipe(recipeId) {
+            const recipe = currentRecipes.find(r => r.id === recipeId);
+            if (!recipe) return;
+            
+            document.getElementById('modal-title').textContent = recipe.title;
+            
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <strong>Categoría:</strong> ${getCategoryName(recipe.category)}
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #E27D60; margin-bottom: 10px;">📋 Ingredientes</h3>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 10px;">
+                        ${recipe.ingredients.split('\n').map(ingredient => 
+                            `<p style="margin: 5px 0;">${ingredient}</p>`
+                        ).join('')}
+                    </div>
+                </div>
+                <div>
+                    <h3 style="color: #E27D60; margin-bottom: 10px;">👨‍🍳 Preparación</h3>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 10px;">
+                        ${recipe.steps.split('\n').map(step => 
+                            `<p style="margin: 10px 0;">${step}</p>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('recipe-modal').classList.add('active');
+        }
+
+        // Eliminar receta
+        function deleteRecipe(recipeId) {
+            const recipe = currentRecipes.find(r => r.id === recipeId);
+            if (!recipe) return;
+            
+            if (confirm(`¿Estás seguro de que quieres eliminar la receta "${recipe.title}"? Esta acción no se puede deshacer.`)) {
+                currentRecipes = currentRecipes.filter(r => r.id !== recipeId);
+                loadRecipes();
+                alert(`Receta "${recipe.title}" eliminada exitosamente.`);
+            }
+        }
+
+        // Buscar recetas
+        document.getElementById('search-btn').addEventListener('click', function() {
+            const searchTerm = document.getElementById('search-recipe').value.trim();
+            loadRecipes(searchTerm);
+        });
+
+        // Mostrar todas las recetas
+        document.getElementById('show-all-btn').addEventListener('click', function() {
+            document.getElementById('search-recipe').value = '';
+            loadRecipes();
+        });
+
+        // Cerrar modal
+        document.getElementById('close-modal').addEventListener('click', function() {
+            document.getElementById('recipe-modal').classList.remove('active');
+        });
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('recipe-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+
+        // Cargar recetas al iniciar si estamos en la sección de eliminar
+        document.addEventListener('DOMContentLoaded', function() {
+            if (currentSection === 'delete-recipe') {
+                loadRecipes();
+            }
+        });
+    </script>
+</body>
+</html>
