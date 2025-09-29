@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 def logout():
     session.pop('usuario', None)
+    session.pop('tipo_usuario', None)
     return redirect('/')
 
 def crear_cuenta(mysql):
@@ -16,7 +17,8 @@ def crear_cuenta(mysql):
     if existe:
         return render_template('login.html', mensaje_malo='Este correo ya está registrado')
 
-    cur.execute("INSERT INTO usuarios (usuario, correo, password) VALUES (%s, %s, %s)", (usuario, correo, password))
+    cur.execute("INSERT INTO usuarios (usuario, correo, password, tipo) VALUES (%s, %s, %s, %s)", 
+                (usuario, correo, password, ''))
     mysql.connection.commit()
     cur.close()
 
@@ -27,12 +29,18 @@ def acceso_login(mysql):
     password = request.form['txt_password']
 
     cur = mysql.connection.cursor()
-    cur.execute("SELECT id, usuario, password FROM usuarios WHERE correo = %s", (correo,))
+    cur.execute("SELECT id, usuario, password, tipo FROM usuarios WHERE correo = %s", (correo,))
     user = cur.fetchone()
     cur.close()
 
     if user and check_password_hash(user[2], password):
         session['usuario'] = user[1]
-        return redirect('/')
+        session['tipo_usuario'] = user[3]  # Guardar el tipo de usuario en la sesión
+        
+        # Redirigir según el tipo de usuario
+        if user[3] == 'admin':
+            return redirect('/admin')
+        else:
+            return redirect('/')
     else:
         return render_template('login.html', mensaje_malo='Correo o contraseña incorrectos')

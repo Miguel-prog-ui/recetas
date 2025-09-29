@@ -85,6 +85,14 @@ def crear_cuenta():
 def acceso_login():
     return func_acceso_login(mysql)
 
+# NUEVA RUTA: Panel de administración
+@app.route('/admin')
+def mostrar_admin():
+    # Verificar si el usuario es administrador
+    if 'tipo_usuario' not in session or session['tipo_usuario'] != 'admin':
+        return redirect('/login')
+    return render_template('admin.html')
+
 # RUTAS PARA RECETAS NORMALES
 @app.route('/buscar_recetas')
 def buscar_recetas_api():
@@ -125,6 +133,10 @@ def error_servidor(error):
 def antes_de_peticion():
     rutas_protegidas = ['/comunidad', '/favoritos']
     if request.path in rutas_protegidas and 'usuario' not in session:
+        return redirect('/login')
+    
+    # Proteger ruta de admin
+    if request.path == '/admin' and ('tipo_usuario' not in session or session['tipo_usuario'] != 'admin'):
         return redirect('/login')
 
 if __name__ == '__main__':
