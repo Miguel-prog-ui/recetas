@@ -793,4 +793,142 @@
         }
 
         function loadRecipes(recipesToShow = filteredRecipes) {
-            const recipesGrid = document.getElementById
+            const recipesGrid = document.getElementById('recipesGrid');
+            
+            const totalItems = recipesToShow.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentItems = recipesToShow.slice(startIndex, endIndex);
+            
+            recipesGrid.innerHTML = currentItems.map(recipe => `
+                <div class="recipe-card" onclick="showRecipeDetailFromMain(${recipe.id})">
+                    <div class="recipe-image">
+                        ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}" style="width:100%;height:100%;object-fit:cover;">` : recipe.icon}
+                        <div class="difficulty-badge">${recipe.difficulty}</div>
+                        <div class="community-badge">👥 Comunidad</div>
+                    </div>
+                    <div class="recipe-content">
+                        <h3>${recipe.name}</h3>
+                        <div class="recipe-meta">
+                            <span>⏱️ ${recipe.time}</span>
+                            <span>${recipe.icon} ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                        </div>
+                        <div class="recipe-author">
+                            <strong>👤 ${recipe.autor}</strong>
+                            <span class="recipe-date">📅 ${recipe.fecha}</span>
+                        </div>
+                        <p class="recipe-description">${recipe.description}</p>
+                        <div class="recipe-ingredients">
+                            <h4>Ingredientes principales:</h4>
+                            <div class="ingredients-list">
+                                ${recipe.ingredients.slice(0, 3).join(', ')}...
+                            </div>
+                        </div>
+                        <div class="recipe-actions">
+                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${recipe.id})">Ver Receta</button>
+                            <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            updatePagination(totalPages, totalItems);
+        }
+
+        function filterByType(type) {
+            currentTypeFilter = type;
+            document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            applyFilters();
+        }
+
+        function filterByDifficulty(difficulty) {
+            currentDifficultyFilter = difficulty;
+            const difficultyButtons = document.querySelectorAll('.filter-group')[1].querySelectorAll('.filter-btn');
+            difficultyButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            applyFilters();
+        }
+
+        function updatePagination(totalPages, totalItems) {
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'flex';
+            
+            let paginationHTML = '';
+            
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    ← Anterior
+                </button>
+            `;
+            
+            const maxPages = Math.min(10, totalPages);
+            for (let i = 1; i <= maxPages; i++) {
+                paginationHTML += `
+                    <button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Siguiente →
+                </button>
+            `;
+            
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadRecipes(filteredRecipes);
+        }
+
+        function applyFilters() {
+            filteredRecipes = allRecipes.filter(recipe => {
+                const typeMatch = currentTypeFilter === 'todos' || recipe.type === currentTypeFilter;
+                const difficultyMatch = currentDifficultyFilter === 'todas' || recipe.difficulty === currentDifficultyFilter;
+                return typeMatch && difficultyMatch;
+            });
+            
+            currentPage = 1;
+            loadRecipes(filteredRecipes);
+            updateResultsCount();
+        }
+
+        function addToFavorites(recipeId) {
+            const recipe = allRecipes.find(r => r.id === recipeId);
+            alert(`¡${recipe.name} agregada a tus favoritos! 💖`);
+            event.stopPropagation();
+        }
+
+        // Permitir búsqueda con Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchRecipes();
+            }
+        });
+
+        document.getElementById('ingredientSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchByIngredients();
+            }
+        });
+
+        // Cargar recetas desde la base de datos al iniciar
+        window.addEventListener('load', () => {
+            loadRecipesFromDatabase();
+        });
+    </script>
+</body>
+</html>
