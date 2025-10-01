@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mysqldb import MySQL
+import os
+from werkzeug.utils import secure_filename
 
 # Importar las funciones desde otros archivos
 from rutas_simples import (
@@ -38,7 +40,14 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'recetas'
 
+# Configuración para upload de imágenes
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
+
 mysql = MySQL(app)
+
+# Asegurar que la carpeta de uploads existe
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Configurar las rutas manteniendo los nombres originales
 @app.route('/')
@@ -85,10 +94,156 @@ def crear_cuenta():
 def acceso_login():
     return func_acceso_login(mysql)
 
+# NUEVAS RUTAS PARA EL PERFIL DE USUARIO
+@app.route('/perfil')
+def perfil():
+    if 'usuario' not in session:
+        return redirect('/login')
+    
+    # Obtener datos básicos del usuario
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT id, usuario, correo, tipo FROM usuarios WHERE usuario = %s", (session['usuario'],))
+    usuario = cur.fetchone()
+    cur.close()
+    
+    if not usuario:
+        session.pop('usuario', None)
+        return redirect('/login')
+    
+    # FUTURO: Obtener estadísticas cuando existan las tablas relacionadas
+    # cur.execute("SELECT COUNT(*) as total_recetas FROM recetas WHERE usuario_id = %s", (usuario[0],))
+    # stats_result = cur.fetchone()
+    # total_recetas = stats_result[0] if stats_result else 0
+    
+    # Por ahora, datos de ejemplo para el frontend
+    total_recetas = 0  # FUTURO: Reemplazar con consulta real
+    total_likes = 0    # FUTURO: Reemplazar con consulta real
+    favoritos_count = 0 # FUTURO: Reemplazar con consulta real
+    
+    return render_template('perfil.html', 
+                         usuario=usuario, 
+                         total_recetas=total_recetas,
+                         total_likes=total_likes,
+                         favoritos_count=favoritos_count)
+
+@app.route('/editar_perfil')
+def editar_perfil():
+    if 'usuario' not in session:
+        return redirect('/login')
+    
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT id, usuario, correo, tipo FROM usuarios WHERE usuario = %s", (session['usuario'],))
+    usuario = cur.fetchone()
+    cur.close()
+    
+    if not usuario:
+        session.pop('usuario', None)
+        return redirect('/login')
+    
+    return render_template('editar_perfil.html', usuario=usuario)
+
+@app.route('/actualizar_perfil', methods=['POST'])
+def actualizar_perfil():
+    if 'usuario' not in session:
+        return redirect('/login')
+    
+    nombre = request.form['nombre']
+    email = request.form['email']
+    
+    cur = mysql.connection.cursor()
+    
+    # Verificar si el nuevo nombre de usuario ya existe (excluyendo el usuario actual)
+    cur.execute("SELECT id FROM usuarios WHERE usuario = %s AND usuario != %s", (nombre, session['usuario']))
+    if cur.fetchone():
+        cur.close()
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT id, usuario, correo, tipo FROM usuarios WHERE usuario = %s", (session['usuario'],))
+        usuario_actual = cur.fetchone()
+        cur.close()
+        return render_template('editar_perfil.html', 
+                             usuario=usuario_actual,
+                             error="El nombre de usuario ya está en uso")
+    
+    # Actualizar datos básicos
+    cur.execute("""
+        UPDATE usuarios 
+        SET usuario = %s, correo = %s 
+        WHERE usuario = %s
+    """, (nombre, email, session['usuario']))
+    
+    mysql.connection.commit()
+    cur.close()
+    
+    # Actualizar la sesión con el nuevo nombre
+    session['usuario'] = nombre
+    
+    return redirect('/perfil')
+
+@app.route('/recetas_favoritas')
+def recetas_favoritas():
+    if 'usuario' not in session:
+        return redirect('/login')
+    
+    # FUTURO: Implementar cuando exista la tabla favoritos
+    # cur = mysql.connection.cursor()
+    # cur.execute("SELECT id FROM usuarios WHERE usuario = %s", (session['usuario'],))
+    # usuario_id = cur.fetchone()
+    # 
+    # if not usuario_id:
+    #     session.pop('usuario', None)
+    #     return redirect('/login')
+    # 
+    # usuario_id = usuario_id[0]
+    # 
+    # # Verificar si existe la tabla favoritos
+    # cur.execute("SHOW TABLES LIKE 'favoritos'")
+    # if not cur.fetchone():
+    #     cur.close()
+    #     return render_template('recetas_favoritas.html', recetas=[])
+    # 
+    # # Obtener recetas favoritas del usuario
+    # cur.execute("""
+    #     SELECT r.* FROM recetas r
+    #     JOIN favoritos f ON r.id = f.receta_id
+    #     WHERE f.usuario_id = %s
+    # """, (usuario_id,))
+    # recetas_favoritas = cur.fetchall()
+    # cur.close()
+    
+    # Por ahora, lista vacía para el frontend
+    recetas_favoritas = []
+    
+    return render_template('recetas_favoritas.html', recetas=recetas_favoritas)
+
+@app.route('/mis_recetas')
+def mis_recetas():
+    if 'usuario' not in session:
+        return redirect('/login')
+    
+    # FUTURO: Implementar cuando exista la relación usuario-recetas
+    # cur = mysql.connection.cursor()
+    # cur.execute("SELECT id FROM usuarios WHERE usuario = %s", (session['usuario'],))
+    # usuario_id = cur.fetchone()
+    # 
+    # if not usuario_id:
+    #     session.pop('usuario', None)
+    #     return redirect('/login')
+    # 
+    # usuario_id = usuario_id[0]
+    # 
+    # # Obtener recetas creadas por el usuario
+    # cur.execute("SELECT * FROM recetas WHERE usuario_id = %s", (usuario_id,))
+    # mis_recetas = cur.fetchall()
+    # cur.close()
+    
+    # Por ahora, lista vacía para el frontend
+    mis_recetas = []
+    
+    return render_template('mis_recetas.html', recetas=mis_recetas)
+
 # NUEVA RUTA: Panel de administración
 @app.route('/admin')
 def mostrar_admin():
-    # Verificar si el usuario es administrador
     if 'tipo_usuario' not in session or session['tipo_usuario'] != 'admin':
         return redirect('/login')
     return render_template('admin.html')
@@ -131,7 +286,7 @@ def error_servidor(error):
 # Middleware para verificar sesión en rutas protegidas
 @app.before_request
 def antes_de_peticion():
-    rutas_protegidas = ['/comunidad', '/favoritos']
+    rutas_protegidas = ['/comunidad', '/perfil', '/editar_perfil', '/recetas_favoritas', '/mis_recetas']
     if request.path in rutas_protegidas and 'usuario' not in session:
         return redirect('/login')
     

@@ -1,0 +1,51 @@
+-- Script para actualizar la base de datos con nuevas características
+
+-- 1. Agregar nuevas columnas a la tabla usuarios
+ALTER TABLE usuarios 
+ADD COLUMN foto_perfil VARCHAR(255) NULL AFTER password,
+ADD COLUMN biografia TEXT NULL AFTER foto_perfil,
+ADD COLUMN fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER biografia;
+
+-- 2. Crear tabla de favoritos si no existe
+CREATE TABLE IF NOT EXISTS favoritos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    receta_id INT NOT NULL,
+    fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (receta_id) REFERENCES recetas(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_favorito (usuario_id, receta_id)
+);
+
+-- 3. Agregar columna de likes a recetas si no existe
+ALTER TABLE recetas 
+ADD COLUMN likes INT DEFAULT 0 AFTER categoria;
+
+-- 4. Crear tabla para seguidores si se desea funcionalidad social
+CREATE TABLE IF NOT EXISTS seguidores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    seguidor_id INT NOT NULL,
+    seguido_id INT NOT NULL,
+    fecha_seguimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (seguidor_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (seguido_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_seguimiento (seguidor_id, seguido_id)
+);
+
+-- 5. Crear tabla para comentarios si se desea funcionalidad social
+CREATE TABLE IF NOT EXISTS comentarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    receta_id INT NOT NULL,
+    comentario TEXT NOT NULL,
+    fecha_comentario TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (receta_id) REFERENCES recetas(id) ON DELETE CASCADE
+);
+
+-- 6. Actualizar algunos usuarios existentes con datos de ejemplo
+UPDATE usuarios SET biografia = 'Amante de la cocina y las recetas tradicionales' WHERE id = 1;
+UPDATE usuarios SET biografia = 'Chef amateur experimentando con nuevos sabores' WHERE id = 2;
+
+-- Mensaje de éxito
+SELECT 'Base de datos actualizada exitosamente!' as mensaje;

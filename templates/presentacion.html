@@ -5,31 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recetas Deliciosas</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='presentacion.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                    <!-- Botón de home con icono -->
-                    <a href="/" class="home-btn" onclick="handleHomeClick(event)">
-                        <span class="home-icon">🏠</span>
+                    <a href="/" class="home-btn">
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
                     </a>
-                    <!-- Texto del logo separado -->
                     <div class="logo-text">Recetas Deliciosas</div>
                 </div>
                 <div class="header-right">
                     <div class="search-bar">
-                        <input type="text" placeholder="Buscar recetas..." id="searchInput">
-                        <button onclick="searchRecipes()">Buscar</button>
+                        <input type="text" id="searchInput" placeholder="Buscar recetas...">
+                        <button onclick="searchRecipes()"><i class="fas fa-search"></i></button>
                     </div>
+                   
                     {% if session.usuario %}
-                    <div class="user-section">
-                        <span class="user-name">{{ session.usuario }}</span>
-                        <a href="{{ url_for('logout') }}" class="logout-btn" onclick="handleSessionAction(event)">Cerrar sesión</a>
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ session.usuario }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
                     </div>
                     {% else %}
-                    <a href="{{ url_for('mostrar_login') }}" class="login-btn" onclick="handleSessionAction(event)">Iniciar sesión</a>
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
                     {% endif %}
                 </div>
             </div>
@@ -39,14 +79,18 @@
     <main class="container">
         <!-- Sección Hero -->
         <section class="hero">
-            <h1>Descubre Sabores Únicos</h1>
-            <p>Explora nuestra colección de recetas cuidadosamente seleccionadas, desde bebidas refrescantes hasta platos de alta cocina que deleitarán tu paladar.</p>
+            <div class="hero-content">
+                <h1>Descubre Sabores Únicos</h1>
+                <p>Explora nuestra colección de recetas cuidadosamente seleccionadas, desde bebidas refrescantes hasta platos de alta cocina que deleitarán tu paladar.</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                </div>
+            </div>
         </section>
 
-        <!-- =========================================== -->
         <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
-        <!-- Se mostrará aquí, después del Hero y antes de las Categorías -->
-        <!-- =========================================== -->
         <section id="searchResultsSection" class="search-results-section" style="display: none;">
             <div class="container">
                 <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
@@ -57,48 +101,59 @@
         <!-- Sección de detalle de receta (oculta inicialmente) -->
         <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
             <div class="container">
-                <button onclick="hideRecipeDetail()" class="back-btn">← Volver a los resultados</button>
+                <button onclick="hideRecipeDetail()" class="back-btn"><i class="fas fa-arrow-left"></i> Volver a los resultados</button>
                 <div id="recipeDetailContent"></div>
             </div>
         </section>
 
         <!-- Sección de Categorías -->
         <section class="categories">
-            <h2>Categorías</h2>
+            <h2 class="section-title">Categorías</h2>
             <div class="category-grid">
                 <a href="{{ url_for('mostrar_bebidas') }}" class="category-card" onclick="selectCategory('bebidas', this)">
-                    <span class="category-icon">🥤</span>
+                    <div class="category-icon">
+                        <i class="fas fa-glass-whiskey"></i>
+                    </div>
                     <h3>Bebidas</h3>
                     <p>Refrescantes jugos, smoothies y bebidas saludables para cualquier momento del día</p>
                 </a>
                 
                 <a href="{{ url_for('mostrar_bebidas_alcoholicas') }}" class="category-card" onclick="selectCategory('alcoholicas', this)">
-                    <span class="category-icon">🍸</span>
+                    <div class="category-icon">
+                        <i class="fas fa-cocktail"></i>
+                    </div>
                     <h3>Bebidas Alcohólicas</h3>
                     <p>Cócteles clásicos y modernos, vinos y licores para ocasiones especiales</p>
                 </a>
                 
                 <a href="{{ url_for('mostrar_postres') }}" class="category-card" onclick="selectCategory('postres', this)">
-                    <span class="category-icon">🍰</span>
+                    <div class="category-icon">
+                        <i class="fas fa-ice-cream"></i>
+                    </div>
                     <h3>Postres</h3>
                     <p>Dulces tentaciones, pasteles y desserts que endulzarán tu día</p>
                 </a>
                 
                 <a href="{{ url_for('mostrar_comidas') }}" class="category-card" onclick="selectCategory('comidas', this)">
-                    <span class="category-icon">🍽️</span>
+                    <div class="category-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
                     <h3>Comidas</h3>
                     <p>Platos principales nutritivos y deliciosos para toda la familia</p>
                 </a>
                 
                 <a href="{{ url_for('mostrar_alta_cocina') }}" class="category-card" onclick="selectCategory('alta-cocina', this)">
-                    <span class="category-icon">👨‍🍳</span>
+                    <div class="category-icon">
+                        <i class="fas fa-chef-hat"></i>
+                    </div>
                     <h3>Alta Cocina</h3>
                     <p>Recetas gourmet y técnicas culinarias para los más exigentes</p>
                 </a>
 
-                <!-- En la sección de categorías, cambia esta línea: -->
                 <a href="{{ url_for('mostrar_comunidad') }}" class="category-card" onclick="selectCategory('comunidad', this)">
-                    <span class="category-icon">👥</span>
+                    <div class="category-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
                     <h3>Recetas de la Comunidad</h3>
                     <p>Recetas compartidas por nuestros usuarios, con sabores auténticos y creativos</p>
                 </a>
@@ -129,6 +184,76 @@
     </footer>
 
     <script>
+        // 🔥 FUNCIONES DEL MENÚ DE USUARIO
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Cerrar el menú al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Cerrar menú al hacer scroll
+        window.addEventListener('scroll', function() {
+            const menu = document.getElementById('userDropdownMenu');
+            if (menu) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // ========== FUNCIONES PARA LIKES (SOLO DISEÑO - NO FUNCIONALES) ==========
+
+        // FUTURO: Implementar sistema de likes real
+        function handleLike(recipeName) {
+            // FUTURO: Conectar con backend para dar like
+            // fetch(`/dar_like/${recipeId}`, { method: 'POST' })
+            // .then(response => response.json())
+            // .then(data => {
+            //     actualizarContadorLikes(recipeId, data.nuevoTotal);
+            // });
+            
+            // Por ahora solo muestra mensaje
+            alert(`Función de "Me gusta" para "${recipeName}" estará disponible próximamente`);
+            
+            // Efecto visual temporal
+            const likeBtn = event.target.closest('.like-btn');
+            if (likeBtn) {
+                const likeCount = likeBtn.querySelector('.like-count');
+                if (likeCount) {
+                    const currentLikes = parseInt(likeCount.textContent);
+                    likeCount.textContent = currentLikes + 1;
+                }
+                
+                likeBtn.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    likeBtn.style.transform = 'scale(1)';
+                }, 200);
+            }
+        }
+
+        // FUTURO: Implementar sistema de favoritos real
+        function handleFavorite(recipeName) {
+            // FUTURO: Conectar con backend para agregar a favoritos
+            alert(`Función de "Favoritos" para "${recipeName}" estará disponible próximamente`);
+            
+            // Efecto visual temporal
+            const favBtn = event.target.closest('.favorite-btn');
+            if (favBtn) {
+                favBtn.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    favBtn.style.transform = 'scale(1)';
+                }, 200);
+            }
+        }
+
+        // ========== FUNCIONES EXISTENTES DE RECETAS ==========
         const recipes = {
             bebidas: [
                 { name: "Smoothie de Mango", time: "5 min", difficulty: "Fácil", icon: "🥭", description: "Refrescante smoothie tropical con mango, yogurt y miel" },
@@ -165,52 +290,37 @@
         let currentCategory = null;
         let currentSearchResults = [];
 
-        // 🔥 NUEVA FUNCIÓN: Manejar clic en el botón de home
         function handleHomeClick(event) {
-            // Si hay búsqueda activa, limpiar antes de redirigir
             if (hasActiveSearch()) {
-                event.preventDefault(); // Prevenir la navegación inmediata
+                event.preventDefault();
                 clearActiveSearch();
             }
-            // Si no hay búsqueda activa, dejar que el enlace funcione normalmente (ir a /)
         }
 
-        // Función para manejar acciones de sesión
         function handleSessionAction(event) {
-            // Si hay búsqueda activa, limpiar antes de redirigir
             if (hasActiveSearch()) {
-                event.preventDefault(); // Prevenir la navegación inmediata
-                
-                // Limpiar búsqueda activa
+                event.preventDefault();
                 clearActiveSearch();
-                
-                // Esperar un momento para que se limpie la interfaz y luego redirigir
                 setTimeout(() => {
-                    // Usar la URL del enlace para la redirección
                     window.location.href = event.target.href;
                 }, 100);
             }
-            // Si no hay búsqueda activa, dejar que el enlace funcione normalmente
         }
 
-        // Función para limpiar búsqueda activa
         function clearActiveSearch() {
             hideSearchResults();
             hideRecipeDetail();
             document.getElementById('searchInput').value = '';
             currentSearchResults = [];
             
-            // Mostrar contenido principal
             document.querySelector('.categories').style.display = 'block';
             document.querySelector('.recipes-section').style.display = 'block';
             
-            // Recargar recetas destacadas
             const firstCategory = document.querySelector('.category-card');
             if (firstCategory) {
                 selectCategory('bebidas', firstCategory);
             }
             
-            // Desplazar hacia arriba
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
@@ -218,7 +328,6 @@
         }
 
         function selectCategory(category, element) {
-            // Ocultar resultados de búsqueda y mostrar contenido principal
             hideSearchResults();
             hideRecipeDetail();
             
@@ -239,15 +348,32 @@
             recipesGrid.innerHTML = categoryRecipes.map(recipe => `
                 <div class="recipe-card" onclick="viewRecipe('${recipe.name}')">
                     <div class="recipe-image">
-                        ${recipe.icon}
+                        <span class="recipe-icon">${recipe.icon}</span>
                     </div>
                     <div class="recipe-content">
                         <h4>${recipe.name}</h4>
                         <div class="recipe-meta">
-                            <span>⏱️ ${recipe.time}</span>
-                            <span>📊 ${recipe.difficulty}</span>
+                            <span><i class="fas fa-clock"></i> ${recipe.time}</span>
+                            <span><i class="fas fa-chart-bar"></i> ${recipe.difficulty}</span>
                         </div>
                         <p class="recipe-description">${recipe.description}</p>
+                        
+                        <!-- SISTEMA DE LIKES - Solo diseño por ahora -->
+                        <div class="recipe-actions-preview">
+                            <div class="like-section">
+                                <button class="like-btn" onclick="event.stopPropagation(); handleLike('${recipe.name}')">
+                                    <span class="like-icon"><i class="fas fa-heart"></i></span>
+                                    <span class="like-count">0</span>
+                                </button>
+                                <span class="like-text">Me gusta</span>
+                            </div>
+                            <div class="favorite-section">
+                                <button class="favorite-btn" onclick="event.stopPropagation(); handleFavorite('${recipe.name}')">
+                                    <span class="favorite-icon"><i class="fas fa-star"></i></span>
+                                </button>
+                                <span class="favorite-text">Favorito</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -267,7 +393,6 @@
                 return;
             }
             
-            // Hacer petición al servidor para buscar en la base de datos
             fetch(`/buscar_recetas?q=${encodeURIComponent(searchTerm)}`)
                 .then(response => response.json())
                 .then(data => {
@@ -285,53 +410,62 @@
             const searchResultsTitle = document.getElementById('searchResultsTitle');
             const searchResultsSection = document.getElementById('searchResultsSection');
             
-            // Ocultar detalle de receta si está visible
             hideRecipeDetail();
             
             if (recetas.length > 0) {
                 searchResultsGrid.innerHTML = recetas.map(receta => `
                     <div class="recipe-card" onclick="showRecipeDetail(${receta.id})">
                         <div class="recipe-image">
-                            <!-- =============================== -->
-                            <!-- AQUÍ SE INSERTARÁ LA IMAGEN DE LA RECETA EN UN FUTURO -->
-                            <!-- La imagen vendrá de: ${receta.imagen || 'No hay imagen disponible'} -->
-                            <!-- =============================== -->
-                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.title}" style="width:100%;height:100%;object-fit:cover;">` : '🍽️'}
+                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.title}" style="width:100%;height:100%;object-fit:cover;">` : '<span class="recipe-icon"><i class="fas fa-utensils"></i></span>'}
                         </div>
                         <div class="recipe-content">
                             <h4>${receta.title}</h4>
                             <div class="recipe-meta">
-                                <span>📁 ${receta.categoria || 'General'}</span>
+                                <span><i class="fas fa-folder"></i> ${receta.categoria || 'General'}</span>
                             </div>
                             <div class="recipe-section">
-                                <h5>📋 Ingredientes:</h5>
+                                <h5><i class="fas fa-list"></i> Ingredientes:</h5>
                                 <p>${receta.ingredients.substring(0, 100)}${receta.ingredients.length > 100 ? '...' : ''}</p>
                             </div>
                             <div class="recipe-section">
-                                <h5>👨‍🍳 Preparación:</h5>
+                                <h5><i class="fas fa-chef-hat"></i> Preparación:</h5>
                                 <p>${receta.steps.substring(0, 150)}${receta.steps.length > 150 ? '...' : ''}</p>
+                            </div>
+                            
+                            <!-- SISTEMA DE LIKES en resultados de búsqueda -->
+                            <div class="recipe-actions-preview">
+                                <div class="like-section">
+                                    <button class="like-btn" onclick="event.stopPropagation(); handleLike('${receta.title}')">
+                                        <span class="like-icon"><i class="fas fa-heart"></i></span>
+                                        <span class="like-count">0</span>
+                                    </button>
+                                    <span class="like-text">Me gusta</span>
+                                </div>
+                                <div class="favorite-section">
+                                    <button class="favorite-btn" onclick="event.stopPropagation(); handleFavorite('${receta.title}')">
+                                        <span class="favorite-icon"><i class="fas fa-star"></i></span>
+                                    </button>
+                                    <span class="favorite-text">Favorito</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 `).join('');
                 
-                // Actualizar el título de la sección
                 searchResultsTitle.textContent = `Resultados para: "${searchTerm}" (${recetas.length} encontrados)`;
                 
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon"><i class="fas fa-search"></i></div>
                         <h3>No se encontraron recetas</h3>
                         <p>No hay recetas que coincidan con "${searchTerm}"</p>
                     </div>
                 `;
             }
             
-            // Mostrar sección de resultados (después del Hero y antes de las Categorías)
             searchResultsSection.style.display = 'block';
             
-            // Desplazar hacia arriba al mostrar resultados
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
@@ -346,7 +480,6 @@
         }
 
         function showRecipeDetail(recipeId) {
-            // Buscar la receta en los resultados actuales
             const receta = currentSearchResults.find(r => r.id === recipeId);
             
             if (!receta) return;
@@ -355,11 +488,9 @@
             const recipeDetailSection = document.getElementById('recipeDetailSection');
             const searchResultsSection = document.getElementById('searchResultsSection');
             
-            // Ocultar resultados y mostrar detalle
             searchResultsSection.style.display = 'none';
             recipeDetailSection.style.display = 'block';
             
-            // Procesar los pasos para quitar la numeración duplicada
             const pasosProcesados = procesarPasos(receta.steps);
             
             recipeDetailContent.innerHTML = `
@@ -369,19 +500,15 @@
                         ${receta.categoria ? `<span class="recipe-category-badge">${receta.categoria}</span>` : ''}
                     </div>
                     
-                    <!-- =============================== -->
-                    <!-- AQUÍ SE INSERTARÁ LA IMAGEN DE LA RECETA EN UN FUTURO -->
-                    <!-- Imagen URL: ${receta.imagen || 'No disponible'} -->
-                    <!-- =============================== -->
                     ${receta.imagen ? `
                     <div class="recipe-detail-image">
                         <img src="${receta.imagen}" alt="${receta.title}">
                     </div>
-                    ` : '<div class="recipe-detail-image" style="background: linear-gradient(135deg, #E27D60, #FFB347); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">🍽️</div>'}
+                    ` : '<div class="recipe-detail-image" style="background: linear-gradient(135deg, #E27D60, #FFB347); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;"><i class="fas fa-utensils"></i></div>'}
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${receta.ingredients.split('\n').map(ingredient => 
                                     ingredient.trim() ? `<p>• ${ingredient}</p>` : ''
@@ -390,23 +517,34 @@
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-chef-hat"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
+                        </div>
+                        
+                        <!-- SISTEMA DE LIKES en detalle de receta -->
+                        <div class="recipe-detail-actions">
+                            <button class="like-btn-detail" onclick="handleLike('${receta.title}')">
+                                <span class="like-icon"><i class="fas fa-heart"></i></span>
+                                <span class="like-text">Me gusta</span>
+                                <span class="like-count">0</span>
+                            </button>
+                            <button class="favorite-btn-detail" onclick="handleFavorite('${receta.title}')">
+                                <span class="favorite-icon"><i class="fas fa-star"></i></span>
+                                <span class="favorite-text">Agregar a Favoritos</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
             
-            // Desplazar la página hacia arriba
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
         }
 
-        // Función: Procesar los pasos para manejar diferentes formatos
         function procesarPasos(steps) {
             if (!steps) return '<p>No hay instrucciones disponibles.</p>';
             
@@ -417,24 +555,20 @@
             lineas.forEach(linea => {
                 linea = linea.trim();
                 if (linea) {
-                    // Detectar si la línea ya tiene numeración
                     const tieneNumeracion = /^\d+[\.:\s]/.test(linea) || /^Paso\s*\d+/i.test(linea);
                     
                     let textoLimpio = linea;
                     
                     if (tieneNumeracion) {
-                        // Si ya tiene numeración, limpiarla
                         textoLimpio = linea.replace(/^\d+[\.:\s]*/, '')
                                           .replace(/^Paso\s*\d+[\.:\s]*/i, '')
                                           .trim();
                     }
                     
-                    // Si después de limpiar queda texto vacío, usar el original
                     if (!textoLimpio) {
                         textoLimpio = linea;
                     }
                     
-                    // Agregar el paso con numeración consistente
                     pasosHTML += `<p><strong>${numeroPaso}.</strong> ${textoLimpio}</p>`;
                     numeroPaso++;
                 }
@@ -449,11 +583,9 @@
             
             recipeDetailSection.style.display = 'none';
             
-            // Mostrar resultados de búsqueda nuevamente si hay resultados
             if (currentSearchResults.length > 0) {
                 searchResultsSection.style.display = 'block';
                 
-                // Desplazar hacia arriba al volver a los resultados
                 window.scrollTo({
                     top: 0,
                     behavior: 'smooth'
@@ -461,7 +593,6 @@
             }
         }
 
-        // Función para verificar si hay búsqueda activa
         function hasActiveSearch() {
             return currentSearchResults.length > 0 || 
                    document.getElementById('searchResultsSection').style.display !== 'none' ||
@@ -479,6 +610,17 @@
             if (e.key === 'Enter') {
                 searchRecipes();
             }
+        });
+
+        // Animación para las tarjetas al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryCards = document.querySelectorAll('.category-card');
+            categoryCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 200 * index);
+            });
         });
     </script>
 </body>

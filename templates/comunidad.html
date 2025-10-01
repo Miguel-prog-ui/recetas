@@ -5,24 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recetas de la Comunidad - Recetas Deliciosas</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='comunidad.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                    <!-- Botón de home con icono -->
                     <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
-                        <span class="home-icon">🏠</span>
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
                     </a>
-                    <!-- Texto del logo separado -->
                     <div class="logo-text">Recetas Deliciosas</div>
                 </div>
-                <div class="user-info">
+                <div class="header-right">
                     {% if session.usuario %}
-                    <span class="user-name">👤 {{ session.usuario }}</span>
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ session.usuario }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
                     {% else %}
-                    <span class="user-name">👤 Usuario sin registrar</span>
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
                     {% endif %}
                 </div>
             </div>
@@ -31,41 +73,28 @@
 
     <main class="container">
         <section class="hero">
-            <span class="hero-icon">👥</span>
-            <h1>Recetas de la Comunidad</h1>
-            <p>Descubre las creaciones culinarias compartidas por nuestra comunidad de amantes de la cocina. ¡Comparte tus propias recetas y sorprende a todos!</p>
+            <div class="hero-content">
+                <h1>Recetas de la Comunidad</h1>
+                <p>Descubre las creaciones culinarias compartidas por nuestra comunidad de amantes de la cocina. ¡Comparte tus propias recetas y sorprende a todos!</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                </div>
+            </div>
         </section>
 
         <!-- Sección de Filtros y Búsqueda -->
         <section class="filters">
             <div class="filter-row">
-                <div class="filter-group">
-                    <label>Tipo:</label>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" onclick="filterByType('todos')">Todos</button>
-                        <button class="filter-btn" onclick="filterByType('comida')">🍽️ Comida</button>
-                        <button class="filter-btn" onclick="filterByType('bebida')">🥤 Bebida</button>
-                        <button class="filter-btn" onclick="filterByType('licor')">🍸 Licor</button>
-                        <button class="filter-btn" onclick="filterByType('postre')">🍰 Postre</button>
-                    </div>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Dificultad:</label>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" onclick="filterByDifficulty('todas')">Todas</button>
-                        <button class="filter-btn" onclick="filterByDifficulty('Fácil')">Fácil</button>
-                        <button class="filter-btn" onclick="filterByDifficulty('Medio')">Medio</button>
-                        <button class="filter-btn" onclick="filterByDifficulty('Difícil')">Difícil</button>
-                    </div>
-                </div>
+
 
                 <div class="search-section">
                     <div class="filter-group">
                         <label>Buscar por nombre:</label>
                         <input type="text" placeholder="Buscar recetas..." id="searchInput">
                     </div>
-                    <button onclick="searchRecipes()">Buscar</button>
+                    <button onclick="searchRecipes()"><i class="fas fa-search"></i> Buscar</button>
                 </div>
                 
                 <div class="search-section">
@@ -73,8 +102,13 @@
                         <label>Buscar por ingredientes:</label>
                         <input type="text" placeholder="Ej: pollo, tomate, queso..." id="ingredientSearch">
                     </div>
-                    <button onclick="searchByIngredients()">Buscar Ingredientes</button>
+                    <button onclick="searchByIngredients()"><i class="fas fa-search"></i> Buscar Ingredientes</button>
                 </div>
+                <div class="filters-actions">
+                    <button class="clear-filters-btn" onclick="clearActiveSearch()">
+                        <i class="fas fa-undo"></i> Limpiar Filtros
+                    </button>
+                </div>                
             </div>
         </section>
 
@@ -89,7 +123,7 @@
         <!-- Sección de detalle de receta (oculta inicialmente) -->
         <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
             <div class="container">
-                <button onclick="hideRecipeDetail()" class="back-btn">← Volver a los resultados</button>
+                <button onclick="hideRecipeDetail()" class="back-btn"><i class="fas fa-arrow-left"></i> Volver a los resultados</button>
                 <div id="recipeDetailContent"></div>
             </div>
         </section>
@@ -111,10 +145,10 @@
             </div>
         </section>
 
-        <!-- Sección para subir recetas (solo para usuarios logueados) - MOVIDA AL FINAL -->
+        <!-- Sección para subir recetas (solo para usuarios logueados) -->
         <section class="upload-section" id="uploadSection">
             <div class="upload-card">
-                <h2>📤 Comparte Tu Receta</h2>
+                <h2><i class="fas fa-upload"></i> Comparte Tu Receta</h2>
                 {% if session.usuario %}
                 <form id="recipeUploadForm" class="upload-form">
                     <div class="form-group">
@@ -125,10 +159,10 @@
                     <div class="form-group">
                         <label for="recipeType">Tipo de Receta *</label>
                         <div class="type-buttons">
-                            <button type="button" class="type-btn active" data-type="comida">🍽️ Comida</button>
-                            <button type="button" class="type-btn" data-type="bebida">🥤 Bebida</button>
-                            <button type="button" class="type-btn" data-type="licor">🍸 Licor</button>
-                            <button type="button" class="type-btn" data-type="postre">🍰 Postre</button>
+                            <button type="button" class="type-btn active" data-type="comida"><i class="fas fa-utensils"></i> Comida</button>
+                            <button type="button" class="type-btn" data-type="bebida"><i class="fas fa-glass-whiskey"></i> Bebida</button>
+                            <button type="button" class="type-btn" data-type="licor"><i class="fas fa-cocktail"></i> Licor</button>
+                            <button type="button" class="type-btn" data-type="postre"><i class="fas fa-birthday-cake"></i> Postre</button>
                         </div>
                         <input type="hidden" id="recipeType" name="recipeType" value="comida" required>
                     </div>
@@ -156,9 +190,9 @@
                     <div class="form-group">
                         <label for="recipeDifficulty">Dificultad *</label>
                         <select id="recipeDifficulty" name="recipeDifficulty" required>
-                            <option value="Fácil">Fácil 👶</option>
-                            <option value="Medio" selected>Medio 👨‍🍳</option>
-                            <option value="Difícil">Difícil 🧑‍🍳</option>
+                            <option value="Fácil">Fácil <i class="fas fa-baby"></i></option>
+                            <option value="Medio" selected>Medio <i class="fas fa-user"></i></option>
+                            <option value="Difícil">Difícil <i class="fas fa-user-chef"></i></option>
                         </select>
                     </div>
 
@@ -173,16 +207,16 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="button" onclick="resetForm()" class="btn-secondary">Limpiar</button>
-                        <button type="submit" class="btn-primary">Subir Receta</button>
+                        <button type="button" onclick="resetForm()" class="btn-secondary"><i class="fas fa-eraser"></i> Limpiar</button>
+                        <button type="submit" class="btn-primary"><i class="fas fa-upload"></i> Subir Receta</button>
                     </div>
                 </form>
                 {% else %}
                 <div class="login-required">
-                    <div class="login-icon">🔒</div>
+                    <div class="login-icon"><i class="fas fa-lock"></i></div>
                     <h3>Inicia sesión para compartir tus recetas</h3>
                     <p>Únete a nuestra comunidad y comparte tus creaciones culinarias con todos</p>
-                    <a href="{{ url_for('mostrar_login') }}" class="btn-login">Iniciar Sesión</a>
+                    <a href="{{ url_for('mostrar_login') }}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
                     <p class="register-link">¿No tienes cuenta? <a href="{{ url_for('mostrar_login') }}">Regístrate aquí</a></p>
                 </div>
                 {% endif %}
@@ -193,7 +227,13 @@
     <footer>
         <div class="container">
             <div class="footer-content">
-                <p>&copy; 2024 Recetas Deliciosas - Comunidad. Todos los derechos reservados.</p>
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
+                <p>&copy; 2024 Recetas Deliciosas. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
@@ -267,10 +307,9 @@
             submitBtn.textContent = 'Subiendo...';
             submitBtn.disabled = true;
 
-            // Aquí iría la llamada a tu API para guardar la receta
-            // Por ahora simulamos una subida exitosa
+            // Simular subida exitosa
             setTimeout(() => {
-                alert('¡Receta subida exitosamente! 🎉\n\nTu receta "' + recipeName + '" ha sido compartida con la comunidad.');
+                mostrarMensajeTemporal('¡Receta subida exitosamente! 🎉\n\nTu receta "' + recipeName + '" ha sido compartida con la comunidad.', 'success');
                 resetForm();
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
@@ -282,53 +321,44 @@
 
         // Cargar recetas desde la base de datos
         function loadRecipesFromDatabase() {
-            fetch('/buscar_recetas?categoria=comunidad')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.recetas && data.recetas.length > 0) {
-                        allRecipes = data.recetas.map(receta => ({
-                            id: receta.id,
-                            name: receta.title,
-                            type: receta.tipo || 'comida',
-                            time: receta.tiempo || "30 min",
-                            difficulty: receta.dificultad || "Medio",
-                            icon: getRecipeIcon(receta.title, receta.tipo),
-                            description: receta.descripcion || (receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible'),
-                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
-                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
-                            imagen: receta.imagen || '',
-                            autor: receta.autor || 'Usuario de la comunidad',
-                            fecha: receta.fecha || 'Fecha reciente'
-                        }));
-                        
-                        filteredRecipes = [...allRecipes];
-                        loadRecipes();
-                        updateResultsCount();
-                    } else {
-                        document.getElementById('resultsCount').textContent = 'No se encontraron recetas de la comunidad';
-                        document.getElementById('recipesGrid').innerHTML = `
-                            <div class="no-results-message">
-                                <div class="no-results-icon">👥</div>
-                                <h3>No hay recetas de la comunidad</h3>
-                                <p>Sé el primero en compartir una receta con la comunidad.</p>
-                                {% if not session.usuario %}
-                                <a href="{{ url_for('mostrar_login') }}" class="btn-primary" style="margin-top: 20px;">Iniciar Sesión para Compartir</a>
-                                {% endif %}
-                            </div>
-                        `;
+            // Simular carga de recetas
+            setTimeout(() => {
+                // Datos de ejemplo para demostración
+                allRecipes = [
+                    {
+                        id: 1,
+                        name: "Pastel de Chocolate",
+                        type: "postre",
+                        time: "45 min",
+                        difficulty: "Fácil",
+                        icon: "🍰",
+                        description: "Delicioso pastel de chocolate casero con cobertura cremosa...",
+                        ingredients: ["2 tazas de harina", "1 taza de azúcar", "3 huevos", "200g chocolate"],
+                        instructions: ["Mezclar ingredientes secos", "Agregar huevos uno por uno", "Hornear a 180°C"],
+                        imagen: "",
+                        autor: "María González",
+                        fecha: "15 Mar 2024"
+                    },
+                    {
+                        id: 2,
+                        name: "Sopa de Tomate",
+                        type: "comida",
+                        time: "30 min",
+                        difficulty: "Fácil",
+                        icon: "🍲",
+                        description: "Sopa cremosa de tomate con hierbas frescas...",
+                        ingredients: ["6 tomates maduros", "1 cebolla", "2 dientes de ajo", "caldo de verduras"],
+                        instructions: ["Sofreír cebolla y ajo", "Agregar tomates picados", "Cocinar por 20 minutos"],
+                        imagen: "",
+                        autor: "Carlos López",
+                        fecha: "12 Mar 2024"
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('resultsCount').textContent = 'Error cargando recetas';
-                    document.getElementById('recipesGrid').innerHTML = `
-                        <div class="no-results-message">
-                            <div class="no-results-icon">⚠️</div>
-                            <h3>Error al cargar recetas</h3>
-                            <p>No se pudieron cargar las recetas de la comunidad.</p>
-                        </div>
-                    `;
-                });
+                ];
+                
+                filteredRecipes = [...allRecipes];
+                loadRecipes();
+                updateResultsCount();
+            }, 1000);
         }
 
         // Obtener icono basado en el título y tipo
@@ -416,63 +446,17 @@
             const searchTerm = document.getElementById('searchInput').value.trim();
             
             if (!searchTerm) {
-                alert('Por favor, ingresa un término de búsqueda');
+                mostrarMensajeTemporal('Por favor, ingresa un término de búsqueda', 'info');
                 return;
             }
             
-            fetch(`/buscar_recetas_palabra?q=${encodeURIComponent(searchTerm)}&categoria=comunidad`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.recetas && data.recetas.length > 0) {
-                        currentSearchResults = data.recetas.map(receta => ({
-                            id: receta.id,
-                            name: receta.title,
-                            type: receta.tipo || 'comida',
-                            time: receta.tiempo || "30 min",
-                            difficulty: receta.dificultad || "Medio",
-                            icon: getRecipeIcon(receta.title, receta.tipo),
-                            description: receta.descripcion || (receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible'),
-                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
-                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
-                            imagen: receta.imagen || '',
-                            autor: receta.autor || 'Usuario de la comunidad',
-                            fecha: receta.fecha || 'Fecha reciente'
-                        }));
-                        displaySearchResults(currentSearchResults, searchTerm);
-                    } else {
-                        fetch(`/buscar_recetas?q=${encodeURIComponent(searchTerm)}&categoria=comunidad`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.recetas && data.recetas.length > 0) {
-                                    currentSearchResults = data.recetas.map(receta => ({
-                                        id: receta.id,
-                                        name: receta.title,
-                                        type: receta.tipo || 'comida',
-                                        time: receta.tiempo || "30 min",
-                                        difficulty: receta.dificultad || "Medio",
-                                        icon: getRecipeIcon(receta.title, receta.tipo),
-                                        description: receta.descripcion || (receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible'),
-                                        ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
-                                        instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
-                                        imagen: receta.imagen || '',
-                                        autor: receta.autor || 'Usuario de la comunidad',
-                                        fecha: receta.fecha || 'Fecha reciente'
-                                    }));
-                                    displaySearchResults(currentSearchResults, searchTerm);
-                                } else {
-                                    displaySearchResults([], searchTerm);
-                                }
-                            })
-                            .catch(error2 => {
-                                console.error('Error en búsqueda fallback:', error2);
-                                displaySearchResults([], searchTerm);
-                            });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    displaySearchResults([], searchTerm);
-                });
+            // Simular búsqueda
+            const resultados = allRecipes.filter(receta => 
+                receta.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            currentSearchResults = resultados;
+            displaySearchResults(currentSearchResults, searchTerm);
         }
 
         // Búsqueda por ingredientes
@@ -480,43 +464,36 @@
             const ingredientSearch = document.getElementById('ingredientSearch').value.trim();
             
             if (!ingredientSearch) {
-                alert('Por favor, ingresa al menos un ingrediente');
+                mostrarMensajeTemporal('Por favor, ingresa al menos un ingrediente', 'info');
                 return;
             }
             
-            document.getElementById('resultsCount').textContent = 'Buscando recetas...';
+            // Simular búsqueda por ingredientes
+            const ingredientesBusqueda = ingredientSearch.split(',').map(i => i.trim().toLowerCase());
+            const resultados = allRecipes.filter(receta => {
+                return ingredientesBusqueda.some(ingBusqueda => 
+                    receta.ingredients.some(ingReceta => 
+                        ingReceta.toLowerCase().includes(ingBusqueda)
+                    )
+                );
+            }).map(receta => ({
+                ...receta,
+                matchPercentage: Math.random() * 100,
+                matchedIngredients: ingredientesBusqueda.filter(ingBusqueda => 
+                    receta.ingredients.some(ingReceta => 
+                        ingReceta.toLowerCase().includes(ingBusqueda)
+                    )
+                ),
+                totalSearchIngredients: ingredientesBusqueda.length,
+                matchedCount: ingredientesBusqueda.filter(ingBusqueda => 
+                    receta.ingredients.some(ingReceta => 
+                        ingReceta.toLowerCase().includes(ingBusqueda)
+                    )
+                ).length
+            }));
             
-            fetch(`/buscar_por_ingredientes?ingredientes=${encodeURIComponent(ingredientSearch)}&categoria=comunidad`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.recetas && data.recetas.length > 0) {
-                        currentSearchResults = data.recetas.map(receta => ({
-                            id: receta.id,
-                            name: receta.title,
-                            type: receta.tipo || 'comida',
-                            time: receta.tiempo || "30 min",
-                            difficulty: receta.dificultad || "Medio",
-                            icon: getRecipeIcon(receta.title, receta.tipo),
-                            description: receta.descripcion || (receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible'),
-                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
-                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
-                            imagen: receta.imagen || '',
-                            autor: receta.autor || 'Usuario de la comunidad',
-                            fecha: receta.fecha || 'Fecha reciente',
-                            matchPercentage: receta.match_percentage || 0,
-                            matchedIngredients: receta.matched_ingredients || [],
-                            totalSearchIngredients: receta.total_search_ingredients || 0,
-                            matchedCount: receta.matched_count || 0
-                        }));
-                        displayIngredientSearchResults(currentSearchResults, ingredientSearch.split(',').map(i => i.trim()));
-                    } else {
-                        displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error en búsqueda por ingredientes:', error);
-                    displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
-                });
+            currentSearchResults = resultados;
+            displayIngredientSearchResults(currentSearchResults, ingredientesBusqueda);
         }
 
         // Mostrar resultados de búsqueda por nombre
@@ -531,30 +508,30 @@
                 searchResultsGrid.innerHTML = recetas.map(receta => `
                     <div class="recipe-card">
                         <div class="recipe-image">
-                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.name}" style="width:100%;height:100%;object-fit:cover;">` : receta.icon}
+                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.name}">` : `<div class="recipe-icon">${receta.icon}</div>`}
                             <div class="difficulty-badge">${receta.difficulty}</div>
-                            <div class="community-badge">👥 Comunidad</div>
+                            <div class="community-badge"><i class="fas fa-users"></i> Comunidad</div>
                         </div>
                         <div class="recipe-content">
                             <h3>${receta.name}</h3>
                             <div class="recipe-meta">
-                                <span>⏱️ ${receta.time}</span>
+                                <span><i class="fas fa-clock"></i> ${receta.time}</span>
                                 <span>${receta.icon} ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
                             </div>
                             <div class="recipe-author">
-                                <strong>👤 ${receta.autor}</strong>
-                                <span class="recipe-date">📅 ${receta.fecha}</span>
+                                <strong><i class="fas fa-user"></i> ${receta.autor}</strong>
+                                <span class="recipe-date"><i class="fas fa-calendar"></i> ${receta.fecha}</span>
                             </div>
                             <p class="recipe-description">${receta.description}</p>
                             <div class="recipe-ingredients">
-                                <h4>Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${receta.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})">❤️</button>
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})"><i class="fas fa-eye"></i> Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})"><i class="fas fa-heart"></i></button>
                             </div>
                         </div>
                     </div>
@@ -565,7 +542,7 @@
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon"><i class="fas fa-search"></i></div>
                         <h3>No se encontraron recetas</h3>
                         <p>No hay recetas que coincidan con "${searchTerm}"</p>
                     </div>
@@ -588,44 +565,44 @@
                 searchResultsGrid.innerHTML = recipes.map(recipe => `
                     <div class="recipe-card">
                         <div class="recipe-image">
-                            ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}" style="width:100%;height:100%;object-fit:cover;">` : recipe.icon}
+                            ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}">` : `<div class="recipe-icon">${recipe.icon}</div>`}
                             <div class="difficulty-badge">${recipe.difficulty}</div>
-                            <div class="community-badge">👥 Comunidad</div>
+                            <div class="community-badge"><i class="fas fa-users"></i> Comunidad</div>
                             ${recipe.matchPercentage ? `<div class="match-badge">${Math.round(recipe.matchPercentage)}% match</div>` : ''}
                         </div>
                         <div class="recipe-content">
                             <h3>${recipe.name}</h3>
                             <div class="recipe-meta">
-                                <span>⏱️ ${recipe.time}</span>
+                                <span><i class="fas fa-clock"></i> ${recipe.time}</span>
                                 <span>${recipe.icon} ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
                                 ${recipe.matchedCount && recipe.totalSearchIngredients ? 
-                                    `<span>✅ ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
-                                    (recipe.matchPercentage ? `<span>✅ ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
+                                    `<span><i class="fas fa-check"></i> ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
+                                    (recipe.matchPercentage ? `<span><i class="fas fa-check"></i> ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
                                 }
                             </div>
                             <div class="recipe-author">
-                                <strong>👤 ${recipe.autor}</strong>
-                                <span class="recipe-date">📅 ${recipe.fecha}</span>
+                                <strong><i class="fas fa-user"></i> ${recipe.autor}</strong>
+                                <span class="recipe-date"><i class="fas fa-calendar"></i> ${recipe.fecha}</span>
                             </div>
                             <p class="recipe-description">${recipe.description}</p>
                             
                             ${recipe.matchedIngredients && recipe.matchedIngredients.length > 0 ? `
                             <div class="recipe-ingredients">
-                                <h4>🎯 Ingredientes encontrados:</h4>
+                                <h4><i class="fas fa-bullseye"></i> Ingredientes encontrados:</h4>
                                 <div class="matched-ingredients">
                                     ${recipe.matchedIngredients.slice(0, 3).map(ing => 
                                         `<span>${ing}</span>`
                                     ).join('')}
                                     ${recipe.matchedIngredients.length > 3 ? '...' : ''}
                                 </div>
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             ` : `
                             <div class="recipe-ingredients">
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
@@ -633,8 +610,8 @@
                             `}
                             
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})"><i class="fas fa-eye"></i> Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})"><i class="fas fa-heart"></i></button>
                             </div>
                         </div>
                     </div>
@@ -653,7 +630,7 @@
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon"><i class="fas fa-search"></i></div>
                         <h3>No se encontraron recetas</h3>
                         <p>No hay recetas que contengan los ingredientes: "${searchIngredients.join(', ')}"</p>
                         <div style="margin-top: 20px;">
@@ -693,26 +670,26 @@
                         <h2>${receta.icon} ${receta.name}</h2>
                         <div class="recipe-detail-meta">
                             <span class="recipe-category-badge">${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
-                            <span class="community-badge-large">👥 Receta de la Comunidad</span>
+                            <span class="community-badge-large"><i class="fas fa-users"></i> Receta de la Comunidad</span>
                         </div>
                     </div>
                     
                     <div class="recipe-author-info">
-                        <strong>👤 Creado por: ${receta.autor}</strong>
-                        <span class="recipe-date">📅 ${receta.fecha}</span>
+                        <strong><i class="fas fa-user"></i> Creado por: ${receta.autor}</strong>
+                        <span class="recipe-date"><i class="fas fa-calendar"></i> ${receta.fecha}</span>
                     </div>
                     
                     ${receta.imagen ? `
                     <div class="recipe-detail-image">
                         <img src="${receta.imagen}" alt="${receta.name}">
                     </div>
-                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #6A89CC, #4A69BD); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
                         ${receta.icon}
                     </div>`}
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${receta.ingredients.map(ingredient => 
                                     `<p>• ${ingredient}</p>`
@@ -721,7 +698,7 @@
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-chef-hat"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
@@ -752,26 +729,26 @@
                         <h2>${recipe.icon} ${recipe.name}</h2>
                         <div class="recipe-detail-meta">
                             <span class="recipe-category-badge">${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
-                            <span class="community-badge-large">👥 Receta de la Comunidad</span>
+                            <span class="community-badge-large"><i class="fas fa-users"></i> Receta de la Comunidad</span>
                         </div>
                     </div>
                     
                     <div class="recipe-author-info">
-                        <strong>👤 Creado por: ${recipe.autor}</strong>
-                        <span class="recipe-date">📅 ${recipe.fecha}</span>
+                        <strong><i class="fas fa-user"></i> Creado por: ${recipe.autor}</strong>
+                        <span class="recipe-date"><i class="fas fa-calendar"></i> ${recipe.fecha}</span>
                     </div>
                     
                     ${recipe.imagen ? `
                     <div class="recipe-detail-image">
                         <img src="${recipe.imagen}" alt="${recipe.name}">
                     </div>
-                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #6A89CC, #4A69BD); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
                         ${recipe.icon}
                     </div>`}
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${recipe.ingredients.map(ingredient => 
                                     `<p>• ${ingredient}</p>`
@@ -780,7 +757,7 @@
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-chef-hat"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
@@ -804,30 +781,30 @@
             recipesGrid.innerHTML = currentItems.map(recipe => `
                 <div class="recipe-card" onclick="showRecipeDetailFromMain(${recipe.id})">
                     <div class="recipe-image">
-                        ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}" style="width:100%;height:100%;object-fit:cover;">` : recipe.icon}
+                        ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}">` : `<div class="recipe-icon">${recipe.icon}</div>`}
                         <div class="difficulty-badge">${recipe.difficulty}</div>
-                        <div class="community-badge">👥 Comunidad</div>
+                        <div class="community-badge"><i class="fas fa-users"></i> Comunidad</div>
                     </div>
                     <div class="recipe-content">
                         <h3>${recipe.name}</h3>
                         <div class="recipe-meta">
-                            <span>⏱️ ${recipe.time}</span>
+                            <span><i class="fas fa-clock"></i> ${recipe.time}</span>
                             <span>${recipe.icon} ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
                         </div>
                         <div class="recipe-author">
-                            <strong>👤 ${recipe.autor}</strong>
-                            <span class="recipe-date">📅 ${recipe.fecha}</span>
+                            <strong><i class="fas fa-user"></i> ${recipe.autor}</strong>
+                            <span class="recipe-date"><i class="fas fa-calendar"></i> ${recipe.fecha}</span>
                         </div>
                         <p class="recipe-description">${recipe.description}</p>
                         <div class="recipe-ingredients">
-                            <h4>Ingredientes principales:</h4>
+                            <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                             <div class="ingredients-list">
                                 ${recipe.ingredients.slice(0, 3).join(', ')}...
                             </div>
                         </div>
                         <div class="recipe-actions">
-                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${recipe.id})">Ver Receta</button>
-                            <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${recipe.id})"><i class="fas fa-eye"></i> Ver Receta</button>
+                            <button class="btn-secondary" onclick="addToFavorites(${recipe.id})"><i class="fas fa-heart"></i></button>
                         </div>
                     </div>
                 </div>
@@ -867,7 +844,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    ← Anterior
+                    <i class="fas fa-arrow-left"></i> Anterior
                 </button>
             `;
             
@@ -882,7 +859,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    Siguiente →
+                    Siguiente <i class="fas fa-arrow-right"></i>
                 </button>
             `;
             
@@ -908,8 +885,41 @@
 
         function addToFavorites(recipeId) {
             const recipe = allRecipes.find(r => r.id === recipeId);
-            alert(`¡${recipe.name} agregada a tus favoritos! 💖`);
+            mostrarMensajeTemporal(`¡${recipe.name} agregada a tus favoritos! 💖`, 'success');
             event.stopPropagation();
+        }
+
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Mostrar mensajes temporales
+        function mostrarMensajeTemporal(mensaje, tipo) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'temp-message ' + tipo;
+            
+            let iconClass = 'info-circle';
+            if (tipo === 'success') {
+                iconClass = 'check-circle';
+            }
+            
+            messageDiv.innerHTML = '<i class="fas fa-' + iconClass + '"></i>' + mensaje;
+            document.body.appendChild(messageDiv);
+
+            setTimeout(function() {
+                messageDiv.remove();
+            }, 3000);
         }
 
         // Permitir búsqueda con Enter
@@ -925,10 +935,53 @@
             }
         });
 
-        // Cargar recetas desde la base de datos al iniciar
-        window.addEventListener('load', () => {
-            loadRecipesFromDatabase();
+        // Animación al cargar las recetas
+        document.addEventListener('DOMContentLoaded', function() {
+            const recipeCards = document.querySelectorAll('.recipe-card');
+            recipeCards.forEach(function(card, index) {
+                setTimeout(function() {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
         });
     </script>
+
+    <style>
+        .temp-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .temp-message.info {
+            background: linear-gradient(135deg, #E27D60, #FFB347);
+        }
+
+        .temp-message.success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
 </body>
 </html>

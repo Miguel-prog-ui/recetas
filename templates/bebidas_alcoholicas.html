@@ -5,24 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bebidas Alcohólicas - Recetas Deliciosas</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bebidas_alcoholicas.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                    <!-- Botón de home con icono -->
                     <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
-                        <span class="home-icon">🏠</span>
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
                     </a>
-                    <!-- Texto del logo separado -->
                     <div class="logo-text">Recetas Deliciosas</div>
                 </div>
-                <div class="user-info">
+                <div class="header-right">
                     {% if session.usuario %}
-                    <span class="user-name">👤 {{ session.usuario }}</span>
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ session.usuario }}@ejemplo.com</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
                     {% else %}
-                    <span class="user-name">👤 Usuario sin registrar</span>
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
                     {% endif %}
                 </div>
             </div>
@@ -31,51 +73,74 @@
 
     <main class="container">
         <section class="hero">
-            <span class="hero-icon">🍹</span>
-            <h1>Bebidas Alcohólicas</h1>
-            <p>Descubre una colección exclusiva de cócteles clásicos y modernos. Desde mojitos refrescantes hasta whiskeys añejados, encuentra la receta perfecta para cada ocasión y conviértete en el bartender de tus sueños.</p>
+            <div class="hero-content">
+                <div class="hero-icon"><i class="fas fa-cocktail"></i></div>
+                <h1>Bebidas Alcohólicas</h1>
+                <p>Descubre una colección exclusiva de cócteles clásicos y modernos. Desde mojitos refrescantes hasta whiskeys añejados, encuentra la receta perfecta para cada ocasión y conviértete en el bartender de tus sueños.</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                </div>
+            </div>
         </section>
 
-        <!-- Sección de Filtros y Búsqueda - SIEMPRE VISIBLE -->
-        <section class="filters">
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label>Tipo:</label>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" onclick="filterByType('todos')">Todos</button>
-                        <button class="filter-btn" onclick="filterByType('clasicos')">Clásicos</button>
-                        <button class="filter-btn" onclick="filterByType('tropicales')">Tropicales</button>
-                        <button class="filter-btn" onclick="filterByType('shots')">Shots</button>
-                        <button class="filter-btn" onclick="filterByType('digestivos')">Digestivos</button>
-                        <button class="filter-btn" onclick="filterByType('cervezas')">Cervezas</button>
-                        <button class="filter-btn" onclick="filterByType('vinos')">Vinos</button>
-                    </div>
-                </div>
+        <!-- Sección de Filtros y Búsqueda -->
+        <section class="filters-section">
+            <div class="filters-card">
+                <h2 class="filters-title"><i class="fas fa-filter"></i> Filtros y Búsqueda</h2>
                 
-                <div class="filter-group">
-                    <label>Intensidad:</label>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" onclick="filterByIntensity('todas')">Todas</button>
-                        <button class="filter-btn" onclick="filterByIntensity('Suave')">Suave</button>
-                        <button class="filter-btn" onclick="filterByIntensity('Medio')">Medio</button>
-                        <button class="filter-btn" onclick="filterByIntensity('Fuerte')">Fuerte</button>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label><i class="fas fa-tags"></i> Tipo de Bebida:</label>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" onclick="filterByType('todos')">Todos</button>
+                            <button class="filter-btn" onclick="filterByType('clasicos')">Clásicos</button>
+                            <button class="filter-btn" onclick="filterByType('tropicales')">Tropicales</button>
+                            <button class="filter-btn" onclick="filterByType('shots')">Shots</button>
+                            <button class="filter-btn" onclick="filterByType('digestivos')">Digestivos</button>
+                            <button class="filter-btn" onclick="filterByType('cervezas')">Cervezas</button>
+                            <button class="filter-btn" onclick="filterByType('vinos')">Vinos</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label><i class="fas fa-fire"></i> Intensidad:</label>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" onclick="filterByIntensity('todas')">Todas</button>
+                            <button class="filter-btn" onclick="filterByIntensity('Suave')">Suave</button>
+                            <button class="filter-btn" onclick="filterByIntensity('Medio')">Medio</button>
+                            <button class="filter-btn" onclick="filterByIntensity('Fuerte')">Fuerte</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="search-section">
-                    <div class="filter-group">
-                        <label>Buscar por nombre:</label>
-                        <input type="text" placeholder="Buscar cócteles..." id="searchInput">
+                <div class="search-row">
+                    <div class="search-group">
+                        <label><i class="fas fa-search"></i> Buscar por nombre:</label>
+                        <div class="search-input-container">
+                            <input type="text" placeholder="Buscar cócteles..." id="searchInput">
+                            <button class="search-btn" onclick="searchDrinks()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
                     </div>
-                    <button onclick="searchDrinks()">Buscar</button>
+                    
+                    <div class="search-group">
+                        <label><i class="fas fa-lemon"></i> Buscar por ingredientes:</label>
+                        <div class="search-input-container">
+                            <input type="text" placeholder="Ej: ron, vodka, limón..." id="ingredientSearch">
+                            <button class="search-btn" onclick="searchByIngredients()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="search-section">
-                    <div class="filter-group">
-                        <label>Buscar por ingredientes:</label>
-                        <input type="text" placeholder="Ej: ron, vodka, limón..." id="ingredientSearch">
-                    </div>
-                    <button onclick="searchByIngredients()">Buscar Ingredientes</button>
+
+                <div class="filters-actions">
+                    <button class="clear-filters-btn" onclick="clearActiveSearch()">
+                        <i class="fas fa-undo"></i> Limpiar Filtros
+                    </button>
                 </div>
             </div>
         </section>
@@ -83,15 +148,22 @@
         <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
         <section id="searchResultsSection" class="search-results-section" style="display: none;">
             <div class="container">
-                <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
+                <div class="section-header">
+                    <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
+                    <button class="back-to-main-btn" onclick="clearActiveSearch()">
+                        <i class="fas fa-arrow-left"></i> Volver al catálogo
+                    </button>
+                </div>
                 <div class="recipes-grid" id="searchResultsGrid"></div>
             </div>
         </section>
 
-        <!-- Sección de detalle de receta (oculta inicialmente) -->
+        <!-- Sección de detalle de receta -->
         <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
             <div class="container">
-                <button onclick="hideRecipeDetail()" class="back-btn">← Volver a los resultados</button>
+                <button onclick="hideRecipeDetail()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Volver a los resultados
+                </button>
                 <div id="recipeDetailContent"></div>
             </div>
         </section>
@@ -100,7 +172,17 @@
         <section class="recipes-section" id="recipesMainSection">
             <div class="section-header">
                 <h2 class="section-title">Nuestros Cócteles</h2>
-                <span class="results-count" id="resultsCount">Cargando recetas...</span>
+                <div class="section-header-right">
+                    <span class="results-count" id="resultsCount">Cargando recetas...</span>
+                    <div class="view-controls">
+                        <button class="view-btn active" onclick="changeView('grid')">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-btn" onclick="changeView('list')">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <div class="recipes-grid" id="recipesGrid">
@@ -117,6 +199,12 @@
     <footer>
         <div class="container">
             <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
                 <p>&copy; 2024 Recetas Deliciosas - Sección Bebidas Alcohólicas. Todos los derechos reservados. Bebe con responsabilidad.</p>
             </div>
         </div>
@@ -130,6 +218,7 @@
         let currentPage = 1;
         const itemsPerPage = 8;
         let currentSearchResults = [];
+        let currentView = 'grid';
 
         // Cargar bebidas alcohólicas desde la base de datos
         function loadDrinksFromDatabase() {
@@ -157,7 +246,7 @@
                         document.getElementById('resultsCount').textContent = 'No se encontraron recetas de bebidas alcohólicas';
                         document.getElementById('recipesGrid').innerHTML = `
                             <div class="no-results-message">
-                                <div class="no-results-icon">🍹</div>
+                                <div class="no-results-icon"><i class="fas fa-cocktail"></i></div>
                                 <h3>No hay bebidas alcohólicas disponibles</h3>
                                 <p>No se encontraron recetas de bebidas alcohólicas en la base de datos.</p>
                             </div>
@@ -409,27 +498,31 @@
             
             if (recetas.length > 0) {
                 searchResultsGrid.innerHTML = recetas.map(receta => `
-                    <div class="recipe-card">
+                    <div class="recipe-card ${currentView === 'list' ? 'list-view' : ''}">
                         <div class="recipe-image">
-                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.name}" style="width:100%;height:100%;object-fit:cover;">` : receta.icon}
-                            <div class="intensity-badge">${receta.intensity}</div>
+                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.name}" style="width:100%;height:100%;object-fit:cover;">` : `<div class="recipe-icon">${receta.icon}</div>`}
+                            <div class="intensity-badge intensity-${receta.intensity.toLowerCase()}">${receta.intensity}</div>
                         </div>
                         <div class="recipe-content">
                             <h3>${receta.name}</h3>
                             <div class="recipe-meta">
-                                <span>⏱️ ${receta.time}</span>
-                                <span>🍸 ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                                <span><i class="fas fa-clock"></i> ${receta.time}</span>
+                                <span><i class="fas fa-tag"></i> ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
                             </div>
                             <p class="recipe-description">${receta.description}</p>
                             <div class="recipe-ingredients">
-                                <h4>Ingredientes principales:</h4>
+                                <h4><i class="fas fa-lemon"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${receta.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})">❤️</button>
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})">
+                                    <i class="fas fa-book-open"></i> Ver Receta
+                                </button>
+                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})">
+                                    <i class="fas fa-heart"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -440,7 +533,7 @@
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon"><i class="fas fa-search"></i></div>
                         <h3>No se encontraron bebidas</h3>
                         <p>No hay bebidas que coincidan con "${searchTerm}"</p>
                     </div>
@@ -461,41 +554,41 @@
             
             if (recipes.length > 0) {
                 searchResultsGrid.innerHTML = recipes.map(recipe => `
-                    <div class="recipe-card">
+                    <div class="recipe-card ${currentView === 'list' ? 'list-view' : ''}">
                         <div class="recipe-image">
-                            ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}" style="width:100%;height:100%;object-fit:cover;">` : recipe.icon}
-                            <div class="intensity-badge">${recipe.intensity}</div>
+                            ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}" style="width:100%;height:100%;object-fit:cover;">` : `<div class="recipe-icon">${recipe.icon}</div>`}
+                            <div class="intensity-badge intensity-${recipe.intensity.toLowerCase()}">${recipe.intensity}</div>
                             ${recipe.matchPercentage ? `<div class="match-badge">${Math.round(recipe.matchPercentage)}% match</div>` : ''}
                         </div>
                         <div class="recipe-content">
                             <h3>${recipe.name}</h3>
                             <div class="recipe-meta">
-                                <span>⏱️ ${recipe.time}</span>
-                                <span>🍸 ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                                <span><i class="fas fa-clock"></i> ${recipe.time}</span>
+                                <span><i class="fas fa-tag"></i> ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
                                 ${recipe.matchedCount && recipe.totalSearchIngredients ? 
-                                    `<span>✅ ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
-                                    (recipe.matchPercentage ? `<span>✅ ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
+                                    `<span><i class="fas fa-check-circle"></i> ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
+                                    (recipe.matchPercentage ? `<span><i class="fas fa-check-circle"></i> ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
                                 }
                             </div>
                             <p class="recipe-description">${recipe.description}</p>
                             
                             ${recipe.matchedIngredients && recipe.matchedIngredients.length > 0 ? `
                             <div class="recipe-ingredients">
-                                <h4>🎯 Ingredientes encontrados:</h4>
+                                <h4><i class="fas fa-bullseye"></i> Ingredientes encontrados:</h4>
                                 <div class="matched-ingredients">
                                     ${recipe.matchedIngredients.slice(0, 3).map(ing => 
                                         `<span>${ing}</span>`
                                     ).join('')}
                                     ${recipe.matchedIngredients.length > 3 ? '...' : ''}
                                 </div>
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-lemon"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             ` : `
                             <div class="recipe-ingredients">
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-lemon"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
@@ -503,8 +596,12 @@
                             `}
                             
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})">
+                                    <i class="fas fa-book-open"></i> Ver Receta
+                                </button>
+                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">
+                                    <i class="fas fa-heart"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -516,7 +613,7 @@
                 
                 searchResultsTitle.innerHTML = `
                     Resultados por ingredientes: "${searchIngredients.join(', ')}"
-                    <small style="display: block; font-size: 1rem; color: #f5f5f5; margin-top: 5px;">
+                    <small style="display: block; font-size: 1rem; color: #666; margin-top: 5px;">
                         ${recipes.length} recetas encontradas • ${avgMatch.toFixed(1)} ingredientes coincidentes en promedio
                     </small>
                 `;
@@ -524,12 +621,12 @@
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon"><i class="fas fa-search"></i></div>
                         <h3>No se encontraron recetas</h3>
                         <p>No hay bebidas que contengan los ingredientes: "${searchIngredients.join(', ')}"</p>
                         <div style="margin-top: 20px;">
                             <p><strong>Sugerencias:</strong></p>
-                            <ul style="text-align: left; display: inline-block; color: #f5f5f5;">
+                            <ul style="text-align: left; display: inline-block; color: #666;">
                                 <li>Verifica la ortografía de los ingredientes</li>
                                 <li>Intenta con términos más generales</li>
                                 <li>Prueba con menos ingredientes</li>
@@ -561,7 +658,7 @@
             recipeDetailContent.innerHTML = `
                 <div class="recipe-detail-card">
                     <div class="recipe-detail-header">
-                        <h2>${receta.icon} ${receta.name}</h2>
+                        <h2><span class="recipe-icon-large">${receta.icon}</span> ${receta.name}</h2>
                         <span class="recipe-category-badge">${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
                     </div>
                     
@@ -569,29 +666,29 @@
                     <div class="recipe-detail-image">
                         <img src="${receta.imagen}" alt="${receta.name}">
                     </div>
-                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #e94560, #533483); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
-                        ${receta.icon}
+                    ` : `<div class="recipe-detail-image-placeholder">
+                        <div class="recipe-icon-large">${receta.icon}</div>
                     </div>`}
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-lemon"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${receta.ingredients.map(ingredient => 
-                                    `<p>• ${ingredient}</p>`
+                                    `<p><i class="fas fa-check-circle"></i> ${ingredient}</p>`
                                 ).join('')}
                             </div>
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-utensils"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
                         </div>
                         
                         <div class="responsibility-warning">
-                            <h3>⚠️ Bebe con responsabilidad</h3>
+                            <h3><i class="fas fa-exclamation-triangle"></i> Bebe con responsabilidad</h3>
                             <p>Disfruta de nuestras recetas de forma moderada y responsable. No conduzcas bajo los efectos del alcohol.</p>
                         </div>
                     </div>
@@ -617,7 +714,7 @@
             recipeDetailContent.innerHTML = `
                 <div class="recipe-detail-card">
                     <div class="recipe-detail-header">
-                        <h2>${drink.icon} ${drink.name}</h2>
+                        <h2><span class="recipe-icon-large">${drink.icon}</span> ${drink.name}</h2>
                         <span class="recipe-category-badge">${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
                     </div>
                     
@@ -625,29 +722,29 @@
                     <div class="recipe-detail-image">
                         <img src="${drink.imagen}" alt="${drink.name}">
                     </div>
-                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #e94560, #533483); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
-                        ${drink.icon}
+                    ` : `<div class="recipe-detail-image-placeholder">
+                        <div class="recipe-icon-large">${drink.icon}</div>
                     </div>`}
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-lemon"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${drink.ingredients.map(ingredient => 
-                                    `<p>• ${ingredient}</p>`
+                                    `<p><i class="fas fa-check-circle"></i> ${ingredient}</p>`
                                 ).join('')}
                             </div>
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-utensils"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
                         </div>
                         
                         <div class="responsibility-warning">
-                            <h3>⚠️ Bebe con responsabilidad</h3>
+                            <h3><i class="fas fa-exclamation-triangle"></i> Bebe con responsabilidad</h3>
                             <p>Disfruta de nuestras recetas de forma moderada y responsable. No conduzcas bajo los efectos del alcohol.</p>
                         </div>
                     </div>
@@ -667,27 +764,31 @@
             const currentItems = drinksToShow.slice(startIndex, endIndex);
             
             recipesGrid.innerHTML = currentItems.map(drink => `
-                <div class="recipe-card" onclick="showRecipeDetailFromMain(${drink.id})">
+                <div class="recipe-card ${currentView === 'list' ? 'list-view' : ''}" onclick="showRecipeDetailFromMain(${drink.id})">
                     <div class="recipe-image">
-                        ${drink.imagen ? `<img src="${drink.imagen}" alt="${drink.name}" style="width:100%;height:100%;object-fit:cover;">` : drink.icon}
-                        <div class="intensity-badge">${drink.intensity}</div>
+                        ${drink.imagen ? `<img src="${drink.imagen}" alt="${drink.name}" style="width:100%;height:100%;object-fit:cover;">` : `<div class="recipe-icon">${drink.icon}</div>`}
+                        <div class="intensity-badge intensity-${drink.intensity.toLowerCase()}">${drink.intensity}</div>
                     </div>
                     <div class="recipe-content">
                         <h3>${drink.name}</h3>
                         <div class="recipe-meta">
-                            <span>⏱️ ${drink.time}</span>
-                            <span>🍸 ${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
+                            <span><i class="fas fa-clock"></i> ${drink.time}</span>
+                            <span><i class="fas fa-tag"></i> ${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
                         </div>
                         <p class="recipe-description">${drink.description}</p>
                         <div class="recipe-ingredients">
-                            <h4>Ingredientes principales:</h4>
+                            <h4><i class="fas fa-lemon"></i> Ingredientes principales:</h4>
                             <div class="ingredients-list">
                                 ${drink.ingredients.slice(0, 3).join(', ')}...
                             </div>
                         </div>
                         <div class="recipe-actions">
-                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${drink.id})">Ver Receta</button>
-                            <button class="btn-secondary" onclick="addToFavorites(${drink.id})">❤️</button>
+                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${drink.id})">
+                                <i class="fas fa-book-open"></i> Ver Receta
+                            </button>
+                            <button class="btn-secondary" onclick="addToFavorites(${drink.id})">
+                                <i class="fas fa-heart"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -713,6 +814,30 @@
             applyFilters();
         }
 
+        function changeView(view) {
+            currentView = view;
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const recipesGrid = document.getElementById('recipesGrid');
+            const searchResultsGrid = document.getElementById('searchResultsGrid');
+            
+            if (view === 'list') {
+                recipesGrid.classList.add('list-view');
+                searchResultsGrid.classList.add('list-view');
+            } else {
+                recipesGrid.classList.remove('list-view');
+                searchResultsGrid.classList.remove('list-view');
+            }
+            
+            loadDrinks(filteredDrinks);
+            if (currentSearchResults.length > 0) {
+                displaySearchResults(currentSearchResults, document.getElementById('searchInput').value);
+            }
+        }
+
         function updatePagination(totalPages, totalItems) {
             const pagination = document.getElementById('pagination');
             
@@ -727,7 +852,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    ← Anterior
+                    <i class="fas fa-chevron-left"></i> Anterior
                 </button>
             `;
             
@@ -742,7 +867,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    Siguiente →
+                    Siguiente <i class="fas fa-chevron-right"></i>
                 </button>
             `;
             
@@ -772,6 +897,21 @@
             event.stopPropagation();
         }
 
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
         // Permitir búsqueda con Enter
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -788,6 +928,15 @@
         // Cargar bebidas alcohólicas desde la base de datos al iniciar
         window.addEventListener('load', () => {
             loadDrinksFromDatabase();
+            
+            // Animación para las tarjetas al cargar
+            const recipeCards = document.querySelectorAll('.recipe-card');
+            recipeCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 200 * index);
+            });
         });
     </script>
 </body>

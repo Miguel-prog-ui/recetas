@@ -5,24 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comidas - Recetas Deliciosas</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='comidas.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                    <!-- Botón de home con icono -->
                     <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
-                        <span class="home-icon">🏠</span>
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
                     </a>
-                    <!-- Texto del logo separado -->
                     <div class="logo-text">Recetas Deliciosas</div>
                 </div>
-                <div class="user-info">
+                <div class="header-right">
                     {% if session.usuario %}
-                    <span class="user-name">👤 {{ session.usuario }}</span>
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ usuario[2] if usuario else 'Email no disponible' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
                     {% else %}
-                    <span class="user-name">👤 Usuario sin registrar</span>
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
                     {% endif %}
                 </div>
             </div>
@@ -31,51 +73,47 @@
 
     <main class="container">
         <section class="hero">
-            <span class="hero-icon">🍽️</span>
-            <h1>Comidas Deliciosas</h1>
-            <p>Explora una increíble variedad de recetas para cada momento del día. Desde desayunos energizantes hasta cenas gourmet, encuentra la receta perfecta para cualquier ocasión.</p>
+            <div class="hero-content">
+                <div class="hero-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h1>Comidas Deliciosas</h1>
+                <p>Explora una increíble variedad de recetas para cada momento del día. Desde desayunos energizantes hasta cenas gourmet, encuentra la receta perfecta para cualquier ocasión.</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                </div>
+            </div>
         </section>
 
         <!-- Sección de Filtros y Búsqueda - SIEMPRE VISIBLE -->
         <section class="filters">
             <div class="filter-row">
-                <div class="filter-group">
-                    <label>Tipo:</label>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" onclick="filterByType('todos')">Todos</button>
-                        <button class="filter-btn" onclick="filterByType('desayunos')">Desayunos</button>
-                        <button class="filter-btn" onclick="filterByType('almuerzos')">Almuerzos</button>
-                        <button class="filter-btn" onclick="filterByType('cenas')">Cenas</button>
-                        <button class="filter-btn" onclick="filterByType('ensaladas')">Ensaladas</button>
-                        <button class="filter-btn" onclick="filterByType('sopas')">Sopas</button>
-                    </div>
-                </div>
+ 
                 
-                <div class="filter-group">
-                    <label>Dificultad:</label>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" onclick="filterByDifficulty('todas')">Todas</button>
-                        <button class="filter-btn" onclick="filterByDifficulty('Fácil')">Fácil</button>
-                        <button class="filter-btn" onclick="filterByDifficulty('Medio')">Medio</button>
-                        <button class="filter-btn" onclick="filterByDifficulty('Difícil')">Difícil</button>
-                    </div>
-                </div>
+
 
                 <div class="search-section">
                     <div class="filter-group">
-                        <label>Buscar por nombre:</label>
+                        <label><i class="fas fa-search"></i> Buscar por nombre:</label>
                         <input type="text" placeholder="Buscar comidas..." id="searchInput">
                     </div>
-                    <button onclick="searchMeals()">Buscar</button>
+                    <button onclick="searchMeals()"><i class="fas fa-search"></i> Buscar</button>
                 </div>
                 
                 <div class="search-section">
                     <div class="filter-group">
-                        <label>Buscar por ingredientes:</label>
+                        <label><i class="fas fa-list"></i> Buscar por ingredientes:</label>
                         <input type="text" placeholder="Ej: pollo, tomate, queso..." id="ingredientSearch">
                     </div>
-                    <button onclick="searchByIngredients()">Buscar Ingredientes</button>
+                    <button onclick="searchByIngredients()"><i class="fas fa-list-alt"></i> Buscar Ingredientes</button>
                 </div>
+                <div class="filters-actions">
+                    <button class="clear-filters-btn" onclick="clearActiveSearch()">
+                        <i class="fas fa-undo"></i> Limpiar Filtros
+                    </button>
+                </div>               
             </div>
         </section>
 
@@ -90,7 +128,7 @@
         <!-- Sección de detalle de receta (oculta inicialmente) -->
         <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
             <div class="container">
-                <button onclick="hideRecipeDetail()" class="back-btn">← Volver a los resultados</button>
+                <button onclick="hideRecipeDetail()" class="back-btn"><i class="fas fa-arrow-left"></i> Volver a los resultados</button>
                 <div id="recipeDetailContent"></div>
             </div>
         </section>
@@ -116,6 +154,12 @@
     <footer>
         <div class="container">
             <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
                 <p>&copy; 2024 Recetas Deliciosas - Sección Comidas. Todos los derechos reservados.</p>
             </div>
         </div>
@@ -129,6 +173,21 @@
         let currentPage = 1;
         const itemsPerPage = 8;
         let currentSearchResults = [];
+
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
 
         // Cargar comidas desde la base de datos
         function loadMealsFromDatabase() {
@@ -156,7 +215,9 @@
                         document.getElementById('resultsCount').textContent = 'No se encontraron recetas de comida';
                         document.getElementById('recipesGrid').innerHTML = `
                             <div class="no-results-message">
-                                <div class="no-results-icon">🍽️</div>
+                                <div class="no-results-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
                                 <h3>No hay comidas disponibles</h3>
                                 <p>No se encontraron recetas de comida en la base de datos.</p>
                             </div>
@@ -216,22 +277,22 @@
         function getMealIcon(title) {
             const titleLower = title.toLowerCase();
             
-            if (titleLower.includes('pasta') || titleLower.includes('espagueti') || titleLower.includes('lasaña')) return '🍝';
-            if (titleLower.includes('pollo') || titleLower.includes('pavo')) return '🍗';
-            if (titleLower.includes('pescado') || titleLower.includes('salmón') || titleLower.includes('atún')) return '🐟';
-            if (titleLower.includes('carne') || titleLower.includes('res') || titleLower.includes('cerdo')) return '🥩';
-            if (titleLower.includes('ensalada') || titleLower.includes('verdura')) return '🥗';
-            if (titleLower.includes('sopa') || titleLower.includes('caldo')) return '🍲';
-            if (titleLower.includes('arroz') || titleLower.includes('risotto')) return '🍚';
-            if (titleLower.includes('pizza')) return '🍕';
-            if (titleLower.includes('hamburguesa') || titleLower.includes('burger')) return '🍔';
-            if (titleLower.includes('taco') || titleLower.includes('burrito')) return '🌮';
-            if (titleLower.includes('sándwich') || titleLower.includes('sandwich')) return '🥪';
-            if (titleLower.includes('huevo') || titleLower.includes('omelet')) return '🍳';
-            if (titleLower.includes('queso')) return '🧀';
-            if (titleLower.includes('pan') || titleLower.includes('tostada')) return '🍞';
+            if (titleLower.includes('pasta') || titleLower.includes('espagueti') || titleLower.includes('lasaña')) return '<i class="fas fa-pasta"></i>';
+            if (titleLower.includes('pollo') || titleLower.includes('pavo')) return '<i class="fas fa-drumstick-bite"></i>';
+            if (titleLower.includes('pescado') || titleLower.includes('salmón') || titleLower.includes('atún')) return '<i class="fas fa-fish"></i>';
+            if (titleLower.includes('carne') || titleLower.includes('res') || titleLower.includes('cerdo')) return '<i class="fas fa-bacon"></i>';
+            if (titleLower.includes('ensalada') || titleLower.includes('verdura')) return '<i class="fas fa-salad"></i>';
+            if (titleLower.includes('sopa') || titleLower.includes('caldo')) return '<i class="fas fa-bowl-food"></i>';
+            if (titleLower.includes('arroz') || titleLower.includes('risotto')) return '<i class="fas fa-bowl-rice"></i>';
+            if (titleLower.includes('pizza')) return '<i class="fas fa-pizza-slice"></i>';
+            if (titleLower.includes('hamburguesa') || titleLower.includes('burger')) return '<i class="fas fa-burger"></i>';
+            if (titleLower.includes('taco') || titleLower.includes('burrito')) return '<i class="fas fa-taco"></i>';
+            if (titleLower.includes('sándwich') || titleLower.includes('sandwich')) return '<i class="fas fa-sandwich"></i>';
+            if (titleLower.includes('huevo') || titleLower.includes('omelet')) return '<i class="fas fa-egg"></i>';
+            if (titleLower.includes('queso')) return '<i class="fas fa-cheese"></i>';
+            if (titleLower.includes('pan') || titleLower.includes('tostada')) return '<i class="fas fa-bread-slice"></i>';
             
-            return '🍽️';
+            return '<i class="fas fa-utensils"></i>';
         }
 
         // Actualizar contador de resultados
@@ -415,19 +476,19 @@
                         <div class="recipe-content">
                             <h3>${receta.name}</h3>
                             <div class="recipe-meta">
-                                <span>⏱️ ${receta.time}</span>
-                                <span>🍽️ ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                                <span><i class="far fa-clock"></i> ${receta.time}</span>
+                                <span><i class="fas fa-utensils"></i> ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
                             </div>
                             <p class="recipe-description">${receta.description}</p>
                             <div class="recipe-ingredients">
-                                <h4>Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${receta.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})">❤️</button>
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})"><i class="fas fa-eye"></i> Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})"><i class="fas fa-heart"></i></button>
                             </div>
                         </div>
                     </div>
@@ -438,7 +499,9 @@
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
                         <h3>No se encontraron comidas</h3>
                         <p>No hay comidas que coincidan con "${searchTerm}"</p>
                     </div>
@@ -468,32 +531,32 @@
                         <div class="recipe-content">
                             <h3>${recipe.name}</h3>
                             <div class="recipe-meta">
-                                <span>⏱️ ${recipe.time}</span>
-                                <span>🍽️ ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                                <span><i class="far fa-clock"></i> ${recipe.time}</span>
+                                <span><i class="fas fa-utensils"></i> ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
                                 ${recipe.matchedCount && recipe.totalSearchIngredients ? 
-                                    `<span>✅ ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
-                                    (recipe.matchPercentage ? `<span>✅ ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
+                                    `<span><i class="fas fa-check-circle"></i> ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
+                                    (recipe.matchPercentage ? `<span><i class="fas fa-check-circle"></i> ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
                                 }
                             </div>
                             <p class="recipe-description">${recipe.description}</p>
                             
                             ${recipe.matchedIngredients && recipe.matchedIngredients.length > 0 ? `
                             <div class="recipe-ingredients">
-                                <h4>🎯 Ingredientes encontrados:</h4>
+                                <h4><i class="fas fa-bullseye"></i> Ingredientes encontrados:</h4>
                                 <div class="matched-ingredients">
                                     ${recipe.matchedIngredients.slice(0, 3).map(ing => 
                                         `<span>${ing}</span>`
                                     ).join('')}
                                     ${recipe.matchedIngredients.length > 3 ? '...' : ''}
                                 </div>
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             ` : `
                             <div class="recipe-ingredients">
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
@@ -501,8 +564,8 @@
                             `}
                             
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})"><i class="fas fa-eye"></i> Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})"><i class="fas fa-heart"></i></button>
                             </div>
                         </div>
                     </div>
@@ -522,7 +585,9 @@
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
                         <h3>No se encontraron recetas</h3>
                         <p>No hay comidas que contengan los ingredientes: "${searchIngredients.join(', ')}"</p>
                         <div style="margin-top: 20px;">
@@ -573,7 +638,7 @@
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${receta.ingredients.map(ingredient => 
                                     `<p>• ${ingredient}</p>`
@@ -582,7 +647,7 @@
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-utensils"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
@@ -624,7 +689,7 @@
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${meal.ingredients.map(ingredient => 
                                     `<p>• ${ingredient}</p>`
@@ -633,7 +698,7 @@
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-utensils"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
@@ -663,19 +728,19 @@
                     <div class="recipe-content">
                         <h3>${meal.name}</h3>
                         <div class="recipe-meta">
-                            <span>⏱️ ${meal.time}</span>
-                            <span>🍽️ ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}</span>
+                            <span><i class="far fa-clock"></i> ${meal.time}</span>
+                            <span><i class="fas fa-utensils"></i> ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}</span>
                         </div>
                         <p class="recipe-description">${meal.description}</p>
                         <div class="recipe-ingredients">
-                            <h4>Ingredientes principales:</h4>
+                            <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                             <div class="ingredients-list">
                                 ${meal.ingredients.slice(0, 3).join(', ')}...
                             </div>
                         </div>
                         <div class="recipe-actions">
-                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${meal.id})">Ver Receta</button>
-                            <button class="btn-secondary" onclick="addToFavorites(${meal.id})">❤️</button>
+                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${meal.id})"><i class="fas fa-eye"></i> Ver Receta</button>
+                            <button class="btn-secondary" onclick="addToFavorites(${meal.id})"><i class="fas fa-heart"></i></button>
                         </div>
                     </div>
                 </div>
@@ -715,7 +780,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    ← Anterior
+                    <i class="fas fa-arrow-left"></i> Anterior
                 </button>
             `;
             
@@ -730,7 +795,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    Siguiente →
+                    Siguiente <i class="fas fa-arrow-right"></i>
                 </button>
             `;
             
@@ -756,7 +821,7 @@
 
         function addToFavorites(mealId) {
             const meal = allMeals.find(d => d.id === mealId);
-            alert(`¡${meal.name} agregado a tus favoritos! 💖`);
+            alert(`¡${meal.name} agregado a tus favoritos! <i class="fas fa-heart"></i>`);
             event.stopPropagation();
         }
 
@@ -771,6 +836,17 @@
             if (e.key === 'Enter') {
                 searchByIngredients();
             }
+        });
+
+        // Animación para las tarjetas al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const recipeCards = document.querySelectorAll('.recipe-card');
+            recipeCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
         });
 
         // Cargar comidas desde la base de datos al iniciar

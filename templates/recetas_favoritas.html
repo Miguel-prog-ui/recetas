@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetas Favoritas - Recetas Deliciosas</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='recetas_favoritas.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <a href="/" class="home-btn">
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
+                    </a>
+                    <div class="logo-text">Recetas Deliciosas</div>
+                </div>
+                <div class="header-right">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Buscar recetas..." id="searchInput">
+                        <button onclick="searchRecipes()"><i class="fas fa-search"></i></button>
+                    </div>
+                    {% if session.usuario %}
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ usuario[2] if usuario else 'Email no disponible' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Tus Recetas Favoritas</h1>
+                <p>Aquí encontrarás todas las recetas que has marcado como favoritas</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="recipes-section">
+            <div class="container">
+                <h2 class="section-title">Mis Favoritas</h2>
+                
+                {% if recetas and recetas|length > 0 %}
+                <div class="recipes-grid">
+                    {% for receta in recetas %}
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            {% if receta[6] %}
+                            <img src="{{ receta[6] }}" alt="{{ receta[1] }}">
+                            {% else %}
+                            <div class="recipe-placeholder">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            {% endif %}
+                            <div class="favorite-badge active">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="recipe-category">
+                                <span>{{ receta[5] or 'General' }}</span>
+                            </div>
+                        </div>
+                        <div class="recipe-content">
+                            <h4>{{ receta[1] }}</h4>
+                            <div class="recipe-meta">
+                                <span class="likes-count">
+                                    <i class="fas fa-heart"></i> 
+                                    <!-- FUTURO: Mostrar likes reales {{ receta[7] or 0 }} -->
+                                    0 likes
+                                </span>
+                                <span class="time-info">
+                                    <i class="far fa-clock"></i> 30 min
+                                </span>
+                            </div>
+                            <p class="recipe-description">{{ receta[2][:100] }}{% if receta[2]|length > 100 %}...{% endif %}</p>
+                            
+                            <div class="recipe-actions">
+                                <button class="action-btn view-btn" onclick="event.stopPropagation()">
+                                    <i class="fas fa-eye"></i> Ver Receta
+                                </button>
+                                <button class="action-btn like-btn-fav" onclick="event.stopPropagation(); handleLikeFav()">
+                                    <i class="fas fa-thumbs-up"></i> Like
+                                </button>
+                                <button class="action-btn remove-fav-btn" onclick="event.stopPropagation()">
+                                    <i class="fas fa-times"></i> Quitar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-results-message">
+                    <div class="no-results-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Aún no tienes recetas favoritas</h3>
+                    <p>Cuando marques recetas como favoritas, aparecerán aquí</p>
+                    <a href="/" class="submit-btn">
+                        <i class="fas fa-utensils"></i> Explorar Recetas
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
+                <p>&copy; 2024 Recetas Deliciosas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Funciones de búsqueda
+        function searchRecipes() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            if (!searchTerm) {
+                alert('Por favor, ingresa un término de búsqueda');
+                return;
+            }
+            
+            window.location.href = `/buscar_recetas?q=${encodeURIComponent(searchTerm)}`;
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchRecipes();
+            }
+        });
+
+        // SISTEMA DE LIKES para recetas favoritas - Solo diseño
+        function handleLikeFav() {
+            // FUTURO: Implementar lógica real de likes
+            // fetch(`/dar_like/${recipeId}`, { method: 'POST' })
+            // .then(response => response.json())
+            // .then(data => {
+            //     actualizarLikesEnReceta(recipeId, data.nuevoTotal);
+            // });
+            
+            alert('Sistema de likes estará disponible próximamente');
+            
+            // Efecto visual temporal
+            const likeBtn = event.target.closest('.like-btn-fav');
+            likeBtn.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                likeBtn.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Animación para las tarjetas de recetas al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const recipeCards = document.querySelectorAll('.recipe-card');
+            recipeCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+
+        // Simular acciones de botones
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                alert('Función de ver receta disponible próximamente');
+            });
+        });
+
+        document.querySelectorAll('.remove-fav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                alert('Función de quitar de favoritos disponible próximamente');
+            });
+        });
+    </script>
+</body>
+</html>
