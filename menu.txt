@@ -1,0 +1,250 @@
+1. HTML - Estructura del Menú de Usuario
+html
+{% if session.usuario %}
+<div class="user-menu-container">
+    <div class="user-avatar" onclick="toggleUserMenu()">
+        <div class="avatar-circle">
+            <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+        </div>
+        <span class="user-name">{{ session.usuario }}</span>
+        <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+    </div>
+    <div class="user-dropdown-menu" id="userDropdownMenu">
+        <div class="dropdown-header">
+            <div class="user-info-dropdown">
+                <div class="avatar-circle small">
+                    <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                </div>
+                <div class="user-details">
+                    <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                    <span class="user-email">{{ session.usuario }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a href="{{ url_for('perfil') }}" class="dropdown-item">
+            <span class="item-icon"><i class="fas fa-user"></i></span>
+            <span class="item-text">Mi Perfil</span>
+        </a>
+        <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+            <span class="item-icon"><i class="fas fa-cog"></i></span>
+            <span class="item-text">Editar Perfil</span>
+        </a>
+        <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+            <span class="item-icon"><i class="fas fa-heart"></i></span>
+            <span class="item-text">Recetas Favoritas</span>
+        </a>
+        <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+            <span class="item-icon"><i class="fas fa-book"></i></span>
+            <span class="item-text">Mis Recetas</span>
+        </a>
+        <div class="dropdown-divider"></div>
+        <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+            <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+            <span class="item-text">Cerrar Sesión</span>
+        </a>
+    </div>
+</div>
+{% else %}
+<a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
+{% endif %}
+2. JavaScript - Funcionalidad del Menú
+javascript
+// 🔥 FUNCIONES DEL MENÚ DE USUARIO
+function toggleUserMenu() {
+    const menu = document.getElementById('userDropdownMenu');
+    menu.classList.toggle('active');
+}
+
+// Cerrar el menú al hacer clic fuera de él
+document.addEventListener('click', function(event) {
+    const userMenu = document.querySelector('.user-menu-container');
+    const menu = document.getElementById('userDropdownMenu');
+    
+    if (userMenu && !userMenu.contains(event.target)) {
+        menu.classList.remove('active');
+    }
+});
+
+// Cerrar menú al hacer scroll
+window.addEventListener('scroll', function() {
+    const menu = document.getElementById('userDropdownMenu');
+    if (menu) {
+        menu.classList.remove('active');
+    }
+});
+3. CSS - Estilos del Menú (debe estar en presentacion.css)
+css
+/* Estilos para el menú de usuario */
+.user-menu-container {
+    position: relative;
+}
+
+.user-avatar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-avatar:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.avatar-circle.small {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+}
+
+.user-name {
+    color: #333;
+    font-weight: 500;
+}
+
+.dropdown-arrow {
+    color: #666;
+    transition: transform 0.3s ease;
+}
+
+.user-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 280px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.user-dropdown-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(5px);
+}
+
+.dropdown-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 12px 12px 0 0;
+}
+
+.user-info-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.welcome-text {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.user-email {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #f0f0f0;
+    margin: 8px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: #f8f9fa;
+}
+
+.item-icon {
+    width: 20px;
+    color: #667eea;
+    text-align: center;
+}
+
+.item-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.logout-item {
+    color: #e74c3c;
+}
+
+.logout-item .item-icon {
+    color: #e74c3c;
+}
+
+.login-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+4. Rutas Flask Utilizadas en el Menú
+python
+# Estas rutas deben existir en app.py
+@app.route('/perfil')
+def perfil():
+    # Muestra el perfil del usuario
+
+@app.route('/editar_perfil')
+def editar_perfil():
+    # Permite editar el perfil
+
+@app.route('/recetas_favoritas')
+def recetas_favoritas():
+    # Muestra recetas favoritas
+
+@app.route('/mis_recetas')
+def mis_recetas():
+    # Muestra recetas del usuario
+
+@app.route('/logout')
+def logout():
+    # Cierra la sesión

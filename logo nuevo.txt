@@ -1,0 +1,70 @@
+Superior
+1. HTML - Estructura del Logo/Home
+html
+<div class="logo-section">
+    <a href="/acceso_publico" class="home-btn">
+        <span class="home-icon"><i class="fas fa-home"></i></span>
+    </a>
+    <div class="logo-text">Recetas Deliciosas</div>
+</div>
+2. CSS - Estilos (debe estar en presentacion.css)
+css
+/* Estilos para la sección del logo/home */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.home-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.home-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.home-icon {
+    color: white;
+    font-size: 18px;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+3. JavaScript - Funcionalidad (si existe)
+En este código no hay funciones JavaScript específicas para la "casita", pero si tuviera alguna funcionalidad adicional, estaría aquí:
+
+javascript
+// No hay funciones específicas para el home en este código
+// Solo funciona como enlace normal a "/acceso_publico"
+4. Header Completo Donde se Encuentra
+html
+<header>
+    <div class="container">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/acceso_publico" class="home-btn">
+                    <span class="home-icon"><i class="fas fa-home"></i></span>
+                </a>
+                <div class="logo-text">Recetas Deliciosas</div>
+            </div>
+            <div class="header-right">
+                <!-- Resto del contenido del header -->
+            </div>
+        </div>
+    </div>
+</header>
