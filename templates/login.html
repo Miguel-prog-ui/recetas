@@ -1,77 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login - RECETA.IO</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style login.css') }}">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" href="{{ url_for('static', filename='imagenes/logo.png') }}" type="image/x-icon">
-
 </head>
-<style>
-    
-</style>
 <body>
+<header class="header">
+    <div class="menu containerr">
+        <a href="#" class="logo">
+            <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="RECETA.IO Logo" class="logo-large">
+        </a>
+        <input type="checkbox" id="menu">
+        <label for="menu">
+            <img src="{{ url_for('static', filename='imagenes/menu.png') }}" class="menu-icono" alt="Menú">
+        </label>
+        <nav class="navbar">
+            <ul>
+                <li>
+                    <a href="/acceso_publico" class="btn-guest">
+                        <span class="btn-icon">👤</span>
+                        <span class="btn-text">Continuar como invitado</span>
+                        <span class="btn-hover-effect"></span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
 
-    <header class="header">
-        <div class="menu containerr">
-            <a href="#" class="logo">
-                <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt=" RECETA.IO Logo" class="logo-large">
-            </a>
-            <input type="checkbox" id="menu">
-            <label for="menu">
-                <img src="imagenes/menu.png" class="menu-icono" alt="">
-            </label>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="/">Inicio</a></li>
-                    <!-- <li><a href="#">Servicios</a></li>
-                    <li><a href="#">Productos</a></li> -->
-                    <!-- <li><a href="/contacto">Contacto</a></li> -->
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <div class="container ">
+    <div class="container">
         <div class="curver-shape"></div>
         <div class="curver-shape2"></div>
 
         <div class="form-box Login">
-            <h2 class="animation" style="--D:0; --S:21;">Inicio</h2>
+            <h2 class="animation" style="--D:0; --S:21;">Inicio de Sesión</h2>
             <p class="bueno animation" style="--D:0; --S:21;"> 
-                {% if mensaje%}
-                {{ mensaje}}
-                {% endif%}</p>
+                {% if mensaje %}
+                {{ mensaje }}
+                {% endif %}
+            </p>
             <p class="malo animation" style="--D:0; --S:21;">
-                {% if mensaje_malo%}
-                {{ mensaje_malo}}
-                {% endif%}
+                {% if mensaje_malo %}
+                {{ mensaje_malo }}
+                {% endif %}
             </p>
             <form action="/acceso_login" method="post">
                 <div class="input-box animation" style="--D:1; --S:22;">
-                    <input type="email" name="txt_correo" required >
-                    <label for="txt_correo">correo electronico</label>
+                    <input type="email" name="txt_correo" required>
+                    <label for="txt_correo">Correo electrónico</label>
                     <i class='bx bxs-envelope'></i>
                 </div>
                 <div class="input-box animation" style="--D:2; --S:23;">
-                    <input type="password" name="txt_password" required >
-                    <label for="txt_password">contraseña</label>
+                    <input type="password" name="txt_password" required>
+                    <label for="txt_password">Contraseña</label>
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <div class="input-box animation" style="--D:3; --S:24;">
-                    <button class="btn" type="submit">iniciar sesión</button>
+                    <button class="btn" type="submit">Iniciar sesión</button>
                 </div>
                 <div class="regi-link animation" style="--D:4; --S:25;">
-                    <p>¿No tienes una cuenta? <a href="#" class="SignUpLink">crear una</a></p>
+                    <p>¿No tienes una cuenta? <a href="#" class="SignUpLink">Crear una</a></p>
                 </div>
             </form>
         </div>
 
         <div class="info-content Login">
             <h2 class="animation" style="--D:0; --S:20;">¡BIENVENIDO!</h2>
-            <p class="animation" style="--D:1; --S:21;">Ingresa tus datos para ingresar a nuestro </p>
+            <p class="animation" style="--D:1; --S:21;">Ingresa tus datos para acceder a todas las funciones</p>
+            <p class="animation" style="--D:2; --S:22;">O continúa como invitado </p>
+            <p class="animation" style="--D:2; --S:22;">para explorar</p>
+
         </div>
 
         <div class="form-box Register">
@@ -79,21 +81,21 @@
             <form action="/crear_cuenta" method="post">
                 <div class="input-box animation" style="--li:18; --S:1;">
                     <input type="text" name="txt_usuario" required>
-                    <label for="txt_correo">nombre de usuario</label>
+                    <label for="txt_usuario">Nombre de usuario</label>
                     <i class='bx bxs-user'></i>
                 </div>
                 <div class="input-box animation" style="--li:19; --S:2;">
                     <input type="email" name="txt_correo" required>
-                    <label for="correo">correo electronico</label>
+                    <label for="txt_correo">Correo electrónico</label>
                     <i class='bx bxs-envelope'></i>
                 </div>
                 <div class="input-box animation" style="--li:20; --S:3;">
                     <input type="password" name="txt_password" required>
-                    <label for="contraseña">contraseña</label>
+                    <label for="txt_password">Contraseña</label>
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <div class="input-box animation" style="--li:21; --S:4;">
-                    <button class="btn" type="submit">registrarse</button>
+                    <button class="btn" type="submit">Registrarse</button>
                 </div>
                 <div class="regi-link animation" style="--li:22; --S:5;">
                     <p>¿Ya tienes una cuenta? <a href="#" class="SignInLink">Iniciar sesión</a></p>
@@ -103,7 +105,7 @@
 
         <div class="info-content Register">
             <h2 class="animation" style="--li:17; --S:0;">¡BIENVENIDO!</h2>
-            <p class="animation" style="--li:18; --S:1;">Registrate para ser parte de nuestra familia</p>
+            <p class="animation" style="--li:18; --S:1;">Regístrate para ser parte de nuestra familia</p>
         </div>
     </div>
 
@@ -113,11 +115,13 @@
             const LoginLink = document.querySelector('.SignInLink');
             const RegisterLink = document.querySelector('.SignUpLink');
         
-            RegisterLink.addEventListener('click', () => {
+            RegisterLink.addEventListener('click', (e) => {
+                e.preventDefault();
                 container.classList.add('active');
             });
         
-            LoginLink.addEventListener('click', () => {
+            LoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
                 container.classList.remove('active');
             });
         });

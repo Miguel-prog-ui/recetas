@@ -12,17 +12,12 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                    <a href="/" class="home-btn">
+                    <a href="/acceso_publico" class="home-btn">
                         <span class="home-icon"><i class="fas fa-home"></i></span>
                     </a>
                     <div class="logo-text">Recetas Deliciosas</div>
                 </div>
                 <div class="header-right">
-                    <div class="search-bar">
-                        <input type="text" id="searchInput" placeholder="Buscar recetas...">
-                        <button onclick="searchRecipes()"><i class="fas fa-search"></i></button>
-                    </div>
-                   
                     {% if session.usuario %}
                     <div class="user-menu-container">
                         <div class="user-avatar" onclick="toggleUserMenu()">
@@ -90,22 +85,6 @@
             </div>
         </section>
 
-        <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
-        <section id="searchResultsSection" class="search-results-section" style="display: none;">
-            <div class="container">
-                <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
-                <div class="recipes-grid" id="searchResultsGrid"></div>
-            </div>
-        </section>
-
-        <!-- Sección de detalle de receta (oculta inicialmente) -->
-        <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
-            <div class="container">
-                <button onclick="hideRecipeDetail()" class="back-btn"><i class="fas fa-arrow-left"></i> Volver a los resultados</button>
-                <div id="recipeDetailContent"></div>
-            </div>
-        </section>
-
         <!-- Sección de Categorías -->
         <section class="categories">
             <h2 class="section-title">Categorías</h2>
@@ -144,7 +123,7 @@
                 
                 <a href="{{ url_for('mostrar_alta_cocina') }}" class="category-card" onclick="selectCategory('alta-cocina', this)">
                     <div class="category-icon">
-                        <i class="fas fa-chef-hat"></i>
+                        <i class="fas fa-crown"></i>
                     </div>
                     <h3>Alta Cocina</h3>
                     <p>Recetas gourmet y técnicas culinarias para los más exigentes</p>
@@ -288,49 +267,8 @@
         };
 
         let currentCategory = null;
-        let currentSearchResults = [];
-
-        function handleHomeClick(event) {
-            if (hasActiveSearch()) {
-                event.preventDefault();
-                clearActiveSearch();
-            }
-        }
-
-        function handleSessionAction(event) {
-            if (hasActiveSearch()) {
-                event.preventDefault();
-                clearActiveSearch();
-                setTimeout(() => {
-                    window.location.href = event.target.href;
-                }, 100);
-            }
-        }
-
-        function clearActiveSearch() {
-            hideSearchResults();
-            hideRecipeDetail();
-            document.getElementById('searchInput').value = '';
-            currentSearchResults = [];
-            
-            document.querySelector('.categories').style.display = 'block';
-            document.querySelector('.recipes-section').style.display = 'block';
-            
-            const firstCategory = document.querySelector('.category-card');
-            if (firstCategory) {
-                selectCategory('bebidas', firstCategory);
-            }
-            
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
 
         function selectCategory(category, element) {
-            hideSearchResults();
-            hideRecipeDetail();
-            
             document.querySelectorAll('.category-card').forEach(card => {
                 card.classList.remove('active');
             });
@@ -385,233 +323,6 @@
             alert(`¡Próximamente podrás ver la receta completa de: ${recipeName}!`);
         }
 
-        function searchRecipes() {
-            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-            
-            if (!searchTerm) {
-                alert('Por favor, ingresa un término de búsqueda');
-                return;
-            }
-            
-            fetch(`/buscar_recetas?q=${encodeURIComponent(searchTerm)}`)
-                .then(response => response.json())
-                .then(data => {
-                    currentSearchResults = data.recetas;
-                    displaySearchResults(data.recetas, searchTerm);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al buscar recetas');
-                });
-        }
-
-        function displaySearchResults(recetas, searchTerm) {
-            const searchResultsGrid = document.getElementById('searchResultsGrid');
-            const searchResultsTitle = document.getElementById('searchResultsTitle');
-            const searchResultsSection = document.getElementById('searchResultsSection');
-            
-            hideRecipeDetail();
-            
-            if (recetas.length > 0) {
-                searchResultsGrid.innerHTML = recetas.map(receta => `
-                    <div class="recipe-card" onclick="showRecipeDetail(${receta.id})">
-                        <div class="recipe-image">
-                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.title}" style="width:100%;height:100%;object-fit:cover;">` : '<span class="recipe-icon"><i class="fas fa-utensils"></i></span>'}
-                        </div>
-                        <div class="recipe-content">
-                            <h4>${receta.title}</h4>
-                            <div class="recipe-meta">
-                                <span><i class="fas fa-folder"></i> ${receta.categoria || 'General'}</span>
-                            </div>
-                            <div class="recipe-section">
-                                <h5><i class="fas fa-list"></i> Ingredientes:</h5>
-                                <p>${receta.ingredients.substring(0, 100)}${receta.ingredients.length > 100 ? '...' : ''}</p>
-                            </div>
-                            <div class="recipe-section">
-                                <h5><i class="fas fa-chef-hat"></i> Preparación:</h5>
-                                <p>${receta.steps.substring(0, 150)}${receta.steps.length > 150 ? '...' : ''}</p>
-                            </div>
-                            
-                            <!-- SISTEMA DE LIKES en resultados de búsqueda -->
-                            <div class="recipe-actions-preview">
-                                <div class="like-section">
-                                    <button class="like-btn" onclick="event.stopPropagation(); handleLike('${receta.title}')">
-                                        <span class="like-icon"><i class="fas fa-heart"></i></span>
-                                        <span class="like-count">0</span>
-                                    </button>
-                                    <span class="like-text">Me gusta</span>
-                                </div>
-                                <div class="favorite-section">
-                                    <button class="favorite-btn" onclick="event.stopPropagation(); handleFavorite('${receta.title}')">
-                                        <span class="favorite-icon"><i class="fas fa-star"></i></span>
-                                    </button>
-                                    <span class="favorite-text">Favorito</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-                
-                searchResultsTitle.textContent = `Resultados para: "${searchTerm}" (${recetas.length} encontrados)`;
-                
-            } else {
-                searchResultsGrid.innerHTML = `
-                    <div class="no-results-message">
-                        <div class="no-results-icon"><i class="fas fa-search"></i></div>
-                        <h3>No se encontraron recetas</h3>
-                        <p>No hay recetas que coincidan con "${searchTerm}"</p>
-                    </div>
-                `;
-            }
-            
-            searchResultsSection.style.display = 'block';
-            
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        function hideSearchResults() {
-            const searchResultsSection = document.getElementById('searchResultsSection');
-            searchResultsSection.style.display = 'none';
-            currentSearchResults = [];
-            document.getElementById('searchInput').value = '';
-        }
-
-        function showRecipeDetail(recipeId) {
-            const receta = currentSearchResults.find(r => r.id === recipeId);
-            
-            if (!receta) return;
-            
-            const recipeDetailContent = document.getElementById('recipeDetailContent');
-            const recipeDetailSection = document.getElementById('recipeDetailSection');
-            const searchResultsSection = document.getElementById('searchResultsSection');
-            
-            searchResultsSection.style.display = 'none';
-            recipeDetailSection.style.display = 'block';
-            
-            const pasosProcesados = procesarPasos(receta.steps);
-            
-            recipeDetailContent.innerHTML = `
-                <div class="recipe-detail-card">
-                    <div class="recipe-detail-header">
-                        <h2>${receta.title}</h2>
-                        ${receta.categoria ? `<span class="recipe-category-badge">${receta.categoria}</span>` : ''}
-                    </div>
-                    
-                    ${receta.imagen ? `
-                    <div class="recipe-detail-image">
-                        <img src="${receta.imagen}" alt="${receta.title}">
-                    </div>
-                    ` : '<div class="recipe-detail-image" style="background: linear-gradient(135deg, #E27D60, #FFB347); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;"><i class="fas fa-utensils"></i></div>'}
-                    
-                    <div class="recipe-detail-content">
-                        <div class="recipe-detail-section">
-                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
-                            <div class="ingredients-list">
-                                ${receta.ingredients.split('\n').map(ingredient => 
-                                    ingredient.trim() ? `<p>• ${ingredient}</p>` : ''
-                                ).join('')}
-                            </div>
-                        </div>
-                        
-                        <div class="recipe-detail-section">
-                            <h3><i class="fas fa-chef-hat"></i> Preparación</h3>
-                            <div class="steps-list">
-                                ${pasosProcesados}
-                            </div>
-                        </div>
-                        
-                        <!-- SISTEMA DE LIKES en detalle de receta -->
-                        <div class="recipe-detail-actions">
-                            <button class="like-btn-detail" onclick="handleLike('${receta.title}')">
-                                <span class="like-icon"><i class="fas fa-heart"></i></span>
-                                <span class="like-text">Me gusta</span>
-                                <span class="like-count">0</span>
-                            </button>
-                            <button class="favorite-btn-detail" onclick="handleFavorite('${receta.title}')">
-                                <span class="favorite-icon"><i class="fas fa-star"></i></span>
-                                <span class="favorite-text">Agregar a Favoritos</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        function procesarPasos(steps) {
-            if (!steps) return '<p>No hay instrucciones disponibles.</p>';
-            
-            const lineas = steps.split('\n');
-            let pasosHTML = '';
-            let numeroPaso = 1;
-            
-            lineas.forEach(linea => {
-                linea = linea.trim();
-                if (linea) {
-                    const tieneNumeracion = /^\d+[\.:\s]/.test(linea) || /^Paso\s*\d+/i.test(linea);
-                    
-                    let textoLimpio = linea;
-                    
-                    if (tieneNumeracion) {
-                        textoLimpio = linea.replace(/^\d+[\.:\s]*/, '')
-                                          .replace(/^Paso\s*\d+[\.:\s]*/i, '')
-                                          .trim();
-                    }
-                    
-                    if (!textoLimpio) {
-                        textoLimpio = linea;
-                    }
-                    
-                    pasosHTML += `<p><strong>${numeroPaso}.</strong> ${textoLimpio}</p>`;
-                    numeroPaso++;
-                }
-            });
-            
-            return pasosHTML || '<p>No hay instrucciones disponibles.</p>';
-        }
-
-        function hideRecipeDetail() {
-            const recipeDetailSection = document.getElementById('recipeDetailSection');
-            const searchResultsSection = document.getElementById('searchResultsSection');
-            
-            recipeDetailSection.style.display = 'none';
-            
-            if (currentSearchResults.length > 0) {
-                searchResultsSection.style.display = 'block';
-                
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            }
-        }
-
-        function hasActiveSearch() {
-            return currentSearchResults.length > 0 || 
-                   document.getElementById('searchResultsSection').style.display !== 'none' ||
-                   document.getElementById('recipeDetailSection').style.display !== 'none';
-        }
-
-        window.addEventListener('load', () => {
-            const firstCategory = document.querySelector('.category-card');
-            if (firstCategory) {
-                selectCategory('bebidas', firstCategory);
-            }
-        });
-
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchRecipes();
-            }
-        });
-
         // Animación para las tarjetas al cargar
         document.addEventListener('DOMContentLoaded', function() {
             const categoryCards = document.querySelectorAll('.category-card');
@@ -621,6 +332,12 @@
                     card.style.transform = 'translateY(0)';
                 }, 200 * index);
             });
+
+            // Cargar la primera categoría por defecto
+            const firstCategory = document.querySelector('.category-card');
+            if (firstCategory) {
+                selectCategory('bebidas', firstCategory);
+            }
         });
     </script>
 </body>

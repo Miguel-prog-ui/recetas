@@ -50,8 +50,19 @@ mysql = MySQL(app)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Configurar las rutas manteniendo los nombres originales
+# En app.py, modifica la ruta principal
 @app.route('/')
 def mostrar_presentacion():
+    # Redirigir al login si no hay sesión activa
+    if 'usuario' not in session:
+        return redirect('/login')
+    return func_presentacion()
+
+# Agregar una nueva ruta para acceso sin login
+@app.route('/acceso_publico')
+def acceso_publico():
+    # Establecer una sesión temporal para usuario público
+    session['usuario_publico'] = True
     return func_presentacion()
 
 @app.route('/bebidas')

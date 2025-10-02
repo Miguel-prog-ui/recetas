@@ -12,7 +12,7 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                    <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
+                    <a href="/acceso_publico" class="home-btn">
                         <span class="home-icon"><i class="fas fa-home"></i></span>
                     </a>
                     <div class="logo-text">Recetas Deliciosas</div>
@@ -90,30 +90,7 @@
             <div class="filters-card">
                 <h2 class="filters-title"><i class="fas fa-filter"></i> Filtros y Búsqueda</h2>
                 
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label><i class="fas fa-tags"></i> Tipo de Bebida:</label>
-                        <div class="filter-buttons">
-                            <button class="filter-btn active" onclick="filterByType('todos')">Todos</button>
-                            <button class="filter-btn" onclick="filterByType('clasicos')">Clásicos</button>
-                            <button class="filter-btn" onclick="filterByType('tropicales')">Tropicales</button>
-                            <button class="filter-btn" onclick="filterByType('shots')">Shots</button>
-                            <button class="filter-btn" onclick="filterByType('digestivos')">Digestivos</button>
-                            <button class="filter-btn" onclick="filterByType('cervezas')">Cervezas</button>
-                            <button class="filter-btn" onclick="filterByType('vinos')">Vinos</button>
-                        </div>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label><i class="fas fa-fire"></i> Intensidad:</label>
-                        <div class="filter-buttons">
-                            <button class="filter-btn active" onclick="filterByIntensity('todas')">Todas</button>
-                            <button class="filter-btn" onclick="filterByIntensity('Suave')">Suave</button>
-                            <button class="filter-btn" onclick="filterByIntensity('Medio')">Medio</button>
-                            <button class="filter-btn" onclick="filterByIntensity('Fuerte')">Fuerte</button>
-                        </div>
-                    </div>
-                </div>
+               
 
                 <div class="search-row">
                     <div class="search-group">
