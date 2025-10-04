@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alta Cocina - Gastronomía Gourmet</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='alta_cocina.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    
+                    <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
+                        <span class="home-icon">🏠</span>
+                    </a>
+                   
+                    <div class="logo-text">Alta Cocina Gourmet</div>
+                </div>
+                <div class="user-info">
+                    {% if session.usuario %}
+                    <span class="user-name">👤 {{ session.usuario }}</span>
+                    {% else %}
+                    <span class="user-name">👤 Usuario sin registrar</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <span class="hero-icon">🍽️</span>
+            <h1>Gastronomía Gourmet Michelin</h1>
+            <p>Descubre el arte culinario en su máxima expresión. Recetas de chefs estrella Michelin con técnicas refinadas, ingredientes premium y presentaciones espectaculares que transforman cada plato en una obra maestra gastronómica.</p>
+        </section>
+
+       
+        <section class="dishes-section" id="dishesMainSection">
+            <div class="section-header">
+                <h2 class="section-title">Creaciones Michelin</h2>
+                <span class="results-count" id="resultsCount">Cargando platos gourmet...</span>
+            </div>
+            
+            <div class="dishes-grid" id="dishesGrid">
+               
+            </div>
+            
+            
+            <div class="pagination" id="pagination">
+               
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 Alta Cocina - Gastronomía Gourmet Michelin. Todos los derechos reservados. El arte culinario en su máxima expresión.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let allDishes = [];
+        let filteredDishes = [];
+        let currentTypeFilter = 'todos';
+        let currentDifficultyFilter = 'todas';
+        let currentPage = 1;
+        const itemsPerPage = 8;
+        let currentSearchResults = [];
+
+        
+        function loadDishesFromDatabase() {
+            
+            fetch('/buscar_recetas_michelin')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.recetas && data.recetas.length > 0) {
+                        allDishes = data.recetas.map(receta => ({
+                            id: receta.id,
+                            name: receta.title,
+                            type: getDishType(receta.title, receta.ingredients),
+                            time: "45 min",
+                            difficulty: getDishDifficulty(receta.title, receta.ingredients),
+                            icon: getDishIcon(receta.title),
+                            description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                            imagen: receta.imagen || '',
+                            chef: receta.chef || 'Chef Michelin',
+                            precio: receta.precio_venta_sugerido || '',
+                            alergenos: receta.alergenos || ''
+                        }));
+                        
+                        filteredDishes = [...allDishes];
+                        loadDishes();
+                        updateResultsCount();
+                    } else {
+                        document.getElementById('resultsCount').textContent = 'No se encontraron platos gourmet';
+                        document.getElementById('dishesGrid').innerHTML = `
+                            <div class="no-results-message">
+                                <div class="no-results-icon">🍽️</div>
+                                <h3>No hay platos disponibles</h3>
+                                <p>No se encontraron recetas de alta cocina en la base de datos.</p>
+                                <p style="margin-top: 10px; font-size: 0.9rem; color: #d4af37;">
+                                    Verifica que la tabla 'michelin' exista en la base de datos.
+                                </p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('resultsCount').textContent = 'Error cargando platos';
+                    document.getElementById('dishesGrid').innerHTML = `
+                        <div class="no-results-message">
+                            <div class="no-results-icon">❌</div>
+                            <h3>Error de conexión</h3>
+                            <p>No se pudo conectar con la base de datos.</p>
+                            <p style="margin-top: 10px; font-size: 0.9rem; color: #d4af37;">
+                                Error: ${error.message}
+                            </p>
+                        </div>
+                    `;
+                });
+        }
+
+        
+        function getDishType(title, ingredients) {
+            const titleLower = title.toLowerCase();
+            const ingredientsLower = ingredients ? ingredients.toLowerCase() : '';
+            
+            if (titleLower.includes('entrante') || titleLower.includes('aperitivo') || 
+                titleLower.includes('foie') || titleLower.includes('caviar') || titleLower.includes('tartar')) {
+                return 'entrantes';
+            } else if (titleLower.includes('principal') || titleLower.includes('plato principal') || 
+                      titleLower.includes('risotto') || titleLower.includes('pasta') || titleLower.includes('paella')) {
+                return 'principales';
+            } else if (titleLower.includes('postre') || titleLower.includes('dulce') || 
+                      titleLower.includes('soufflé') || titleLower.includes('mousse') || titleLower.includes('tarta')) {
+                return 'postres';
+            } else if (titleLower.includes('marisco') || titleLower.includes('langosta') || 
+                      titleLower.includes('vieira') || titleLower.includes('pulpo') || titleLower.includes('salmón')) {
+                return 'mariscos';
+            } else if (titleLower.includes('carne') || titleLower.includes('ternera') || 
+                      titleLower.includes('cordero') || titleLower.includes('pato') || titleLower.includes('solomillo')) {
+                return 'carnes';
+            } else if (titleLower.includes('vegetariano') || titleLower.includes('verdura') || 
+                      ingredientsLower.includes('quinoa') || ingredientsLower.includes('ensalada')) {
+                return 'vegetarianos';
+            } else {
+                return 'principales';
+            }
+        }
+
+        
+        function getDishDifficulty(title, ingredients) {
+            const titleLower = title.toLowerCase();
+            const ingredientsText = ingredients ? ingredients.toLowerCase() : '';
+            
+            if (titleLower.includes('fácil') || titleLower.includes('simple') || titleLower.includes('básico') ||
+                ingredientsText.includes('pocos ingredientes') || titleLower.includes('express')) {
+                return 'Intermedio';
+            } else if (titleLower.includes('complejo') || titleLower.includes('avanzado') ||
+                      ingredientsText.includes('técnica') || ingredientsText.includes('sofisticado') ||
+                      titleLower.includes('gourmet') || titleLower.includes('chef')) {
+                return 'Chef';
+            } else {
+                return 'Avanzado';
+            }
+        }
+
+       
+        function getDishIcon(title) {
+            const titleLower = title.toLowerCase();
+            
+            if (titleLower.includes('foie') || titleLower.includes('pato')) return '🦆';
+            if (titleLower.includes('caviar')) return '🖤';
+            if (titleLower.includes('langosta') || titleLower.includes('marisco')) return '🦞';
+            if (titleLower.includes('trufa')) return '🍄';
+            if (titleLower.includes('ternera') || titleLower.includes('carne')) return '🥩';
+            if (titleLower.includes('pescado') || titleLower.includes('salmón')) return '🐟';
+            if (titleLower.includes('pulpo')) return '🐙';
+            if (titleLower.includes('cordero')) return '🐑';
+            if (titleLower.includes('ensalada') || titleLower.includes('vegetal')) return '🥗';
+            if (titleLower.includes('risotto')) return '🍚';
+            if (titleLower.includes('sopa')) return '🍲';
+            if (titleLower.includes('pasta')) return '🍝';
+            if (titleLower.includes('chocolate')) return '🍫';
+            if (titleLower.includes('soufflé')) return '☁️';
+            if (titleLower.includes('tarta')) return '🥧';
+            if (titleLower.includes('mousse')) return '🍮';
+            
+            return '🍽️';
+        }
+
+        
+        function updateResultsCount() {
+            const resultsCount = document.getElementById('resultsCount');
+            resultsCount.textContent = `${filteredDishes.length} platos gourmet encontrados`;
+        }
+
+        
+        function procesarPasos(instructions) {
+            if (!instructions || instructions.length === 0) return '<p>No hay instrucciones disponibles.</p>';
+            
+            let pasosHTML = '';
+            let numeroPaso = 1;
+            
+            instructions.forEach(instruccion => {
+                const instruccionLimpia = instruccion.trim();
+                if (instruccionLimpia) {
+                    pasosHTML += `<p><strong>${numeroPaso}.</strong> ${instruccionLimpia}</p>`;
+                    numeroPaso++;
+                }
+            });
+            
+            return pasosHTML || '<p>No hay instrucciones disponibles.</p>';
+        }
+
+        function showRecipeDetailFromMain(dishId) {
+            const dish = allDishes.find(d => d.id === dishId);
+            
+            if (!dish) return;
+            
+            const recipeDetailContent = document.getElementById('recipeDetailContent');
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const dishesMainSection = document.getElementById('dishesMainSection');
+            
+            dishesMainSection.style.display = 'none';
+            recipeDetailSection.style.display = 'block';
+            
+            const pasosProcesados = procesarPasos(dish.instructions);
+            
+            recipeDetailContent.innerHTML = `
+                <div class="recipe-detail-card">
+                    <div class="recipe-detail-header">
+                        <h2>${dish.icon} ${dish.name}</h2>
+                        <div class="recipe-meta-info">
+                            <span class="recipe-category-badge">${dish.type.charAt(0).toUpperCase() + dish.type.slice(1)}</span>
+                            ${dish.chef ? `<span class="chef-badge">👨‍🍳 ${dish.chef}</span>` : ''}
+                            ${dish.precio ? `<span class="price-badge">💰 ${dish.precio}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    ${dish.imagen ? `
+                    <div class="recipe-detail-image">
+                        <img src="${dish.imagen}" alt="${dish.name}">
+                    </div>
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #d4af37, #8b4513); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                        ${dish.icon}
+                    </div>`}
+                    
+                    <div class="recipe-detail-content">
+                        <div class="recipe-detail-section">
+                            <h3>📋 Ingredientes Premium</h3>
+                            <div class="ingredients-list">
+                                ${dish.ingredients.map(ingredient => 
+                                    `<p>• ${ingredient}</p>`
+                                ).join('')}
+                            </div>
+                            ${dish.alergenos ? `
+                            <div class="allergens-info">
+                                <h4>⚠️ Alérgenos:</h4>
+                                <p>${dish.alergenos}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="recipe-detail-section">
+                            <h3>👨‍🍳 Técnica Michelin</h3>
+                            <div class="steps-list">
+                                ${pasosProcesados}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            event.stopPropagation();
+        }
+
+        function loadDishes(dishesToShow = filteredDishes) {
+            const dishesGrid = document.getElementById('dishesGrid');
+            
+            const totalItems = dishesToShow.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentItems = dishesToShow.slice(startIndex, endIndex);
+            
+            dishesGrid.innerHTML = currentItems.map(dish => `
+                <div class="dish-card" onclick="showRecipeDetailFromMain(${dish.id})">
+                    <div class="dish-image">
+                        ${dish.imagen ? `<img src="${dish.imagen}" alt="${dish.name}" style="width:100%;height:100%;object-fit:cover;">` : dish.icon}
+                        <div class="difficulty-badge">${dish.difficulty}</div>
+                    </div>
+                    <div class="dish-content">
+                        <h3>${dish.name}</h3>
+                        <div class="dish-meta">
+                            <span>⏱️ ${dish.time}</span>
+                            <span>🍽️ ${dish.type.charAt(0).toUpperCase() + dish.type.slice(1)}</span>
+                            ${dish.chef ? `<span>👨‍🍳 ${dish.chef}</span>` : ''}
+                        </div>
+                        <p class="dish-description">${dish.description}</p>
+                        <div class="dish-ingredients">
+                            <h4>Ingredientes premium:</h4>
+                            <div class="ingredients-list">
+                                ${dish.ingredients.slice(0, 3).join(', ')}...
+                            </div>
+                        </div>
+                        <div class="dish-actions">
+                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${dish.id})">Ver Receta</button>
+                            <button class="btn-secondary" onclick="addToFavorites(${dish.id})">⭐</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            updatePagination(totalPages, totalItems);
+        }
+
+        function filterByType(type) {
+            currentTypeFilter = type;
+            document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            applyFilters();
+        }
+
+        function filterByDifficulty(difficulty) {
+            currentDifficultyFilter = difficulty;
+            const difficultyButtons = document.querySelectorAll('.filter-group')[1].querySelectorAll('.filter-btn');
+            difficultyButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            applyFilters();
+        }
+
+        function updatePagination(totalPages, totalItems) {
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'flex';
+            
+            let paginationHTML = '';
+            
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    ← Anterior
+                </button>
+            `;
+            
+            const maxPages = Math.min(10, totalPages);
+            for (let i = 1; i <= maxPages; i++) {
+                paginationHTML += `
+                    <button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Siguiente →
+                </button>
+            `;
+            
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadDishes(filteredDishes);
+        }
+
+        function applyFilters() {
+            filteredDishes = allDishes.filter(dish => {
+                const typeMatch = currentTypeFilter === 'todos' || dish.type === currentTypeFilter;
+                const difficultyMatch = currentDifficultyFilter === 'todas' || dish.difficulty === currentDifficultyFilter;
+                return typeMatch && difficultyMatch;
+            });
+            
+            currentPage = 1;
+            loadDishes(filteredDishes);
+            updateResultsCount();
+        }
+
+        function addToFavorites(dishId) {
+            const dish = allDishes.find(d => d.id === dishId);
+            alert(`¡${dish.name} agregado a tus favoritos! ⭐`);
+            event.stopPropagation();
+        }
+
+        window.addEventListener('load', () => {
+            loadDishesFromDatabase();
+        });
+    </script>
+</body>
+</html>

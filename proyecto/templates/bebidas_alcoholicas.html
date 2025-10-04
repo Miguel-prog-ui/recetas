@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bebidas Alcohólicas - Recetario</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bebidas_alcoholicas.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    
+                    <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
+                        <span class="home-icon">🏠</span>
+                    </a>
+                    
+                    <div class="logo-text">Recetario</div>
+                </div>
+                <div class="user-info">
+                    {% if session.usuario %}
+                    <span class="user-name">👤 {{ session.usuario }}</span>
+                    {% else %}
+                    <span class="user-name">👤 Usuario sin registrar</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <span class="hero-icon">🍹</span>
+            <h1>Bebidas Alcohólicas</h1>
+            <p>Descubre una colección exclusiva de cócteles clásicos y modernos. Desde mojitos refrescantes hasta whiskeys añejados, encuentra la receta perfecta para cada ocasión y conviértete en el bartender de tus sueños.</p>
+        </section>
+
+        
+        <section class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    
+                    <div class="filter-buttons">
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <div class="filter-buttons">
+                    </div>
+                </div>
+
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label>Buscar por nombre:</label>
+                        <input type="text" placeholder="Buscar cócteles..." id="searchInput">
+                    </div>
+                    <button onclick="searchDrinks()">Buscar</button>
+                </div>
+                
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label>Buscar por ingredientes:</label>
+                        <input type="text" placeholder="Ej: ron, vodka, limón..." id="ingredientSearch">
+                    </div>
+                    <button onclick="searchByIngredients()">Buscar Ingredientes</button>
+                </div>
+            </div>
+        </section>
+
+        ->
+        <section id="searchResultsSection" class="search-results-section" style="display: none;">
+            <div class="container">
+                <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
+                <div class="recipes-grid" id="searchResultsGrid"></div>
+            </div>
+        </section>
+
+        <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
+            <div class="container">
+                <button onclick="hideRecipeDetail()" class="back-btn">← Volver a los resultados</button>
+                <div id="recipeDetailContent"></div>
+            </div>
+        </section>
+
+        
+        <section class="recipes-section" id="recipesMainSection">
+            <div class="section-header">
+                <h2 class="section-title">Nuestros Cócteles</h2>
+                <span class="results-count" id="resultsCount">Cargando recetas...</span>
+            </div>
+            
+            <div class="recipes-grid" id="recipesGrid">
+               
+            </div>
+            
+            
+            <div class="pagination" id="pagination">
+               
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 Recetas Deliciosas - Sección Bebidas Alcohólicas. Todos los derechos reservados. Bebe con responsabilidad.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let allDrinks = [];
+        let filteredDrinks = [];
+        let currentTypeFilter = 'todos';
+        let currentIntensityFilter = 'todas';
+        let currentPage = 1;
+        const itemsPerPage = 8;
+        let currentSearchResults = [];
+
+        function getImageUrl(imagenFilename) {
+    if (!imagenFilename) {
+        console.log('❌ No hay imagen_filename para esta receta');
+        return '';
+    }
+    
+    const cleanFilename = imagenFilename.trim();
+    
+   
+    if (cleanFilename.startsWith('http://') || cleanFilename.startsWith('https://')) {
+        return cleanFilename;
+    }
+    
+    
+    if (cleanFilename.startsWith('/static/') || cleanFilename.startsWith('static/')) {
+        return cleanFilename;
+    }
+    
+   
+    const finalUrl = `/static/imagenes_recetas/${cleanFilename}`;
+    console.log(`📁 Convertido: "${cleanFilename}" → "${finalUrl}"`);
+    return finalUrl;
+}
+
+        
+        function loadDrinksFromDatabase() {
+            fetch('/buscar_recetas?categoria=licor')
+                .then(response => response.json())
+                .then(data => {
+        if (data.recetas && data.recetas.length > 0) {
+            
+            allDrinks = data.recetas.map(receta => {
+                const imagenUrl = getImageUrl(receta.imagen_filename);
+                console.log(`🖼️ Procesando receta: ${receta.title}`, {
+                    imagen_filename: receta.imagen_filename,  
+                    url_generada: imagenUrl
+                });
+                return {
+                    id: receta.id,
+                    name: receta.title,
+                    type: getDrinkType(receta.title, receta.ingredients),
+                    time: "5 min",
+                    intensity: getDrinkIntensity(receta.title, receta.ingredients),
+                    icon: getDrinkIcon(receta.title),
+                    description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                    ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                    instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                    imagen: imagenUrl || ''
+                };
+            });
+
+            filteredDrinks = [...allDrinks];
+            loadDrinks();
+            updateResultsCount();
+                    } else {
+                        document.getElementById('resultsCount').textContent = 'No se encontraron recetas de bebidas alcohólicas';
+                        document.getElementById('recipesGrid').innerHTML = `
+                            <div class="no-results-message">
+                                <div class="no-results-icon">🍹</div>
+                                <h3>No hay bebidas alcohólicas disponibles</h3>
+                                <p>No se encontraron recetas de bebidas alcohólicas en la base de datos.</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('resultsCount').textContent = 'Error cargando recetas';
+                });
+        }
+
+        
+        function getDrinkType(title, ingredients) {
+            const titleLower = title.toLowerCase();
+            const ingredientsLower = ingredients ? ingredients.toLowerCase() : '';
+            
+            if (titleLower.includes('clásico') || titleLower.includes('clasico') || 
+                titleLower.includes('mojito') || titleLower.includes('margarita') || 
+                titleLower.includes('negroni') || titleLower.includes('manhattan')) {
+                return 'clasicos';
+            } else if (titleLower.includes('tropical') || titleLower.includes('piña colada') || 
+                      titleLower.includes('mai tai') || titleLower.includes('hawaiian')) {
+                return 'tropicales';
+            } else if (titleLower.includes('shot') || titleLower.includes('b-52') || 
+                      titleLower.includes('kamikaze') || titleLower.includes('tequila sunrise')) {
+                return 'shots';
+            } else if (titleLower.includes('digestivo') || titleLower.includes('whiskey') || 
+                      titleLower.includes('bourbon') || titleLower.includes('old fashioned')) {
+                return 'digestivos';
+            } else if (titleLower.includes('cerveza') || titleLower.includes('ipa') || 
+                      titleLower.includes('stout') || titleLower.includes('trigo')) {
+                return 'cervezas';
+            } else if (titleLower.includes('vino') || titleLower.includes('sangría') || 
+                      titleLower.includes('sauvignon') || titleLower.includes('reserva')) {
+                return 'vinos';
+            } else {
+                return 'clasicos';
+            }
+        }
+
+        
+        function getDrinkIntensity(title, ingredients) {
+            const titleLower = title.toLowerCase();
+            const ingredientsText = ingredients ? ingredients.toLowerCase() : '';
+            
+            if (titleLower.includes('suave') || titleLower.includes('ligero') ||
+                ingredientsText.includes('cerveza') || ingredientsText.includes('vino') ||
+                titleLower.includes('refrescante') || titleLower.includes('fácil')) {
+                return 'Suave';
+            } else if (titleLower.includes('fuerte') || titleLower.includes('intenso') ||
+                      ingredientsText.includes('whiskey') || ingredientsText.includes('tequila') ||
+                      titleLower.includes('shot') || titleLower.includes('digestivo')) {
+                return 'Fuerte';
+            } else {
+                return 'Medio';
+            }
+        }
+
+        function getDrinkIcon(title) {
+            const titleLower = title.toLowerCase();
+            
+            if (titleLower.includes('mojito') || titleLower.includes('menta')) return '🍃';
+            if (titleLower.includes('piña colada') || titleLower.includes('coco')) return '🥥';
+            if (titleLower.includes('margarita') || titleLower.includes('tequila')) return '🍋';
+            if (titleLower.includes('whiskey') || titleLower.includes('bourbon')) return '🥃';
+            if (titleLower.includes('cerveza') || titleLower.includes('ipa')) return '🍺';
+            if (titleLower.includes('vino') || titleLower.includes('sangría')) return '🍷';
+            if (titleLower.includes('shot') || titleLower.includes('kamikaze')) return '⚡';
+            if (titleLower.includes('tropical') || titleLower.includes('hawaiian')) return '🌺';
+            if (titleLower.includes('gin') || titleLower.includes('tonic')) return '🌿';
+            if (titleLower.includes('vodka') || titleLower.includes('cosmopolitan')) return '💗';
+            if (titleLower.includes('ron') || titleLower.includes('cuba')) return '🏝️';
+            
+            return '🍹';
+        }
+
+       
+        function updateResultsCount() {
+            const resultsCount = document.getElementById('resultsCount');
+            resultsCount.textContent = `${filteredDrinks.length} recetas encontradas`;
+        }
+
+        
+        function clearActiveSearch() {
+            hideSearchResults();
+            hideRecipeDetail();
+            document.getElementById('searchInput').value = '';
+            document.getElementById('ingredientSearch').value = '';
+            currentSearchResults = [];
+            
+            document.getElementById('recipesMainSection').style.display = 'block';
+            loadDrinks();
+            updateResultsCount();
+        }
+
+        
+        function hideSearchResults() {
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            searchResultsSection.style.display = 'none';
+            currentSearchResults = [];
+        }
+
+        
+        function hideRecipeDetail() {
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            const recipesMainSection = document.getElementById('recipesMainSection');
+            
+            recipeDetailSection.style.display = 'none';
+            
+            if (currentSearchResults.length > 0) {
+                searchResultsSection.style.display = 'block';
+            } else {
+                recipesMainSection.style.display = 'block';
+            }
+        }
+
+        
+        function procesarPasos(instructions) {
+            if (!instructions || instructions.length === 0) return '<p>No hay instrucciones disponibles.</p>';
+            
+            let pasosHTML = '';
+            let numeroPaso = 1;
+            
+            instructions.forEach(instruccion => {
+                const instruccionLimpia = instruccion.trim();
+                if (instruccionLimpia) {
+                    pasosHTML += `<p><strong>${numeroPaso}.</strong> ${instruccionLimpia}</p>`;
+                    numeroPaso++;
+                }
+            });
+            
+            return pasosHTML || '<p>No hay instrucciones disponibles.</p>';
+        }
+
+        
+       function searchDrinks() {
+    const searchTerm = document.getElementById('searchInput').value.trim();
+    
+    if (!searchTerm) {
+        alert('Por favor, ingresa un término de búsqueda');
+        return;
+    }
+    
+    fetch(`/buscar_recetas_palabra?q=${encodeURIComponent(searchTerm)}&categoria=licor`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.recetas && data.recetas.length > 0) {
+                currentSearchResults = data.recetas.map(receta => ({
+                    id: receta.id,
+                    name: receta.title,
+                    type: getDrinkType(receta.title, receta.ingredients),
+                    time: "5 min",
+                    intensity: getDrinkIntensity(receta.title, receta.ingredients),
+                    icon: getDrinkIcon(receta.title),
+                    description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                    ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                    instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                    imagen: getImageUrl(receta.imagen_filename) 
+                }));
+                displaySearchResults(currentSearchResults, searchTerm);
+            } else {
+                        fetch(`/buscar_recetas?q=${encodeURIComponent(searchTerm)}&categoria=licor`)
+                        .then(response => response.json())
+                        .then(data => {
+                       if (data.recetas && data.recetas.length > 0) {
+                        currentSearchResults = data.recetas.map(receta => ({
+                        id: receta.id,
+                       name: receta.title,
+                           type: getDrinkType(receta.title, receta.ingredients),
+                      time: "5 min",
+                      intensity: getDrinkIntensity(receta.title, receta.ingredients),
+                     icon: getDrinkIcon(receta.title),
+                         description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                     ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                        instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                         imagen: getImageUrl(receta.imagen_filename)  
+            }));
+            displaySearchResults(currentSearchResults, searchTerm);
+        } else {
+            displaySearchResults([], searchTerm);
+        }
+    })
+                            .catch(error2 => {
+                                console.error('Error en búsqueda fallback:', error2);
+                                displaySearchResults([], searchTerm);
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displaySearchResults([], searchTerm);
+                });
+        }
+
+        
+        function searchByIngredients() {
+    const ingredientSearch = document.getElementById('ingredientSearch').value.trim();
+    
+    if (!ingredientSearch) {
+        alert('Por favor, ingresa al menos un ingrediente');
+        return;
+    }
+    
+   
+    document.getElementById('resultsCount').textContent = 'Buscando recetas...';
+    
+    
+    fetch(`/buscar_por_ingredientes?ingredientes=${encodeURIComponent(ingredientSearch)}&categoria=licor`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.recetas && data.recetas.length > 0) {
+                currentSearchResults = data.recetas.map(receta => ({
+                    id: receta.id,
+                    name: receta.title,
+                    type: getDrinkType(receta.title, receta.ingredients),
+                    time: "5 min",
+                    intensity: getDrinkIntensity(receta.title, receta.ingredients),
+                    icon: getDrinkIcon(receta.title),
+                    description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                    ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                    instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                    imagen: getImageUrl(receta.imagen_filename),  
+                    matchPercentage: receta.match_percentage || 0,
+                    matchedIngredients: receta.matched_ingredients || [],
+                    totalSearchIngredients: receta.total_search_ingredients || 0,
+                    matchedCount: receta.matched_count || 0
+                }));
+                displayIngredientSearchResults(currentSearchResults, ingredientSearch.split(',').map(i => i.trim()));
+            } else {
+                displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
+            }
+        })
+        .catch(error => {
+            console.error('Error en búsqueda por ingredientes:', error);
+            displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
+        });
+}
+
+        
+        function displaySearchResults(recetas, searchTerm) {
+            const searchResultsGrid = document.getElementById('searchResultsGrid');
+            const searchResultsTitle = document.getElementById('searchResultsTitle');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            hideRecipeDetail();
+            
+            if (recetas.length > 0) {
+                searchResultsGrid.innerHTML = recetas.map(receta => `
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.name}" style="width:100%;height:100%;object-fit:cover;">` : receta.icon}
+                            <div class="intensity-badge">${receta.intensity}</div>
+                        </div>
+                        <div class="recipe-content">
+                            <h3>${receta.name}</h3>
+                            <div class="recipe-meta">
+                                <span>⏱️ ${receta.time}</span>
+                                <span>🍸 ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                            </div>
+                            <p class="recipe-description">${receta.description}</p>
+                            <div class="recipe-ingredients">
+                                <h4>Ingredientes principales:</h4>
+                                <div class="ingredients-list">
+                                    ${receta.ingredients.slice(0, 3).join(', ')}...
+                                </div>
+                            </div>
+                            <div class="recipe-actions">
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})">Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})">❤️</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                searchResultsTitle.textContent = `Resultados para: "${searchTerm}" (${recetas.length} encontrados)`;
+                
+            } else {
+                searchResultsGrid.innerHTML = `
+                    <div class="no-results-message">
+                        <div class="no-results-icon">🔍</div>
+                        <h3>No se encontraron bebidas</h3>
+                        <p>No hay bebidas que coincidan con "${searchTerm}"</p>
+                    </div>
+                `;
+            }
+            
+            searchResultsSection.style.display = 'block';
+            document.getElementById('recipesMainSection').style.display = 'none';
+        }
+
+        
+        function displayIngredientSearchResults(recipes, searchIngredients) {
+            const searchResultsGrid = document.getElementById('searchResultsGrid');
+            const searchResultsTitle = document.getElementById('searchResultsTitle');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            hideRecipeDetail();
+            
+            if (recipes.length > 0) {
+                searchResultsGrid.innerHTML = recipes.map(recipe => `
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}" style="width:100%;height:100%;object-fit:cover;">` : recipe.icon}
+                            <div class="intensity-badge">${recipe.intensity}</div>
+                            ${recipe.matchPercentage ? `<div class="match-badge">${Math.round(recipe.matchPercentage)}% match</div>` : ''}
+                        </div>
+                        <div class="recipe-content">
+                            <h3>${recipe.name}</h3>
+                            <div class="recipe-meta">
+                                <span>⏱️ ${recipe.time}</span>
+                                <span>🍸 ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                                ${recipe.matchedCount && recipe.totalSearchIngredients ? 
+                                    `<span>✅ ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
+                                    (recipe.matchPercentage ? `<span>✅ ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
+                                }
+                            </div>
+                            <p class="recipe-description">${recipe.description}</p>
+                            
+                            ${recipe.matchedIngredients && recipe.matchedIngredients.length > 0 ? `
+                            <div class="recipe-ingredients">
+                                <h4>🎯 Ingredientes encontrados:</h4>
+                                <div class="matched-ingredients">
+                                    ${recipe.matchedIngredients.slice(0, 3).map(ing => 
+                                        `<span>${ing}</span>`
+                                    ).join('')}
+                                    ${recipe.matchedIngredients.length > 3 ? '...' : ''}
+                                </div>
+                                <h4>📋 Ingredientes principales:</h4>
+                                <div class="ingredients-list">
+                                    ${recipe.ingredients.slice(0, 3).join(', ')}...
+                                </div>
+                            </div>
+                            ` : `
+                            <div class="recipe-ingredients">
+                                <h4>📋 Ingredientes principales:</h4>
+                                <div class="ingredients-list">
+                                    ${recipe.ingredients.slice(0, 3).join(', ')}...
+                                </div>
+                            </div>
+                            `}
+                            
+                            <div class="recipe-actions">
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})">Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                
+                const totalSearchIngredients = searchIngredients.length;
+                const avgMatch = recipes.reduce((sum, recipe) => sum + (recipe.matchedCount || 0), 0) / recipes.length;
+                
+                searchResultsTitle.innerHTML = `
+                    Resultados por ingredientes: "${searchIngredients.join(', ')}"
+                    <small style="display: block; font-size: 1rem; color: #f5f5f5; margin-top: 5px;">
+                        ${recipes.length} recetas encontradas • ${avgMatch.toFixed(1)} ingredientes coincidentes en promedio
+                    </small>
+                `;
+                
+            } else {
+                searchResultsGrid.innerHTML = `
+                    <div class="no-results-message">
+                        <div class="no-results-icon">🔍</div>
+                        <h3>No se encontraron recetas</h3>
+                        <p>No hay bebidas que contengan los ingredientes: "${searchIngredients.join(', ')}"</p>
+                        <div style="margin-top: 20px;">
+                            <p><strong>Sugerencias:</strong></p>
+                            <ul style="text-align: left; display: inline-block; color: #f5f5f5;">
+                                <li>Verifica la ortografía de los ingredientes</li>
+                                <li>Intenta con términos más generales</li>
+                                <li>Prueba con menos ingredientes</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            searchResultsSection.style.display = 'block';
+            document.getElementById('recipesMainSection').style.display = 'none';
+        }
+
+        
+        function showRecipeDetailFromSearch(recipeId) {
+            const receta = currentSearchResults.find(r => r.id === recipeId);
+            
+            if (!receta) return;
+            
+            const recipeDetailContent = document.getElementById('recipeDetailContent');
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            searchResultsSection.style.display = 'none';
+            recipeDetailSection.style.display = 'block';
+            
+            const pasosProcesados = procesarPasos(receta.instructions);
+            
+            recipeDetailContent.innerHTML = `
+                <div class="recipe-detail-card">
+                    <div class="recipe-detail-header">
+                        <h2>${receta.icon} ${receta.name}</h2>
+                        <span class="recipe-category-badge">${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                    </div>
+                    
+                    ${receta.imagen ? `
+                    <div class="recipe-detail-image">
+                        <img src="${receta.imagen}" alt="${receta.name}">
+                    </div>
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #e94560, #533483); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                        ${receta.icon}
+                    </div>`}
+                    
+                    <div class="recipe-detail-content">
+                        <div class="recipe-detail-section">
+                            <h3>📋 Ingredientes</h3>
+                            <div class="ingredients-list">
+                                ${receta.ingredients.map(ingredient => 
+                                    `<p>• ${ingredient}</p>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="recipe-detail-section">
+                            <h3>👨‍🍳 Preparación</h3>
+                            <div class="steps-list">
+                                ${pasosProcesados}
+                            </div>
+                        </div>
+                        
+                        <div class="responsibility-warning">
+                            <h3>⚠️ Bebe con responsabilidad</h3>
+                            <p>Disfruta de nuestras recetas de forma moderada y responsable. No conduzcas bajo los efectos del alcohol.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showRecipeDetailFromMain(drinkId) {
+            const drink = allDrinks.find(d => d.id === drinkId);
+            
+            if (!drink) return;
+            
+            const recipeDetailContent = document.getElementById('recipeDetailContent');
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const recipesMainSection = document.getElementById('recipesMainSection');
+            
+            recipesMainSection.style.display = 'none';
+            recipeDetailSection.style.display = 'block';
+            
+            const pasosProcesados = procesarPasos(drink.instructions);
+            
+            recipeDetailContent.innerHTML = `
+                <div class="recipe-detail-card">
+                    <div class="recipe-detail-header">
+                        <h2>${drink.icon} ${drink.name}</h2>
+                        <span class="recipe-category-badge">${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
+                    </div>
+                    
+                    ${drink.imagen ? `
+                    <div class="recipe-detail-image">
+                        <img src="${drink.imagen}" alt="${drink.name}">
+                    </div>
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #e94560, #533483); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                        ${drink.icon}
+                    </div>`}
+                    
+                    <div class="recipe-detail-content">
+                        <div class="recipe-detail-section">
+                            <h3>📋 Ingredientes</h3>
+                            <div class="ingredients-list">
+                                ${drink.ingredients.map(ingredient => 
+                                    `<p>• ${ingredient}</p>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="recipe-detail-section">
+                            <h3>👨‍🍳 Preparación</h3>
+                            <div class="steps-list">
+                                ${pasosProcesados}
+                            </div>
+                        </div>
+                        
+                        <div class="responsibility-warning">
+                            <h3>⚠️ Bebe con responsabilidad</h3>
+                            <p>Disfruta de nuestras recetas de forma moderada y responsable. No conduzcas bajo los efectos del alcohol.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            event.stopPropagation();
+        }
+
+        function loadDrinks(drinksToShow = filteredDrinks) {
+            const recipesGrid = document.getElementById('recipesGrid');
+            
+            const totalItems = drinksToShow.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentItems = drinksToShow.slice(startIndex, endIndex);
+            
+            recipesGrid.innerHTML = currentItems.map(drink => `
+                <div class="recipe-card" onclick="showRecipeDetailFromMain(${drink.id})">
+                    <div class="recipe-image">
+                        ${drink.imagen ? `<img src="${drink.imagen}" alt="${drink.name}" style="width:100%;height:100%;object-fit:cover;">` : drink.icon}
+                        <div class="intensity-badge">${drink.intensity}</div>
+                    </div>
+                    <div class="recipe-content">
+                        <h3>${drink.name}</h3>
+                        <div class="recipe-meta">
+                            <span>⏱️ ${drink.time}</span>
+                            <span>🍸 ${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
+                        </div>
+                        <p class="recipe-description">${drink.description}</p>
+                        <div class="recipe-ingredients">
+                            <h4>Ingredientes principales:</h4>
+                            <div class="ingredients-list">
+                                ${drink.ingredients.slice(0, 3).join(', ')}...
+                            </div>
+                        </div>
+                        <div class="recipe-actions">
+                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${drink.id})">Ver Receta</button>
+                            <button class="btn-secondary" onclick="addToFavorites(${drink.id})">❤️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            updatePagination(totalPages, totalItems);
+        }
+
+        function filterByType(type) {
+            currentTypeFilter = type;
+            document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            applyFilters();
+        }
+
+        function filterByIntensity(intensity) {
+            currentIntensityFilter = intensity;
+            const intensityButtons = document.querySelectorAll('.filter-group')[1].querySelectorAll('.filter-btn');
+            intensityButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            applyFilters();
+        }
+
+        function updatePagination(totalPages, totalItems) {
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'flex';
+            
+            let paginationHTML = '';
+            
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    ← Anterior
+                </button>
+            `;
+            
+            const maxPages = Math.min(10, totalPages);
+            for (let i = 1; i <= maxPages; i++) {
+                paginationHTML += `
+                    <button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Siguiente →
+                </button>
+            `;
+            
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadDrinks(filteredDrinks);
+        }
+
+        function applyFilters() {
+            filteredDrinks = allDrinks.filter(drink => {
+                const typeMatch = currentTypeFilter === 'todos' || drink.type === currentTypeFilter;
+                const intensityMatch = currentIntensityFilter === 'todas' || drink.intensity === currentIntensityFilter;
+                return typeMatch && intensityMatch;
+            });
+            
+            currentPage = 1;
+            loadDrinks(filteredDrinks);
+            updateResultsCount();
+        }
+
+        function addToFavorites(drinkId) {
+            const drink = allDrinks.find(d => d.id === drinkId);
+            alert(`¡${drink.name} agregado a tus favoritos! 💖`);
+            event.stopPropagation();
+        }
+
+        
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchDrinks();
+            }
+        });
+
+        document.getElementById('ingredientSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchByIngredients();
+            }
+        });
+
+        
+        window.addEventListener('load', () => {
+            loadDrinksFromDatabase();
+        });
+    </script>
+</body>
+</html>
