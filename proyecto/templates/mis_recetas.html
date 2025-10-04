@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Recetas - Recetas Deliciosas</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='mis_recetas.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                     <a href="/" class="home-btn">
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
+                    </a>
+                    <div class="logo-text">Recetas Deliciosas</div>
+                </div>
+                <div class="header-right">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Buscar recetas..." id="searchInput">
+                        <button onclick="searchRecipes()"><i class="fas fa-search"></i></button>
+                    </div>
+                    {% if session.usuario %}
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ session.usuario }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Mis Recetas Creadas</h1>
+                <p>Gestiona las recetas que has compartido con la comunidad</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="recipes-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Mis Recetas Publicadas</h2>
+                    <a href="{{ url_for('mostrar_comunidad') }}" class="create-recipe-btn">
+                        <i class="fas fa-plus"></i> Crear Nueva Receta
+                    </a>
+                </div>
+                
+                {% if recetas and recetas|length > 0 %}
+                <div class="stats-summary">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">{{ recetas|length }}</span>
+                            <span class="stat-label">Recetas Totales</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Likes Totales</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Visualizaciones</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recipes-grid">
+                    {% for receta in recetas %}
+                    <div class="recipe-card" data-recipe-id="{{ receta[0] }}">
+                        <div class="recipe-image">
+                            {% if receta[6] %}
+                            <img src="{{ receta[6] }}" alt="{{ receta[1] }}">
+                            {% else %}
+                            <div class="recipe-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            {% endif %}
+                            <div class="recipe-overlay">
+                                <span class="recipe-category">{{ receta[5] or 'General' }}</span>
+                            </div>
+                        </div>
+                        <div class="recipe-content">
+                            <h4>{{ receta[1] }}</h4>
+                            <div class="recipe-meta">
+                                <span><i class="fas fa-folder"></i> {{ receta[5] or 'General' }}</span>
+                                <span class="likes-count"><i class="fas fa-heart"></i> 0 likes</span>
+                            </div>
+                            <p class="recipe-description">{{ receta[2][:100] }}{% if receta[2]|length > 100 %}...{% endif %}</p>
+                            
+                            <div class="recipe-stats">
+                                <div class="stat-mini">
+                                    <i class="fas fa-heart"></i>
+                                    <span>0</span>
+                                </div>
+                                <div class="stat-mini">
+                                    <i class="fas fa-eye"></i>
+                                    <span>0</span>
+                                </div>
+                                <div class="stat-mini">
+                                    <i class="fas fa-star"></i>
+                                    <span>0</span>
+                                </div>
+                            </div>
+
+                           
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-results-message">
+                    <div class="no-results-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3>Aún no has creado recetas</h3>
+                    <p>Comparte tu primera receta con la comunidad y comienza tu viaje culinario</p>
+                    <a href="{{ url_for('mostrar_comunidad') }}" class="create-first-recipe-btn">
+                        <i class="fas fa-plus"></i> Crear Mi Primera Receta
+                    </a>
+                    <div class="empty-state-features">
+                        <div class="feature-item">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Comparte tus creaciones</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-heart"></i>
+                            <span>Recibe likes de la comunidad</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Mira tus estadísticas</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
+                <p>&copy; 2024 Recetas Deliciosas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal de Estadísticas -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Estadísticas de Receta</h3>
+                <span class="close-modal" onclick="cerrarModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-circle">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <span class="stat-value">0</span>
+                        <span class="stat-label">Likes</span>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-circle">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <span class="stat-value">0</span>
+                        <span class="stat-label">Visualizaciones</span>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-circle">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="stat-value">0</span>
+                        <span class="stat-label">Favoritos</span>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-circle">
+                            <i class="fas fa-share"></i>
+                        </div>
+                        <span class="stat-value">0</span>
+                        <span class="stat-label">Compartidos</span>
+                    </div>
+                </div>
+                <div class="stats-message">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Las estadísticas detalladas estarán disponibles en una próxima actualización</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Funciones de búsqueda
+        function searchRecipes() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            if (!searchTerm) {
+                alert('Por favor, ingresa un término de búsqueda');
+                return;
+            }
+            
+            window.location.href = '/buscar_recetas?q=' + encodeURIComponent(searchTerm);
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchRecipes();
+            }
+        });
+
+        // Funciones de gestión de recetas
+        function editarReceta(recipeId) {
+            mostrarMensajeTemporal('Función de edición disponible próximamente', 'info');
+        }
+
+        function eliminarReceta(recipeId, recipeName) {
+            if (confirm('¿Estás seguro de que quieres eliminar la receta "' + recipeName + '"? Esta acción no se puede deshacer.')) {
+                mostrarMensajeTemporal('Función de eliminación disponible próximamente', 'info');
+            }
+        }
+
+        function verEstadisticas(recipeId, recipeName) {
+            document.getElementById('modalTitle').textContent = 'Estadísticas: ' + recipeName;
+            document.getElementById('statsModal').style.display = 'block';
+        }
+
+        function cerrarModal() {
+            document.getElementById('statsModal').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('statsModal');
+            if (event.target === modal) {
+                cerrarModal();
+            }
+        });
+
+        // Mostrar mensajes temporales
+        function mostrarMensajeTemporal(mensaje, tipo) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'temp-message ' + tipo;
+            
+            let iconClass = 'info-circle';
+            if (tipo === 'success') {
+                iconClass = 'check-circle';
+            }
+            
+            messageDiv.innerHTML = '<i class="fas fa-' + iconClass + '"></i>' + mensaje;
+            document.body.appendChild(messageDiv);
+
+            setTimeout(function() {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        // Animación al cargar las recetas
+        document.addEventListener('DOMContentLoaded', function() {
+            const recipeCards = document.querySelectorAll('.recipe-card');
+            recipeCards.forEach(function(card, index) {
+                setTimeout(function() {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+
+            // Animación para las tarjetas de estadísticas
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach(function(card, index) {
+                setTimeout(function() {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateX(0)';
+                }, 150 * index);
+            });
+        });
+
+        // Efectos hover mejorados para las tarjetas
+        document.querySelectorAll('.recipe-card').forEach(function(card) {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+
+    <style>
+        .temp-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .temp-message.info {
+            background: linear-gradient(135deg, #E27D60, #FFB347);
+        }
+
+        .temp-message.success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</body>
+</html>

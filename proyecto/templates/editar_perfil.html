@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil - Recetas Deliciosas</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='editar_perfil.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                     <a href="/" class="home-btn">
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
+                    </a>
+                    <div class="logo-text">Recetas Deliciosas</div>
+                </div>
+                <div class="header-right">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Buscar recetas..." id="searchInput">
+                        <button onclick="searchRecipes()"><i class="fas fa-search"></i></button>
+                    </div>
+                    {% if session.usuario %}
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ session.usuario }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Editar Perfil</h1>
+                <p>Actualiza tu información personal y preferencias</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-section">
+            <div class="profile-form-card">
+                <form action="{{ url_for('actualizar_perfil') }}" method="POST">
+                    <!-- Sección de foto de perfil (solo diseño) -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-camera"></i> Foto de Perfil</h3>
+                            <span class="coming-soon-badge"><i class="fas fa-clock"></i> Próximamente</span>
+                        </div>
+                        <div class="photo-section">
+                            <div class="current-photo-display">
+                                <div class="avatar-large-edit">
+                                    <div class="avatar-circle large">
+                                        <span class="avatar-initial">{{ (usuario[1] if usuario else session.usuario)[0] | upper }}</span>
+                                    </div>
+                                </div>
+                                <div class="photo-info">
+                                    <p class="photo-coming-soon-text">Función de foto de perfil disponible próximamente</p>
+                                    <p class="photo-features">Podrás subir tu foto, recortarla y ajustarla</p>
+                                    <div class="photo-features-list">
+                                        <span><i class="fas fa-upload"></i> Subir imagen</span>
+                                        <span><i class="fas fa-crop"></i> Recortar</span>
+                                        <span><i class="fas fa-sync"></i> Actualizar</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección de información básica -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-user-edit"></i> Información Básica</h3>
+                        <div class="form-group">
+                            <label for="nombre">Nombre de Usuario:</label>
+                            <input type="text" id="nombre" name="nombre" value="{{ usuario[1] if usuario else session.usuario }}" required>
+                            <p class="field-help">Este es el nombre que verán otros usuarios en la comunidad</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" value="{{ usuario[2] if usuario else '' }}" required>
+                            <p class="field-help">Tu dirección de email para notificaciones y recuperación de cuenta</p>
+                        </div>
+                    </div>
+
+                    <!-- Sección de biografía (solo diseño) -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-pencil-alt"></i> Biografía</h3>
+                            <span class="coming-soon-badge"><i class="fas fa-clock"></i> Próximamente</span>
+                        </div>
+                        <div class="bio-placeholder-section">
+                            <div class="bio-icon">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="bio-text">
+                                <h4>Biografía Personal</h4>
+                                <p>Próximamente podrás agregar una biografía para compartir más sobre ti, tus intereses culinarios y tu experiencia en la cocina con la comunidad.</p>
+                                <div class="coming-soon-features">
+                                    <span class="feature-tag"><i class="fas fa-edit"></i> Edición avanzada</span>
+                                    <span class="feature-tag"><i class="fas fa-palette"></i> Formato enriquecido</span>
+                                    <span class="feature-tag"><i class="fas fa-save"></i> Guardado automático</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección de contraseña (solo diseño) -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-lock"></i> Contraseña</h3>
+                            <span class="coming-soon-badge"><i class="fas fa-clock"></i> Próximamente</span>
+                        </div>
+                        <div class="password-placeholder">
+                            <div class="lock-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="password-text">
+                                <h4>Seguridad de la Cuenta</h4>
+                                <p>La función para cambiar contraseña estará disponible en una próxima actualización para mayor seguridad de tu cuenta.</p>
+                                <div class="security-features">
+                                    <span><i class="fas fa-check-circle"></i> Contraseña segura</span>
+                                    <span><i class="fas fa-check-circle"></i> Verificación en dos pasos</span>
+                                    <span><i class="fas fa-check-circle"></i> Notificaciones de seguridad</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if error %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if success %}
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i> {{ success }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('perfil') }}" class="cancel-btn">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
+                <p>&copy; 2024 Recetas Deliciosas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Funciones de búsqueda
+        function searchRecipes() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            if (!searchTerm) {
+                alert('Por favor, ingresa un término de búsqueda');
+                return;
+            }
+            
+            window.location.href = `/buscar_recetas?q=${encodeURIComponent(searchTerm)}`;
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchRecipes();
+            }
+        });
+
+        // Simular funcionalidad de secciones (solo visual)
+        document.querySelectorAll('.photo-section, .bio-placeholder-section, .password-placeholder').forEach(section => {
+            section.addEventListener('click', function() {
+                // Efecto visual temporal
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+                
+                // Mostrar mensaje
+                const message = document.createElement('div');
+                message.className = 'feature-message';
+                message.innerHTML = '<i class="fas fa-rocket"></i> ¡Esta función estará disponible en una próxima actualización!';
+                document.body.appendChild(message);
+                
+                setTimeout(() => {
+                    message.remove();
+                }, 3000);
+            });
+        });
+
+        // Validación de formulario mejorada
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            
+            if (!nombre || !email) {
+                e.preventDefault();
+                alert('Por favor, completa todos los campos obligatorios');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                e.preventDefault();
+                alert('Por favor, ingresa una dirección de email válida');
+                return;
+            }
+        });
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Animación al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const formSections = document.querySelectorAll('.form-section');
+            formSections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, 200 * index);
+            });
+        });
+    </script>
+
+    <style>
+        .feature-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #E27D60, #FFB347);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</body>
+</html>

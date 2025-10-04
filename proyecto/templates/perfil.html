@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Recetas Deliciosas</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='perfil.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                     <a href="/" class="home-btn">
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
+                    </a>
+                    <div class="logo-text">Recetas Deliciosas</div>
+                </div>
+                <div class="header-right">
+                   
+                    {% if session.usuario %}
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ usuario[2] if usuario else 'Email no disponible' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Mi Perfil</h1>
+                <p>Gestiona tu información personal y actividad en la comunidad</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-section">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <div class="avatar-large">
+                            <div class="avatar-circle large">
+                                <span class="avatar-initial">{{ (usuario[1] if usuario else session.usuario)[0] | upper }}</span>
+                            </div>
+                        </div>
+                        <div class="photo-coming-soon">
+                            <span class="coming-soon-badge"><i class="fas fa-camera"></i> Foto próximamente</span>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h2>{{ usuario[1] if usuario else session.usuario }}</h2>
+                        <p class="profile-email">{{ usuario[2] if usuario else 'Email no disponible' }}</p>
+                        <div class="profile-badges">
+                            <span class="profile-badge type-badge">
+                                <i class="fas fa-user-tag"></i> {{ usuario[3] if usuario else 'Usuario' }}
+                            </span>
+                            <span class="profile-badge member-badge">
+                                <i class="fas fa-calendar-alt"></i> Miembro desde 2024
+                            </span>
+                        </div>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <span class="stat-number">{{ total_recetas }}</span>
+                                <span class="stat-label">Recetas</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">{{ total_likes }}</span>
+                                <span class="stat-label">Likes Recibidos</span>
+                                <!-- FUTURO: Mostrar likes reales cuando esté implementado -->
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">{{ favoritos_count }}</span>
+                                <span class="stat-label">Favoritos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-bio">
+                    <div class="bio-header">
+                        <h3><i class="fas fa-pencil-alt"></i> Sobre Mí</h3>
+                        <button class="edit-bio-btn" title="Editar biografía">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <p class="bio-placeholder">Esta es tu página de perfil. Próximamente podrás agregar una biografía personalizada y foto de perfil para compartir más sobre ti con la comunidad.</p>
+                </div>
+                
+                <div class="profile-actions">
+                    <a href="{{ url_for('editar_perfil') }}" class="edit-profile-btn">
+                        <i class="fas fa-user-edit"></i> Editar Perfil
+                    </a>
+                    <a href="{{ url_for('mis_recetas') }}" class="view-recipes-btn">
+                        <i class="fas fa-book-open"></i> Ver Mis Recetas
+                    </a>
+                    <a href="#" class="share-profile-btn">
+                        <i class="fas fa-share-alt"></i> Compartir Perfil
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de actividad reciente -->
+        <section class="activity-section">
+            <h2 class="section-title">Mi Actividad</h2>
+            <div class="activity-grid">
+                <div class="activity-card">
+                    <div class="activity-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3>Recetas Creadas</h3>
+                    <p>{{ total_recetas }} recetas publicadas</p>
+                    <a href="{{ url_for('mis_recetas') }}" class="activity-link">
+                        Ver todas <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Recetas Favoritas</h3>
+                    <p>{{ favoritos_count }} recetas guardadas</p>
+                    <a href="{{ url_for('recetas_favoritas') }}" class="activity-link">
+                        Ver favoritas <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Sistema de Likes</h3>
+                    <p>Función disponible próximamente</p>
+                    <span class="activity-link coming-soon-link">
+                        Próximamente <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>Logros</h3>
+                    <p>Descubre tus logros culinarios</p>
+                    <span class="activity-link coming-soon-link">
+                        Próximamente <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
+                <p>&copy; 2024 Recetas Deliciosas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Funciones de búsqueda
+        function searchRecipes() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            if (!searchTerm) {
+                alert('Por favor, ingresa un término de búsqueda');
+                return;
+            }
+            
+            window.location.href = `/buscar_recetas?q=${encodeURIComponent(searchTerm)}`;
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchRecipes();
+            }
+        });
+
+        // Animación para las tarjetas de actividad al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const activityCards = document.querySelectorAll('.activity-card');
+            activityCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 200 * index);
+            });
+        });
+
+        // FUTURO: Sistema de likes para perfil
+        // function actualizarLikesPerfil() {
+        //     // FUTURO: Actualizar estadísticas de likes en tiempo real
+        //     fetch('/obtener_estadisticas_usuario')
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         document.querySelector('.stat-number:nth-child(2)').textContent = data.total_likes;
+        //     });
+        // }
+    </script>
+</body>
+</html>
