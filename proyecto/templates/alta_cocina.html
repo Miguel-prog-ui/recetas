@@ -5,24 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alta Cocina - Gastronomía Gourmet</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='alta_cocina.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                    
                     <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
-                        <span class="home-icon">🏠</span>
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
                     </a>
-                   
                     <div class="logo-text">Alta Cocina Gourmet</div>
                 </div>
-                <div class="user-info">
+                <div class="header-right">
                     {% if session.usuario %}
-                    <span class="user-name">👤 {{ session.usuario }}</span>
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ usuario[2] if usuario else 'Email no disponible' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
                     {% else %}
-                    <span class="user-name">👤 Usuario sin registrar</span>
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
                     {% endif %}
                 </div>
             </div>
@@ -31,25 +73,76 @@
 
     <main class="container">
         <section class="hero">
-            <span class="hero-icon">🍽️</span>
-            <h1>Gastronomía Gourmet Michelin</h1>
-            <p>Descubre el arte culinario en su máxima expresión. Recetas de chefs estrella Michelin con técnicas refinadas, ingredientes premium y presentaciones espectaculares que transforman cada plato en una obra maestra gastronómica.</p>
+            <div class="hero-content">
+                <div class="hero-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h1>Gastronomía Gourmet Michelin</h1>
+                <p>Descubre el arte culinario en su máxima expresión. Recetas de chefs estrella Michelin con técnicas refinadas, ingredientes premium y presentaciones espectaculares que transforman cada plato en una obra maestra gastronómica.</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                </div>
+            </div>
         </section>
 
-       
-        <section class="dishes-section" id="dishesMainSection">
+        <!-- Sección de Filtros y Búsqueda - SIEMPRE VISIBLE -->
+        <section class="filters">
+            <div class="filter-row">
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label><i class="fas fa-search"></i> Buscar por nombre:</label>
+                        <input type="text" placeholder="Buscar platos gourmet..." id="searchInput">
+                    </div>
+                    <button onclick="searchDishes()"><i class="fas fa-search"></i> Buscar</button>
+                </div>
+                
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label><i class="fas fa-list"></i> Buscar por ingredientes:</label>
+                        <input type="text" placeholder="Ej: trufa, foie, caviar..." id="ingredientSearch">
+                    </div>
+                    <button onclick="searchByIngredients()"><i class="fas fa-list-alt"></i> Buscar Ingredientes</button>
+                </div>
+                <div class="filters-actions">
+                    <button class="clear-filters-btn" onclick="clearActiveSearch()">
+                        <i class="fas fa-undo"></i> Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
+        <section id="searchResultsSection" class="search-results-section" style="display: none;">
+            <div class="container">
+                <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
+                <div class="recipes-grid" id="searchResultsGrid"></div>
+            </div>
+        </section>
+
+        <!-- Sección de detalle de receta (oculta inicialmente) -->
+        <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
+            <div class="container">
+                <button onclick="hideRecipeDetail()" class="back-btn"><i class="fas fa-arrow-left"></i> Volver a los resultados</button>
+                <div id="recipeDetailContent"></div>
+            </div>
+        </section>
+
+        <!-- Sección principal de platos -->
+        <section class="recipes-section" id="dishesMainSection">
             <div class="section-header">
                 <h2 class="section-title">Creaciones Michelin</h2>
                 <span class="results-count" id="resultsCount">Cargando platos gourmet...</span>
             </div>
             
-            <div class="dishes-grid" id="dishesGrid">
-               
+            <div class="recipes-grid" id="dishesGrid">
+                <!-- Los platos se cargarán dinámicamente desde la base de datos -->
             </div>
             
-            
+            <!-- Paginación -->
             <div class="pagination" id="pagination">
-               
+                <!-- Los controles de paginación se cargarán dinámicamente -->
             </div>
         </section>
     </main>
@@ -57,6 +150,12 @@
     <footer>
         <div class="container">
             <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
                 <p>&copy; 2025 Alta Cocina - Gastronomía Gourmet Michelin. Todos los derechos reservados. El arte culinario en su máxima expresión.</p>
             </div>
         </div>
@@ -71,9 +170,24 @@
         const itemsPerPage = 8;
         let currentSearchResults = [];
 
-        
-        function loadDishesFromDatabase() {
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
             
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Cargar platos desde la base de datos Michelin
+        function loadDishesFromDatabase() {
+            // Usar la ruta específica de Michelin
             fetch('/buscar_recetas_michelin')
                 .then(response => response.json())
                 .then(data => {
@@ -101,7 +215,9 @@
                         document.getElementById('resultsCount').textContent = 'No se encontraron platos gourmet';
                         document.getElementById('dishesGrid').innerHTML = `
                             <div class="no-results-message">
-                                <div class="no-results-icon">🍽️</div>
+                                <div class="no-results-icon">
+                                    <i class="fas fa-crown"></i>
+                                </div>
                                 <h3>No hay platos disponibles</h3>
                                 <p>No se encontraron recetas de alta cocina en la base de datos.</p>
                                 <p style="margin-top: 10px; font-size: 0.9rem; color: #d4af37;">
@@ -116,7 +232,9 @@
                     document.getElementById('resultsCount').textContent = 'Error cargando platos';
                     document.getElementById('dishesGrid').innerHTML = `
                         <div class="no-results-message">
-                            <div class="no-results-icon">❌</div>
+                            <div class="no-results-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
                             <h3>Error de conexión</h3>
                             <p>No se pudo conectar con la base de datos.</p>
                             <p style="margin-top: 10px; font-size: 0.9rem; color: #d4af37;">
@@ -127,7 +245,7 @@
                 });
         }
 
-        
+        // Determinar tipo de plato basado en título e ingredientes
         function getDishType(title, ingredients) {
             const titleLower = title.toLowerCase();
             const ingredientsLower = ingredients ? ingredients.toLowerCase() : '';
@@ -155,7 +273,7 @@
             }
         }
 
-        
+        // Determinar dificultad basada en título e ingredientes
         function getDishDifficulty(title, ingredients) {
             const titleLower = title.toLowerCase();
             const ingredientsText = ingredients ? ingredients.toLowerCase() : '';
@@ -172,37 +290,72 @@
             }
         }
 
-       
+        // Obtener icono basado en el título
         function getDishIcon(title) {
             const titleLower = title.toLowerCase();
             
-            if (titleLower.includes('foie') || titleLower.includes('pato')) return '🦆';
-            if (titleLower.includes('caviar')) return '🖤';
-            if (titleLower.includes('langosta') || titleLower.includes('marisco')) return '🦞';
-            if (titleLower.includes('trufa')) return '🍄';
-            if (titleLower.includes('ternera') || titleLower.includes('carne')) return '🥩';
-            if (titleLower.includes('pescado') || titleLower.includes('salmón')) return '🐟';
-            if (titleLower.includes('pulpo')) return '🐙';
-            if (titleLower.includes('cordero')) return '🐑';
-            if (titleLower.includes('ensalada') || titleLower.includes('vegetal')) return '🥗';
-            if (titleLower.includes('risotto')) return '🍚';
-            if (titleLower.includes('sopa')) return '🍲';
-            if (titleLower.includes('pasta')) return '🍝';
-            if (titleLower.includes('chocolate')) return '🍫';
-            if (titleLower.includes('soufflé')) return '☁️';
-            if (titleLower.includes('tarta')) return '🥧';
-            if (titleLower.includes('mousse')) return '🍮';
+            if (titleLower.includes('foie') || titleLower.includes('pato')) return '<i class="fas fa-drumstick-bite"></i>';
+            if (titleLower.includes('caviar')) return '<i class="fas fa-gem"></i>';
+            if (titleLower.includes('langosta') || titleLower.includes('marisco')) return '<i class="fas fa-shrimp"></i>';
+            if (titleLower.includes('trufa')) return '<i class="fas fa-mushroom"></i>';
+            if (titleLower.includes('ternera') || titleLower.includes('carne')) return '<i class="fas fa-bacon"></i>';
+            if (titleLower.includes('pescado') || titleLower.includes('salmón')) return '<i class="fas fa-fish"></i>';
+            if (titleLower.includes('pulpo')) return '<i class="fas fa-octopus"></i>';
+            if (titleLower.includes('cordero')) return '<i class="fas fa-lamb"></i>';
+            if (titleLower.includes('ensalada') || titleLower.includes('vegetal')) return '<i class="fas fa-salad"></i>';
+            if (titleLower.includes('risotto')) return '<i class="fas fa-bowl-rice"></i>';
+            if (titleLower.includes('sopa')) return '<i class="fas fa-bowl-food"></i>';
+            if (titleLower.includes('pasta')) return '<i class="fas fa-pasta"></i>';
+            if (titleLower.includes('chocolate')) return '<i class="fas fa-candy-cane"></i>';
+            if (titleLower.includes('soufflé')) return '<i class="fas fa-cloud"></i>';
+            if (titleLower.includes('tarta')) return '<i class="fas fa-pie"></i>';
+            if (titleLower.includes('mousse')) return '<i class="fas fa-whipped-cream"></i>';
             
-            return '🍽️';
+            return '<i class="fas fa-crown"></i>';
         }
 
-        
+        // Actualizar contador de resultados
         function updateResultsCount() {
             const resultsCount = document.getElementById('resultsCount');
             resultsCount.textContent = `${filteredDishes.length} platos gourmet encontrados`;
         }
 
-        
+        // Limpiar búsqueda activa
+        function clearActiveSearch() {
+            hideSearchResults();
+            hideRecipeDetail();
+            document.getElementById('searchInput').value = '';
+            document.getElementById('ingredientSearch').value = '';
+            currentSearchResults = [];
+            
+            document.getElementById('dishesMainSection').style.display = 'block';
+            loadDishes();
+            updateResultsCount();
+        }
+
+        // Ocultar resultados de búsqueda
+        function hideSearchResults() {
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            searchResultsSection.style.display = 'none';
+            currentSearchResults = [];
+        }
+
+        // Ocultar detalle de receta
+        function hideRecipeDetail() {
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            const dishesMainSection = document.getElementById('dishesMainSection');
+            
+            recipeDetailSection.style.display = 'none';
+            
+            if (currentSearchResults.length > 0) {
+                searchResultsSection.style.display = 'block';
+            } else {
+                dishesMainSection.style.display = 'block';
+            }
+        }
+
+        // Procesar los pasos para manejar diferentes formatos
         function procesarPasos(instructions) {
             if (!instructions || instructions.length === 0) return '<p>No hay instrucciones disponibles.</p>';
             
@@ -220,6 +373,305 @@
             return pasosHTML || '<p>No hay instrucciones disponibles.</p>';
         }
 
+        // Búsqueda por nombre
+        function searchDishes() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            
+            if (!searchTerm) {
+                alert('Por favor, ingresa un término de búsqueda');
+                return;
+            }
+            
+            // Usar la ruta específica de Michelin
+            fetch(`/buscar_recetas_michelin?q=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.recetas && data.recetas.length > 0) {
+                        currentSearchResults = data.recetas.map(receta => ({
+                            id: receta.id,
+                            name: receta.title,
+                            type: getDishType(receta.title, receta.ingredients),
+                            time: "45 min",
+                            difficulty: getDishDifficulty(receta.title, receta.ingredients),
+                            icon: getDishIcon(receta.title),
+                            description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                            imagen: receta.imagen || '',
+                            chef: receta.chef || 'Chef Michelin',
+                            precio: receta.precio_venta_sugerido || '',
+                            alergenos: receta.alergenos || ''
+                        }));
+                        displaySearchResults(currentSearchResults, searchTerm);
+                    } else {
+                        displaySearchResults([], searchTerm);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displaySearchResults([], searchTerm);
+                });
+        }
+
+        // Búsqueda por ingredientes
+        function searchByIngredients() {
+            const ingredientSearch = document.getElementById('ingredientSearch').value.trim();
+            
+            if (!ingredientSearch) {
+                alert('Por favor, ingresa al menos un ingrediente');
+                return;
+            }
+            
+            // Mostrar loading
+            document.getElementById('resultsCount').textContent = 'Buscando platos gourmet...';
+            
+            // Llamar al backend para búsqueda por ingredientes específica de Michelin
+            fetch(`/buscar_michelin_ingredientes?ingredientes=${encodeURIComponent(ingredientSearch)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.recetas && data.recetas.length > 0) {
+                        currentSearchResults = data.recetas.map(receta => ({
+                            id: receta.id,
+                            name: receta.title,
+                            type: getDishType(receta.title, receta.ingredients),
+                            time: "45 min",
+                            difficulty: getDishDifficulty(receta.title, receta.ingredients),
+                            icon: getDishIcon(receta.title),
+                            description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                            imagen: receta.imagen || '',
+                            chef: receta.chef || 'Chef Michelin',
+                            precio: receta.precio_venta_sugerido || '',
+                            alergenos: receta.alergenos || '',
+                            matchPercentage: receta.match_percentage || 0,
+                            matchedIngredients: receta.matched_ingredients || [],
+                            totalSearchIngredients: receta.total_search_ingredients || 0,
+                            matchedCount: receta.matched_count || 0
+                        }));
+                        displayIngredientSearchResults(currentSearchResults, ingredientSearch.split(',').map(i => i.trim()));
+                    } else {
+                        displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en búsqueda por ingredientes:', error);
+                    displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
+                });
+        }
+
+        // Mostrar resultados de búsqueda por nombre
+        function displaySearchResults(recetas, searchTerm) {
+            const searchResultsGrid = document.getElementById('searchResultsGrid');
+            const searchResultsTitle = document.getElementById('searchResultsTitle');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            hideRecipeDetail();
+            
+            if (recetas.length > 0) {
+                searchResultsGrid.innerHTML = recetas.map(receta => `
+                    <div class="recipe-card" onclick="showRecipeDetailFromSearch(${receta.id})">
+                        <div class="recipe-image">
+                            ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.name}">` : receta.icon}
+                            <div class="difficulty-badge">${receta.difficulty}</div>
+                        </div>
+                        <div class="recipe-content">
+                            <h3>${receta.name}</h3>
+                            <div class="recipe-meta">
+                                <span><i class="far fa-clock"></i> ${receta.time}</span>
+                                <span><i class="fas fa-utensils"></i> ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                                ${receta.chef ? `<span><i class="fas fa-user-tie"></i> ${receta.chef}</span>` : ''}
+                            </div>
+                            <p class="recipe-description">${receta.description}</p>
+                            <div class="recipe-ingredients">
+                                <h4><i class="fas fa-list"></i> Ingredientes premium:</h4>
+                                <div class="ingredients-list">
+                                    ${receta.ingredients.slice(0, 3).join(', ')}...
+                                </div>
+                            </div>
+                            <div class="recipe-actions">
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})"><i class="fas fa-eye"></i> Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})"><i class="fas fa-star"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                searchResultsTitle.textContent = `Resultados para: "${searchTerm}" (${recetas.length} encontrados)`;
+                
+            } else {
+                searchResultsGrid.innerHTML = `
+                    <div class="no-results-message">
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>No se encontraron platos</h3>
+                        <p>No hay platos gourmet que coincidan con "${searchTerm}"</p>
+                    </div>
+                `;
+            }
+            
+            searchResultsSection.style.display = 'block';
+            document.getElementById('dishesMainSection').style.display = 'none';
+        }
+
+        // Mostrar resultados de búsqueda por ingredientes
+        function displayIngredientSearchResults(recipes, searchIngredients) {
+            const searchResultsGrid = document.getElementById('searchResultsGrid');
+            const searchResultsTitle = document.getElementById('searchResultsTitle');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            hideRecipeDetail();
+            
+            if (recipes.length > 0) {
+                searchResultsGrid.innerHTML = recipes.map(recipe => `
+                    <div class="recipe-card" onclick="showRecipeDetailFromSearch(${recipe.id})">
+                        <div class="recipe-image">
+                            ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}">` : recipe.icon}
+                            <div class="difficulty-badge">${recipe.difficulty}</div>
+                            ${recipe.matchPercentage ? `<div class="match-badge">${Math.round(recipe.matchPercentage)}% match</div>` : ''}
+                        </div>
+                        <div class="recipe-content">
+                            <h3>${recipe.name}</h3>
+                            <div class="recipe-meta">
+                                <span><i class="far fa-clock"></i> ${recipe.time}</span>
+                                <span><i class="fas fa-utensils"></i> ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                                ${recipe.chef ? `<span><i class="fas fa-user-tie"></i> ${recipe.chef}</span>` : ''}
+                                ${recipe.matchedCount && recipe.totalSearchIngredients ? 
+                                    `<span><i class="fas fa-check-circle"></i> ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
+                                    (recipe.matchPercentage ? `<span><i class="fas fa-check-circle"></i> ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
+                                }
+                            </div>
+                            <p class="recipe-description">${recipe.description}</p>
+                            
+                            ${recipe.matchedIngredients && recipe.matchedIngredients.length > 0 ? `
+                            <div class="recipe-ingredients">
+                                <h4><i class="fas fa-bullseye"></i> Ingredientes encontrados:</h4>
+                                <div class="matched-ingredients">
+                                    ${recipe.matchedIngredients.slice(0, 3).map(ing => 
+                                        `<span>${ing}</span>`
+                                    ).join('')}
+                                    ${recipe.matchedIngredients.length > 3 ? '...' : ''}
+                                </div>
+                                <h4><i class="fas fa-list"></i> Ingredientes premium:</h4>
+                                <div class="ingredients-list">
+                                    ${recipe.ingredients.slice(0, 3).join(', ')}...
+                                </div>
+                            </div>
+                            ` : `
+                            <div class="recipe-ingredients">
+                                <h4><i class="fas fa-list"></i> Ingredientes premium:</h4>
+                                <div class="ingredients-list">
+                                    ${recipe.ingredients.slice(0, 3).join(', ')}...
+                                </div>
+                            </div>
+                            `}
+                            
+                            <div class="recipe-actions">
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})"><i class="fas fa-eye"></i> Ver Receta</button>
+                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})"><i class="fas fa-star"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Calcular estadísticas
+                const totalSearchIngredients = searchIngredients.length;
+                const avgMatch = recipes.reduce((sum, recipe) => sum + (recipe.matchedCount || 0), 0) / recipes.length;
+                
+                searchResultsTitle.innerHTML = `
+                    Resultados por ingredientes: "${searchIngredients.join(', ')}"
+                    <small style="display: block; font-size: 1rem; color: #d4af37; margin-top: 5px;">
+                        ${recipes.length} platos encontrados • ${avgMatch.toFixed(1)} ingredientes coincidentes en promedio
+                    </small>
+                `;
+                
+            } else {
+                searchResultsGrid.innerHTML = `
+                    <div class="no-results-message">
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>No se encontraron platos</h3>
+                        <p>No hay platos gourmet que contengan los ingredientes: "${searchIngredients.join(', ')}"</p>
+                        <div style="margin-top: 20px;">
+                            <p><strong>Sugerencias:</strong></p>
+                            <ul style="text-align: left; display: inline-block;">
+                                <li>Verifica la ortografía de los ingredientes</li>
+                                <li>Intenta con términos más generales</li>
+                                <li>Prueba con menos ingredientes</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            searchResultsSection.style.display = 'block';
+            document.getElementById('dishesMainSection').style.display = 'none';
+        }
+
+        // Mostrar detalle desde búsqueda
+        function showRecipeDetailFromSearch(recipeId) {
+            const receta = currentSearchResults.find(r => r.id === recipeId);
+            
+            if (!receta) return;
+            
+            const recipeDetailContent = document.getElementById('recipeDetailContent');
+            const recipeDetailSection = document.getElementById('recipeDetailSection');
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            
+            searchResultsSection.style.display = 'none';
+            recipeDetailSection.style.display = 'block';
+            
+            const pasosProcesados = procesarPasos(receta.instructions);
+            
+            recipeDetailContent.innerHTML = `
+                <div class="recipe-detail-card">
+                    <div class="recipe-detail-header">
+                        <h2>${receta.icon} ${receta.name}</h2>
+                        <div class="recipe-meta-info">
+                            <span class="recipe-category-badge">${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                            ${receta.chef ? `<span class="chef-badge"><i class="fas fa-user-tie"></i> ${receta.chef}</span>` : ''}
+                            ${receta.precio ? `<span class="price-badge"><i class="fas fa-tag"></i> ${receta.precio}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    ${receta.imagen ? `
+                    <div class="recipe-detail-image">
+                        <img src="${receta.imagen}" alt="${receta.name}">
+                    </div>
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #d4af37, #8b4513); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                        ${receta.icon}
+                    </div>`}
+                    
+                    <div class="recipe-detail-content">
+                        <div class="recipe-detail-section">
+                            <h3><i class="fas fa-list"></i> Ingredientes Premium</h3>
+                            <div class="ingredients-list">
+                                ${receta.ingredients.map(ingredient => 
+                                    `<p>• ${ingredient}</p>`
+                                ).join('')}
+                            </div>
+                            ${receta.alergenos ? `
+                            <div class="allergens-info">
+                                <h4><i class="fas fa-exclamation-triangle"></i> Alérgenos:</h4>
+                                <p>${receta.alergenos}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="recipe-detail-section">
+                            <h3><i class="fas fa-user-tie"></i> Técnica Michelin</h3>
+                            <div class="steps-list">
+                                ${pasosProcesados}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mostrar detalle desde sección principal
         function showRecipeDetailFromMain(dishId) {
             const dish = allDishes.find(d => d.id === dishId);
             
@@ -240,8 +692,8 @@
                         <h2>${dish.icon} ${dish.name}</h2>
                         <div class="recipe-meta-info">
                             <span class="recipe-category-badge">${dish.type.charAt(0).toUpperCase() + dish.type.slice(1)}</span>
-                            ${dish.chef ? `<span class="chef-badge">👨‍🍳 ${dish.chef}</span>` : ''}
-                            ${dish.precio ? `<span class="price-badge">💰 ${dish.precio}</span>` : ''}
+                            ${dish.chef ? `<span class="chef-badge"><i class="fas fa-user-tie"></i> ${dish.chef}</span>` : ''}
+                            ${dish.precio ? `<span class="price-badge"><i class="fas fa-tag"></i> ${dish.precio}</span>` : ''}
                         </div>
                     </div>
                     
@@ -255,7 +707,7 @@
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes Premium</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes Premium</h3>
                             <div class="ingredients-list">
                                 ${dish.ingredients.map(ingredient => 
                                     `<p>• ${ingredient}</p>`
@@ -263,14 +715,14 @@
                             </div>
                             ${dish.alergenos ? `
                             <div class="allergens-info">
-                                <h4>⚠️ Alérgenos:</h4>
+                                <h4><i class="fas fa-exclamation-triangle"></i> Alérgenos:</h4>
                                 <p>${dish.alergenos}</p>
                             </div>
                             ` : ''}
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Técnica Michelin</h3>
+                            <h3><i class="fas fa-user-tie"></i> Técnica Michelin</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
@@ -292,28 +744,28 @@
             const currentItems = dishesToShow.slice(startIndex, endIndex);
             
             dishesGrid.innerHTML = currentItems.map(dish => `
-                <div class="dish-card" onclick="showRecipeDetailFromMain(${dish.id})">
-                    <div class="dish-image">
-                        ${dish.imagen ? `<img src="${dish.imagen}" alt="${dish.name}" style="width:100%;height:100%;object-fit:cover;">` : dish.icon}
+                <div class="recipe-card" onclick="showRecipeDetailFromMain(${dish.id})">
+                    <div class="recipe-image">
+                        ${dish.imagen ? `<img src="${dish.imagen}" alt="${dish.name}">` : dish.icon}
                         <div class="difficulty-badge">${dish.difficulty}</div>
                     </div>
-                    <div class="dish-content">
+                    <div class="recipe-content">
                         <h3>${dish.name}</h3>
-                        <div class="dish-meta">
-                            <span>⏱️ ${dish.time}</span>
-                            <span>🍽️ ${dish.type.charAt(0).toUpperCase() + dish.type.slice(1)}</span>
-                            ${dish.chef ? `<span>👨‍🍳 ${dish.chef}</span>` : ''}
+                        <div class="recipe-meta">
+                            <span><i class="far fa-clock"></i> ${dish.time}</span>
+                            <span><i class="fas fa-utensils"></i> ${dish.type.charAt(0).toUpperCase() + dish.type.slice(1)}</span>
+                            ${dish.chef ? `<span><i class="fas fa-user-tie"></i> ${dish.chef}</span>` : ''}
                         </div>
-                        <p class="dish-description">${dish.description}</p>
-                        <div class="dish-ingredients">
-                            <h4>Ingredientes premium:</h4>
+                        <p class="recipe-description">${dish.description}</p>
+                        <div class="recipe-ingredients">
+                            <h4><i class="fas fa-list"></i> Ingredientes premium:</h4>
                             <div class="ingredients-list">
                                 ${dish.ingredients.slice(0, 3).join(', ')}...
                             </div>
                         </div>
-                        <div class="dish-actions">
-                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${dish.id})">Ver Receta</button>
-                            <button class="btn-secondary" onclick="addToFavorites(${dish.id})">⭐</button>
+                        <div class="recipe-actions">
+                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${dish.id})"><i class="fas fa-eye"></i> Ver Receta</button>
+                            <button class="btn-secondary" onclick="addToFavorites(${dish.id})"><i class="fas fa-star"></i></button>
                         </div>
                     </div>
                 </div>
@@ -353,7 +805,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    ← Anterior
+                    <i class="fas fa-arrow-left"></i> Anterior
                 </button>
             `;
             
@@ -368,7 +820,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    Siguiente →
+                    Siguiente <i class="fas fa-arrow-right"></i>
                 </button>
             `;
             
@@ -394,10 +846,35 @@
 
         function addToFavorites(dishId) {
             const dish = allDishes.find(d => d.id === dishId);
-            alert(`¡${dish.name} agregado a tus favoritos! ⭐`);
+            alert(`¡${dish.name} agregado a tus favoritos! <i class="fas fa-star"></i>`);
             event.stopPropagation();
         }
 
+        // Permitir búsqueda con Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchDishes();
+            }
+        });
+
+        document.getElementById('ingredientSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchByIngredients();
+            }
+        });
+
+        // Animación para las tarjetas al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const dishCards = document.querySelectorAll('.recipe-card');
+            dishCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+
+        // Cargar platos desde la base de datos al iniciar
         window.addEventListener('load', () => {
             loadDishesFromDatabase();
         });

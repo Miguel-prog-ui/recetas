@@ -354,22 +354,3 @@ body{
     transform: rotate(-11deg) skewY(-41deg);
     transition-delay: 1.2s;
 }
-
-.input-hint {
-    display: block;
-    font-size: 0.75rem;
-    color: #666;
-    margin-top: 5px;
-    font-style: italic;
-}
-
-.input-box {
-    position: relative;
-}
-
-.input-box small {
-    position: absolute;
-    bottom: -20px;
-    left: 0;
-    width: 100%;
-}

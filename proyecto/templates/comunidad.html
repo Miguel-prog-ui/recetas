@@ -5,24 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recetas de la Comunidad - Recetas Deliciosas</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='comunidad.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <header>
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                  
                     <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
-                        <span class="home-icon">🏠</span>
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
                     </a>
-                    
-                    <div class="logo-text">Recetario</div>
+                    <div class="logo-text">Recetas Deliciosas</div>
                 </div>
-                <div class="user-info">
+                <div class="header-right">
                     {% if session.usuario %}
-                    <span class="user-name">👤 {{ session.usuario }}</span>
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ session.usuario }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
                     {% else %}
-                    <span class="user-name">👤 Usuario sin registrar</span>
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
                     {% endif %}
                 </div>
             </div>
@@ -31,42 +74,60 @@
 
     <main class="container">
         <section class="hero">
-            <span class="hero-icon">👥</span>
-            <h1>Recetas de la Comunidad</h1>
-            <p>Descubre las creaciones culinarias compartidas por nuestra comunidad de amantes de la cocina. ¡Comparte tus propias recetas y sorprende a todos!</p>
-        </section>
-
-        <section class="filters">
-            <div class="filter-row">
-                <div class="filter-group">
-                    <div class="filter-buttons">
-                        
-                    </div>
+            <div class="hero-content">
+                <div class="hero-icon">
+                    <i class="fas fa-users"></i>
                 </div>
-                
-                <div class="filter-group">
-                    <div class="filter-buttons">
-                    </div>
-                </div>
-
-                <div class="search-section">
-                    <div class="filter-group">
-                        <label>Buscar por nombre:</label>
-                        <input type="text" placeholder="Buscar recetas..." id="searchInput">
-                    </div>
-                    <button onclick="searchRecipes()">Buscar</button>
-                </div>
-                
-                <div class="search-section">
-                    <div class="filter-group">
-                        <label>Buscar por ingredientes:</label>
-                        <input type="text" placeholder="Ej: pollo, tomate, queso..." id="ingredientSearch">
-                    </div>
-                    <button onclick="searchByIngredients()">Buscar Ingredientes</button>
+                <h1>Recetas de la Comunidad</h1>
+                <p>Descubre las creaciones culinarias compartidas por nuestra comunidad de amantes de la cocina. ¡Comparte tus propias recetas y sorprende a todos!</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
                 </div>
             </div>
         </section>
 
+        <!-- Sección de Filtros y Búsqueda -->
+        <section class="filters">
+            <div class="filter-row">
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label><i class="fas fa-search"></i> Buscar por nombre:</label>
+                        <input type="text" placeholder="Buscar recetas..." id="searchInput">
+                    </div>
+                    <button onclick="searchRecipes()"><i class="fas fa-search"></i> Buscar</button>
+                </div>
+                
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label><i class="fas fa-list"></i> Buscar por ingredientes:</label>
+                        <input type="text" placeholder="Ej: pollo, tomate, queso..." id="ingredientSearch">
+                    </div>
+                    <button onclick="searchByIngredients()"><i class="fas fa-list-alt"></i> Buscar Ingredientes</button>
+                </div>
+                
+                <div class="sort-section">
+                    <div class="filter-group">
+                        <label><i class="fas fa-sort"></i> Ordenar por:</label>
+                        <select id="sortSelect" onchange="sortRecipes()">
+                            <option value="nombre">Nombre (A-Z)</option>
+                            <option value="popularidad">Más populares</option>
+                            <option value="recientes">Más recientes</option>
+                            <option value="fecha">Fecha de creación</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filters-actions">
+                    <button class="clear-filters-btn" onclick="clearActiveSearch()">
+                        <i class="fas fa-undo"></i> Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
         <section id="searchResultsSection" class="search-results-section" style="display: none;">
             <div class="container">
                 <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
@@ -74,15 +135,15 @@
             </div>
         </section>
 
-        
+        <!-- Sección de detalle de receta (oculta inicialmente) -->
         <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
             <div class="container">
-                <button onclick="hideRecipeDetail()" class="back-btn">← Volver a los resultados</button>
+                <button onclick="hideRecipeDetail()" class="back-btn"><i class="fas fa-arrow-left"></i> Volver a los resultados</button>
                 <div id="recipeDetailContent"></div>
             </div>
         </section>
 
-     
+        <!-- Sección principal de recetas -->
         <section class="recipes-section" id="recipesMainSection">
             <div class="section-header">
                 <h2 class="section-title">Recetas de la Comunidad</h2>
@@ -90,19 +151,19 @@
             </div>
             
             <div class="recipes-grid" id="recipesGrid">
-              
+                <!-- Las recetas se cargarán dinámicamente desde la base de datos -->
             </div>
             
-           
+            <!-- Paginación -->
             <div class="pagination" id="pagination">
-              
+                <!-- Los controles de paginación se cargarán dinámicamente -->
             </div>
         </section>
 
-       
+        <!-- Sección para subir recetas -->
         <section class="upload-section" id="uploadSection">
             <div class="upload-card">
-                <h2>📤 Comparte Tu Receta</h2>
+                <h2><i class="fas fa-upload"></i> Comparte Tu Receta</h2>
                 {% if session.usuario %}
                 <form id="recipeUploadForm" class="upload-form">
                     <div class="form-group">
@@ -135,7 +196,6 @@
                         <small>Separa cada paso con un salto de línea</small>
                     </div>
 
-
                     <div class="form-group">
                         <label for="recipeImage">Imagen de la receta (Opcional)</label>
                         <input type="file" id="recipeImage" name="recipeImage" accept=".jpg,.jpeg,.png,.gif,.webp">
@@ -149,7 +209,7 @@
                 </form>
                 {% else %}
                 <div class="login-required">
-                    <div class="login-icon">🔒</div>
+                    <div class="login-icon"><i class="fas fa-lock"></i></div>
                     <h3>Inicia sesión para compartir tus recetas</h3>
                     <p>Únete a nuestra comunidad y comparte tus creaciones culinarias con todos</p>
                     <a href="{{ url_for('mostrar_login') }}" class="btn-login">Iniciar Sesión</a>
@@ -163,7 +223,13 @@
     <footer>
         <div class="container">
             <div class="footer-content">
-                <p>&copy; 2025 Recetas Deliciosas - Comunidad. Todos los derechos reservados.</p>
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
+                <p>&copy; 2024 Recetas Deliciosas - Comunidad. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
@@ -171,21 +237,195 @@
     <script>
         let allRecipes = [];
         let filteredRecipes = [];
-        let currentTypeFilter = 'todos';
-        let currentDifficultyFilter = 'todas';
         let currentPage = 1;
         const itemsPerPage = 8;
         let currentSearchResults = [];
+        let currentUserId = "{{ session.usuario }}";
+        let currentSort = 'nombre';
 
-        
+        // Función para obtener URL de imagen
+        function getImageUrl(imagenFilename) {
+            if (!imagenFilename) {
+                console.log('❌ No hay imagen_filename para esta receta');
+                return '';
+            }
+            
+            const cleanFilename = imagenFilename.trim();
+            
+            if (cleanFilename.startsWith('http://') || cleanFilename.startsWith('https://')) {
+                return cleanFilename;
+            }
+            
+            if (cleanFilename.startsWith('/static/') || cleanFilename.startsWith('static/')) {
+                return cleanFilename;
+            }
+            
+            const finalUrl = `/static/imagenes_recetas/${cleanFilename}`;
+            console.log(`📁 Convertido: "${cleanFilename}" → "${finalUrl}"`);
+            return finalUrl;
+        }
+
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // 🔥 FUNCIONES DE LIKES CORREGIDAS
+        async function toggleLike(recipeId, likeButton, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            
+            if (!currentUserId) {
+                alert('Debes iniciar sesión para dar like');
+                return;
+            }
+
+            try {
+                const likeIcon = likeButton.querySelector('i');
+                const originalIcon = likeIcon.className;
+                likeIcon.className = 'fas fa-spinner fa-spin';
+                likeButton.disabled = true;
+
+                const response = await fetch('/toggle_like', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        recipe_id: recipeId,
+                        user_id: currentUserId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const likeCountSpan = likeButton.querySelector('.like-count');
+                    
+                    if (data.user_liked) {
+                        likeIcon.className = 'fas fa-heart';
+                        likeButton.classList.add('liked');
+                    } else {
+                        likeIcon.className = 'far fa-heart';
+                        likeButton.classList.remove('liked');
+                    }
+                    
+                    if (likeCountSpan) {
+                        likeCountSpan.textContent = data.total_likes;
+                    }
+                    
+                    updateAllLikeButtons(recipeId, data.user_liked, data.total_likes);
+                    updateRecipeLikes(recipeId, data.user_liked, data.total_likes);
+                    
+                } else {
+                    console.error('Error en like:', data.message);
+                    likeIcon.className = originalIcon;
+                }
+            } catch (error) {
+                console.error('Error al dar like:', error);
+                alert('Error al procesar el like');
+            } finally {
+                likeButton.disabled = false;
+            }
+        }
+
+        function updateAllLikeButtons(recipeId, userLiked, totalLikes) {
+            const allLikeButtons = document.querySelectorAll(`.like-btn[data-recipe-id="${recipeId}"]`);
+            
+            allLikeButtons.forEach(button => {
+                const likeIcon = button.querySelector('i');
+                const likeCountSpan = button.querySelector('.like-count');
+                
+                if (userLiked) {
+                    likeIcon.className = 'fas fa-heart';
+                    button.classList.add('liked');
+                } else {
+                    likeIcon.className = 'far fa-heart';
+                    button.classList.remove('liked');
+                }
+                
+                if (likeCountSpan) {
+                    likeCountSpan.textContent = totalLikes;
+                }
+            });
+        }
+
+        function updateRecipeLikes(recipeId, userLiked, totalLikes) {
+            const recipe = allRecipes.find(r => r.id === recipeId);
+            if (recipe) {
+                recipe.likesInfo = {
+                    user_liked: userLiked,
+                    total_likes: totalLikes
+                };
+            }
+            
+            const filteredRecipe = filteredRecipes.find(r => r.id === recipeId);
+            if (filteredRecipe) {
+                filteredRecipe.likesInfo = {
+                    user_liked: userLiked,
+                    total_likes: totalLikes
+                };
+            }
+            
+            const searchRecipe = currentSearchResults.find(r => r.id === recipeId);
+            if (searchRecipe) {
+                searchRecipe.likesInfo = {
+                    user_liked: userLiked,
+                    total_likes: totalLikes
+                };
+            }
+        }
+
+        async function getLikesInfo(recipeId) {
+            try {
+                const response = await fetch(`/likes_receta?recipe_id=${recipeId}&user_id=${currentUserId}`);
+                const data = await response.json();
+                
+                if (!data.error) {
+                    return data;
+                }
+            } catch (error) {
+                console.error('Error al obtener info de likes:', error);
+            }
+            
+            return { total_likes: 0, user_liked: false };
+        }
+
+        function createLikeButton(recipeId, likesInfo = null) {
+            const userLiked = likesInfo ? likesInfo.user_liked : false;
+            const totalLikes = likesInfo ? likesInfo.total_likes : 0;
+            
+            return `
+                <button class="like-btn ${userLiked ? 'liked' : ''}" 
+                        data-recipe-id="${recipeId}"
+                        onclick="toggleLike('${recipeId}', this, event)"
+                        title="${userLiked ? 'Quitar like' : 'Dar like'}">
+                    <i class="${userLiked ? 'fas' : 'far'} fa-heart"></i>
+                    <span class="like-count">${totalLikes}</span>
+                </button>
+            `;
+        }
+
+        // Inicializar formulario
         document.addEventListener('DOMContentLoaded', function() {
             initializeForm();
             loadRecipesFromDatabase();
         });
 
-        
         function initializeForm() {
-            
             const form = document.getElementById('recipeUploadForm');
             if (form) {
                 form.addEventListener('submit', function(e) {
@@ -195,7 +435,6 @@
             }
         }
 
-      
         function resetForm() {
             const form = document.getElementById('recipeUploadForm');
             if (form) {
@@ -203,10 +442,8 @@
             }
         }
 
-       
         function submitRecipe() {
             const formData = new FormData(document.getElementById('recipeUploadForm'));
-            
             
             const recipeName = formData.get('recipeName');
             const recipeIngredients = formData.get('recipeIngredients');
@@ -217,13 +454,11 @@
                 return;
             }
 
-            
             const submitBtn = document.querySelector('#recipeUploadForm .btn-primary');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Subiendo...';
             submitBtn.disabled = true;
 
-            
             fetch('/agregar_receta_comunidad', {
                 method: 'POST',
                 body: formData
@@ -233,7 +468,6 @@
                 if (data.success) {
                     alert('¡Receta subida exitosamente! 🎉\n\n' + data.message);
                     resetForm();
-                
                     loadRecipesFromDatabase();
                 } else {
                     alert('❌ Error: ' + data.error);
@@ -249,102 +483,222 @@
             });
         }
 
-       
-        function loadRecipesFromDatabase() {
-            fetch('/obtener_recetas_comunidad')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.recetas && data.recetas.length > 0) {
-                        allRecipes = data.recetas.map(receta => ({
-                            id: receta.id,
-                            name: receta.title,
-                            url: receta.url || '',
-                            icon: getRecipeIcon(receta.title),
-                            description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
-                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
-                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
-                            imagen: receta.imagen_filename ? `/static/imagenes_recetas/${receta.imagen_filename}` : '',
-                            autor: 'Usuario de la comunidad',
-                            fecha: receta.fecha || 'Fecha reciente'
-                        }));
-                        
-                        filteredRecipes = [...allRecipes];
-                        loadRecipes();
-                        updateResultsCount();
-                    } else {
-                        document.getElementById('resultsCount').textContent = 'No se encontraron recetas de la comunidad';
-                        document.getElementById('recipesGrid').innerHTML = `
-                            <div class="no-results-message">
-                                <div class="no-results-icon">👥</div>
-                                <h3>No hay recetas de la comunidad</h3>
-                                <p>Sé el primero en compartir una receta con la comunidad.</p>
-                                {% if not session.usuario %}
-                                <a href="{{ url_for('mostrar_login') }}" class="btn-primary" style="margin-top: 20px;">Iniciar Sesión para Compartir</a>
-                                {% endif %}
-                            </div>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('resultsCount').textContent = 'Error cargando recetas';
+        // Cargar recetas desde la base de datos
+        async function loadRecipesFromDatabase() {
+            try {
+                const response = await fetch('/obtener_recetas_comunidad');
+                const data = await response.json();
+                
+                console.log('📥 Datos recibidos de la API:', data);
+                
+                if (data.recetas && data.recetas.length > 0) {
+                    const recipesWithLikes = await Promise.all(
+                        data.recetas.map(async (receta) => {
+                            const likesInfo = await getLikesInfo(receta.id);
+                            const imagenUrl = getImageUrl(receta.imagen_filename);
+                            
+                            return {
+                                id: receta.id,
+                                name: receta.title,
+                                type: getRecipeType(receta.title, receta.ingredients),
+                                time: "30 min",
+                                difficulty: getRecipeDifficulty(receta.title, receta.ingredients),
+                                icon: getRecipeIcon(receta.title),
+                                description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                                ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                                instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                                imagen: imagenUrl,
+                                autor: 'Usuario de la comunidad',
+                                fecha: receta.fecha || 'Fecha reciente',
+                                likesInfo: likesInfo
+                            };
+                        })
+                    );
+                    
+                    allRecipes = recipesWithLikes;
+                    filteredRecipes = [...allRecipes];
+                    sortRecipes();
+                    updateResultsCount();
+                } else {
+                    document.getElementById('resultsCount').textContent = 'No se encontraron recetas de la comunidad';
                     document.getElementById('recipesGrid').innerHTML = `
                         <div class="no-results-message">
-                            <div class="no-results-icon">⚠️</div>
-                            <h3>Error al cargar recetas</h3>
-                            <p>No se pudieron cargar las recetas de la comunidad.</p>
+                            <div class="no-results-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3>No hay recetas de la comunidad</h3>
+                            <p>Sé el primero en compartir una receta con la comunidad.</p>
+                            {% if not session.usuario %}
+                            <a href="{{ url_for('mostrar_login') }}" class="btn-primary" style="margin-top: 20px;">Iniciar Sesión para Compartir</a>
+                            {% endif %}
                         </div>
                     `;
-                });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('resultsCount').textContent = 'Error cargando recetas';
+                document.getElementById('recipesGrid').innerHTML = `
+                    <div class="no-results-message">
+                        <div class="no-results-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3>Error al cargar recetas</h3>
+                        <p>No se pudieron cargar las recetas de la comunidad.</p>
+                    </div>
+                `;
+            }
         }
 
-        
+        // 🔥 FUNCIÓN DE ORDENAMIENTO
+        function sortRecipes() {
+            const sortSelect = document.getElementById('sortSelect');
+            currentSort = sortSelect.value;
+            
+            let recipesToSort = currentSearchResults.length > 0 ? currentSearchResults : filteredRecipes;
+            
+            switch(currentSort) {
+                case 'popularidad':
+                    recipesToSort.sort((a, b) => {
+                        const likesA = a.likesInfo ? a.likesInfo.total_likes : 0;
+                        const likesB = b.likesInfo ? b.likesInfo.total_likes : 0;
+                        return likesB - likesA;
+                    });
+                    break;
+                    
+                case 'recientes':
+                    recipesToSort.sort((a, b) => b.id - a.id);
+                    break;
+                    
+                case 'fecha':
+                    recipesToSort.sort((a, b) => b.id - a.id);
+                    break;
+                    
+                case 'nombre':
+                default:
+                    recipesToSort.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+            }
+            
+            if (currentSearchResults.length > 0) {
+                currentSearchResults = recipesToSort;
+                const searchTerm = document.getElementById('searchInput').value;
+                if (searchTerm) {
+                    displaySearchResults(currentSearchResults, searchTerm);
+                } else {
+                    const ingredientSearch = document.getElementById('ingredientSearch').value;
+                    if (ingredientSearch) {
+                        displayIngredientSearchResults(currentSearchResults, ingredientSearch.split(',').map(i => i.trim()));
+                    }
+                }
+            } else {
+                filteredRecipes = recipesToSort;
+                loadRecipes();
+            }
+            
+            updateResultsCount();
+        }
+
+        function getRecipeType(title, ingredients) {
+            const titleLower = title.toLowerCase();
+            const ingredientsLower = ingredients ? ingredients.toLowerCase() : '';
+            
+            if (titleLower.includes('desayuno') || titleLower.includes('desayunar') || 
+                titleLower.includes('huevo') || titleLower.includes('tostada') || titleLower.includes('pancake')) {
+                return 'desayunos';
+            } else if (titleLower.includes('almuerzo') || titleLower.includes('comida') || 
+                      titleLower.includes('pasta') || titleLower.includes('arroz') || titleLower.includes('sándwich')) {
+                return 'almuerzos';
+            } else if (titleLower.includes('cena') || titleLower.includes('noche') || 
+                      titleLower.includes('asado') || titleLower.includes('horno') || titleLower.includes('gourmet')) {
+                return 'cenas';
+            } else if (titleLower.includes('ensalada') || titleLower.includes('verde') || 
+                      ingredientsLower.includes('lechuga') || ingredientsLower.includes('tomate')) {
+                return 'ensaladas';
+            } else if (titleLower.includes('sopa') || titleLower.includes('caldo') || 
+                      titleLower.includes('crema') || titleLower.includes('guiso')) {
+                return 'sopas';
+            } else {
+                return 'comunidad';
+            }
+        }
+
+        function getRecipeDifficulty(title, ingredients) {
+            const titleLower = title.toLowerCase();
+            const ingredientsText = ingredients ? ingredients.toLowerCase() : '';
+            
+            if (titleLower.includes('fácil') || titleLower.includes('simple') || titleLower.includes('rápido') ||
+                ingredientsText.includes('3 ingredientes') || ingredientsText.includes('4 ingredientes') ||
+                titleLower.includes('express') || titleLower.includes('fácil')) {
+                return 'Fácil';
+            } else if (titleLower.includes('difícil') || titleLower.includes('complejo') || titleLower.includes('avanzado') ||
+                      ingredientsText.includes('técnica') || ingredientsText.includes('profesional') ||
+                      titleLower.includes('gourmet') || titleLower.includes('chef')) {
+                return 'Difícil';
+            } else {
+                return 'Medio';
+            }
+        }
+
         function getRecipeIcon(title) {
             const titleLower = title.toLowerCase();
-            if (titleLower.includes('pasta') || titleLower.includes('espagueti')) return '🍝';
-            if (titleLower.includes('pollo') || titleLower.includes('pavo')) return '🍗';
-            if (titleLower.includes('pescado') || titleLower.includes('salmón')) return '🐟';
-            if (titleLower.includes('carne') || titleLower.includes('res')) return '🥩';
-            if (titleLower.includes('ensalada') || titleLower.includes('verdura')) return '🥗';
-            if (titleLower.includes('sopa') || titleLower.includes('caldo')) return '🍲';
-            if (titleLower.includes('arroz') || titleLower.includes('risotto')) return '🍚';
-            if (titleLower.includes('pizza')) return '🍕';
-            if (titleLower.includes('hamburguesa')) return '🍔';
-            if (titleLower.includes('taco') || titleLower.includes('burrito')) return '🌮';
-            if (titleLower.includes('bebida') || titleLower.includes('jugo')) return '🥤';
-            if (titleLower.includes('postre') || titleLower.includes('dulce')) return '🍰';
-            if (titleLower.includes('licor') || titleLower.includes('coctel')) return '🍸';
             
-            return '🍽️';
+            if (titleLower.includes('pasta') || titleLower.includes('espagueti') || titleLower.includes('lasaña')) return '<i class="fas fa-pasta"></i>';
+            if (titleLower.includes('pollo') || titleLower.includes('pavo')) return '<i class="fas fa-drumstick-bite"></i>';
+            if (titleLower.includes('pescado') || titleLower.includes('salmón') || titleLower.includes('atún')) return '<i class="fas fa-fish"></i>';
+            if (titleLower.includes('carne') || titleLower.includes('res') || titleLower.includes('cerdo')) return '<i class="fas fa-bacon"></i>';
+            if (titleLower.includes('ensalada') || titleLower.includes('verdura')) return '<i class="fas fa-leaf"></i>';
+            if (titleLower.includes('sopa') || titleLower.includes('caldo')) return '<i class="fas fa-bowl-food"></i>';
+            if (titleLower.includes('arroz') || titleLower.includes('risotto')) return '<i class="fas fa-rice"></i>';
+            if (titleLower.includes('pizza')) return '<i class="fas fa-pizza-slice"></i>';
+            if (titleLower.includes('hamburguesa') || titleLower.includes('burger')) return '<i class="fas fa-hamburger"></i>';
+            if (titleLower.includes('taco') || titleLower.includes('burrito')) return '<i class="fas fa-taco"></i>';
+            if (titleLower.includes('sándwich') || titleLower.includes('sandwich')) return '<i class="fas fa-sandwich"></i>';
+            if (titleLower.includes('huevo') || titleLower.includes('omelet')) return '<i class="fas fa-egg"></i>';
+            if (titleLower.includes('queso')) return '<i class="fas fa-cheese"></i>';
+            if (titleLower.includes('pan') || titleLower.includes('tostada')) return '<i class="fas fa-bread-slice"></i>';
+            
+            return '<i class="fas fa-utensils"></i>';
         }
 
         function updateResultsCount() {
             const resultsCount = document.getElementById('resultsCount');
-            resultsCount.textContent = `${filteredRecipes.length} recetas de la comunidad`;
+            const total = currentSearchResults.length > 0 ? currentSearchResults.length : filteredRecipes.length;
+            const sortText = getSortText();
+            resultsCount.textContent = `${total} recetas encontradas ${sortText}`;
         }
 
-       a
+        function getSortText() {
+            switch(currentSort) {
+                case 'popularidad': return '(ordenadas por popularidad)';
+                case 'recientes': return '(ordenadas por más recientes)';
+                case 'fecha': return '(ordenadas por fecha)';
+                case 'nombre': return '(ordenadas por nombre)';
+                default: return '';
+            }
+        }
+
         function clearActiveSearch() {
             hideSearchResults();
             hideRecipeDetail();
             document.getElementById('searchInput').value = '';
             document.getElementById('ingredientSearch').value = '';
+            document.getElementById('sortSelect').value = 'nombre';
             currentSearchResults = [];
+            currentSort = 'nombre';
             
             document.getElementById('recipesMainSection').style.display = 'block';
-            document.getElementById('uploadSection').style.display = 'block'; 
-            loadRecipes();
+            document.getElementById('uploadSection').style.display = 'block';
+            filteredRecipes = [...allRecipes];
+            sortRecipes();
             updateResultsCount();
         }
 
-        
         function hideSearchResults() {
             const searchResultsSection = document.getElementById('searchResultsSection');
             searchResultsSection.style.display = 'none';
             currentSearchResults = [];
         }
 
-        
         function hideRecipeDetail() {
             const recipeDetailSection = document.getElementById('recipeDetailSection');
             const searchResultsSection = document.getElementById('searchResultsSection');
@@ -355,14 +709,13 @@
             
             if (currentSearchResults.length > 0) {
                 searchResultsSection.style.display = 'block';
-                uploadSection.style.display = 'none'; 
+                uploadSection.style.display = 'none';
             } else {
                 recipesMainSection.style.display = 'block';
-                uploadSection.style.display = 'block'; 
+                uploadSection.style.display = 'block';
             }
         }
 
-        
         function procesarPasos(instructions) {
             if (!instructions || instructions.length === 0) return '<p>No hay instrucciones disponibles.</p>';
             
@@ -380,8 +733,8 @@
             return pasosHTML || '<p>No hay instrucciones disponibles.</p>';
         }
 
-        
-        function searchRecipes() {
+        // Búsqueda por nombre
+        async function searchRecipes() {
             const searchTerm = document.getElementById('searchInput').value.trim();
             
             if (!searchTerm) {
@@ -389,19 +742,47 @@
                 return;
             }
             
-            
-            const filteredResults = allRecipes.filter(receta => 
-                receta.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                receta.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                receta.ingredients.some(ing => ing.toLowerCase().includes(searchTerm.toLowerCase()))
-            );
-            
-            currentSearchResults = filteredResults;
-            displaySearchResults(currentSearchResults, searchTerm);
+            try {
+                const response = await fetch(`/buscar_recetas_comunidad?q=${encodeURIComponent(searchTerm)}`);
+                const data = await response.json();
+                
+                if (data.recetas && data.recetas.length > 0) {
+                    const resultsWithLikes = await Promise.all(
+                        data.recetas.map(async (receta) => {
+                            const likesInfo = await getLikesInfo(receta.id);
+                            const imagenUrl = getImageUrl(receta.imagen_filename);
+                            
+                            return {
+                                id: receta.id,
+                                name: receta.title,
+                                type: getRecipeType(receta.title, receta.ingredients),
+                                time: "30 min",
+                                difficulty: getRecipeDifficulty(receta.title, receta.ingredients),
+                                icon: getRecipeIcon(receta.title),
+                                description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                                ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                                instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                                imagen: imagenUrl,
+                                autor: 'Usuario de la comunidad',
+                                fecha: 'Fecha reciente',
+                                likesInfo: likesInfo
+                            };
+                        })
+                    );
+                    
+                    currentSearchResults = resultsWithLikes;
+                    sortRecipes();
+                } else {
+                    displaySearchResults([], searchTerm);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                displaySearchResults([], searchTerm);
+            }
         }
 
-        
-        function searchByIngredients() {
+        // Búsqueda por ingredientes
+        async function searchByIngredients() {
             const ingredientSearch = document.getElementById('ingredientSearch').value.trim();
             
             if (!ingredientSearch) {
@@ -409,72 +790,86 @@
                 return;
             }
             
-            const searchIngredients = ingredientSearch.split(',').map(ing => ing.trim().toLowerCase());
-            
-            
-            const filteredResults = allRecipes.filter(receta => {
-                const recetaIngredients = receta.ingredients.map(ing => ing.toLowerCase());
-                return searchIngredients.some(searchIng => 
-                    recetaIngredients.some(recetaIng => recetaIng.includes(searchIng))
-                );
-            });
-            
-            
-            const resultsWithMatches = filteredResults.map(receta => {
-                const recetaIngredients = receta.ingredients.map(ing => ing.toLowerCase());
-                const matchedIngredients = searchIngredients.filter(searchIng => 
-                    recetaIngredients.some(recetaIng => recetaIng.includes(searchIng))
-                );
-                const matchPercentage = (matchedIngredients.length / searchIngredients.length) * 100;
+            try {
+                const response = await fetch(`/buscar_por_ingredientes?ingredientes=${encodeURIComponent(ingredientSearch)}&categoria=comunidad`);
+                const data = await response.json();
                 
-                return {
-                    ...receta,
-                    matchedIngredients: matchedIngredients,
-                    matchedCount: matchedIngredients.length,
-                    totalSearchIngredients: searchIngredients.length,
-                    matchPercentage: matchPercentage
-                };
-            });
-            
-            currentSearchResults = resultsWithMatches;
-            displayIngredientSearchResults(currentSearchResults, searchIngredients);
+                if (data.recetas && data.recetas.length > 0) {
+                    const resultsWithLikes = await Promise.all(
+                        data.recetas.map(async (receta) => {
+                            const likesInfo = await getLikesInfo(receta.id);
+                            const imagenUrl = getImageUrl(receta.imagen_filename);
+                            
+                            return {
+                                id: receta.id,
+                                name: receta.title,
+                                type: getRecipeType(receta.title, receta.ingredients),
+                                time: "30 min",
+                                difficulty: getRecipeDifficulty(receta.title, receta.ingredients),
+                                icon: getRecipeIcon(receta.title),
+                                description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                                ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                                instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                                imagen: imagenUrl,
+                                autor: 'Usuario de la comunidad',
+                                fecha: 'Fecha reciente',
+                                likesInfo: likesInfo,
+                                matchPercentage: receta.match_percentage || 0,
+                                matchedIngredients: receta.matched_ingredients || [],
+                                totalSearchIngredients: receta.total_search_ingredients || 0,
+                                matchedCount: receta.matched_count || 0
+                            };
+                        })
+                    );
+                    
+                    currentSearchResults = resultsWithLikes;
+                    sortRecipes();
+                } else {
+                    displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
+                }
+            } catch (error) {
+                console.error('Error en búsqueda por ingredientes:', error);
+                displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
+            }
         }
 
-        
+        // Mostrar resultados de búsqueda por nombre
         function displaySearchResults(recetas, searchTerm) {
             const searchResultsGrid = document.getElementById('searchResultsGrid');
             const searchResultsTitle = document.getElementById('searchResultsTitle');
             const searchResultsSection = document.getElementById('searchResultsSection');
+            const uploadSection = document.getElementById('uploadSection');
             
             hideRecipeDetail();
             
             if (recetas.length > 0) {
                 searchResultsGrid.innerHTML = recetas.map(receta => `
-                    <div class="recipe-card">
+                    <div class="recipe-card" onclick="showRecipeDetailFromSearch('${receta.id}')">
                         <div class="recipe-image">
                             ${receta.imagen ? `<img src="${receta.imagen}" alt="${receta.name}" style="width:100%;height:100%;object-fit:cover;">` : receta.icon}
-                            <div class="community-badge">👥 Comunidad</div>
+                            <div class="difficulty-badge">${receta.difficulty}</div>
                         </div>
                         <div class="recipe-content">
                             <h3>${receta.name}</h3>
                             <div class="recipe-meta">
-                                <span>📅 ${receta.fecha}</span>
-                                <span>${receta.icon} Receta de la Comunidad</span>
+                                <span><i class="far fa-clock"></i> ${receta.time}</span>
+                                <span><i class="fas fa-utensils"></i> ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                                ${receta.likesInfo ? `<span><i class="fas fa-heart"></i> ${receta.likesInfo.total_likes} likes</span>` : ''}
                             </div>
                             <div class="recipe-author">
-                                <strong>👤 ${receta.autor}</strong>
-                                <span class="recipe-date">📅 ${receta.fecha}</span>
+                                <strong><i class="fas fa-user"></i> ${receta.autor}</strong>
+                                <span class="recipe-date"><i class="far fa-calendar"></i> ${receta.fecha}</span>
                             </div>
                             <p class="recipe-description">${receta.description}</p>
                             <div class="recipe-ingredients">
-                                <h4>Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${receta.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})">❤️</button>
+                                <button class="btn-primary" onclick="event.stopPropagation(); showRecipeDetailFromSearch('${receta.id}')"><i class="fas fa-eye"></i> Ver Receta</button>
+                                ${createLikeButton(receta.id, receta.likesInfo)}
                             </div>
                         </div>
                     </div>
@@ -485,7 +880,9 @@
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
                         <h3>No se encontraron recetas</h3>
                         <p>No hay recetas que coincidan con "${searchTerm}"</p>
                     </div>
@@ -494,59 +891,60 @@
             
             searchResultsSection.style.display = 'block';
             document.getElementById('recipesMainSection').style.display = 'none';
-            document.getElementById('uploadSection').style.display = 'none'; 
+            uploadSection.style.display = 'none';
         }
 
-       
+        // Mostrar resultados de búsqueda por ingredientes
         function displayIngredientSearchResults(recipes, searchIngredients) {
             const searchResultsGrid = document.getElementById('searchResultsGrid');
             const searchResultsTitle = document.getElementById('searchResultsTitle');
             const searchResultsSection = document.getElementById('searchResultsSection');
+            const uploadSection = document.getElementById('uploadSection');
             
             hideRecipeDetail();
             
             if (recipes.length > 0) {
                 searchResultsGrid.innerHTML = recipes.map(recipe => `
-                    <div class="recipe-card">
+                    <div class="recipe-card" onclick="showRecipeDetailFromSearch('${recipe.id}')">
                         <div class="recipe-image">
                             ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}" style="width:100%;height:100%;object-fit:cover;">` : recipe.icon}
                             <div class="difficulty-badge">${recipe.difficulty}</div>
-                            <div class="community-badge">👥 Comunidad</div>
                             ${recipe.matchPercentage ? `<div class="match-badge">${Math.round(recipe.matchPercentage)}% match</div>` : ''}
                         </div>
                         <div class="recipe-content">
                             <h3>${recipe.name}</h3>
                             <div class="recipe-meta">
-                                <span>⏱️ ${recipe.time}</span>
-                                <span>${recipe.icon} ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                                <span><i class="far fa-clock"></i> ${recipe.time}</span>
+                                <span><i class="fas fa-utensils"></i> ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                                ${recipe.likesInfo ? `<span><i class="fas fa-heart"></i> ${recipe.likesInfo.total_likes} likes</span>` : ''}
                                 ${recipe.matchedCount && recipe.totalSearchIngredients ? 
-                                    `<span>✅ ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
-                                    (recipe.matchPercentage ? `<span>✅ ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
+                                    `<span><i class="fas fa-check-circle"></i> ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
+                                    (recipe.matchPercentage ? `<span><i class="fas fa-check-circle"></i> ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
                                 }
                             </div>
                             <div class="recipe-author">
-                                <strong>👤 ${recipe.autor}</strong>
-                                <span class="recipe-date">📅 ${recipe.fecha}</span>
+                                <strong><i class="fas fa-user"></i> ${recipe.autor}</strong>
+                                <span class="recipe-date"><i class="far fa-calendar"></i> ${recipe.fecha}</span>
                             </div>
                             <p class="recipe-description">${recipe.description}</p>
                             
                             ${recipe.matchedIngredients && recipe.matchedIngredients.length > 0 ? `
                             <div class="recipe-ingredients">
-                                <h4>🎯 Ingredientes encontrados:</h4>
+                                <h4><i class="fas fa-bullseye"></i> Ingredientes encontrados:</h4>
                                 <div class="matched-ingredients">
                                     ${recipe.matchedIngredients.slice(0, 3).map(ing => 
                                         `<span>${ing}</span>`
                                     ).join('')}
                                     ${recipe.matchedIngredients.length > 3 ? '...' : ''}
                                 </div>
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             ` : `
                             <div class="recipe-ingredients">
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
@@ -554,8 +952,8 @@
                             `}
                             
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                                <button class="btn-primary" onclick="event.stopPropagation(); showRecipeDetailFromSearch('${recipe.id}')"><i class="fas fa-eye"></i> Ver Receta</button>
+                                ${createLikeButton(recipe.id, recipe.likesInfo)}
                             </div>
                         </div>
                     </div>
@@ -574,7 +972,9 @@
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
                         <h3>No se encontraron recetas</h3>
                         <p>No hay recetas que contengan los ingredientes: "${searchIngredients.join(', ')}"</p>
                         <div style="margin-top: 20px;">
@@ -591,14 +991,16 @@
             
             searchResultsSection.style.display = 'block';
             document.getElementById('recipesMainSection').style.display = 'none';
-            document.getElementById('uploadSection').style.display = 'none'; 
+            uploadSection.style.display = 'none';
         }
 
-        
-        function showRecipeDetailFromSearch(recipeId) {
-            const receta = currentSearchResults.find(r => r.id === recipeId);
+        // Mostrar detalle desde búsqueda
+        async function showRecipeDetailFromSearch(recipeId) {
+            const receta = currentSearchResults.find(r => r.id == recipeId);
             
             if (!receta) return;
+            
+            const updatedLikesInfo = await getLikesInfo(recipeId);
             
             const recipeDetailContent = document.getElementById('recipeDetailContent');
             const recipeDetailSection = document.getElementById('recipeDetailSection');
@@ -606,7 +1008,7 @@
             const uploadSection = document.getElementById('uploadSection');
             
             searchResultsSection.style.display = 'none';
-            uploadSection.style.display = 'none'; 
+            uploadSection.style.display = 'none';
             recipeDetailSection.style.display = 'block';
             
             const pasosProcesados = procesarPasos(receta.instructions);
@@ -615,27 +1017,43 @@
                 <div class="recipe-detail-card">
                     <div class="recipe-detail-header">
                         <h2>${receta.icon} ${receta.name}</h2>
-                        <div class="recipe-detail-meta">
-                            <span class="community-badge-large">👥 Receta de la Comunidad</span>
+                        <div class="header-actions">
+                            <span class="recipe-category-badge">${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                            ${createLikeButton(recipeId, updatedLikesInfo)}
                         </div>
                     </div>
                     
                     <div class="recipe-author-info">
-                        <strong>👤 Creado por: ${receta.autor}</strong>
-                        <span class="recipe-date">📅 ${receta.fecha}</span>
+                        <strong><i class="fas fa-user"></i> Creado por: ${receta.autor}</strong>
+                        <span class="recipe-date"><i class="far fa-calendar"></i> ${receta.fecha}</span>
                     </div>
                     
                     ${receta.imagen ? `
                     <div class="recipe-detail-image">
                         <img src="${receta.imagen}" alt="${receta.name}">
                     </div>
-                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #6A89CC, #4A69BD); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #E27D60, #FFB347); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
                         ${receta.icon}
                     </div>`}
                     
                     <div class="recipe-detail-content">
+                        <div class="recipe-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-clock"></i>
+                                <span>${receta.time}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-fire"></i>
+                                <span>${receta.difficulty}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-heart"></i>
+                                <span>${updatedLikesInfo.total_likes} likes</span>
+                            </div>
+                        </div>
+                        
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${receta.ingredients.map(ingredient => 
                                     `<p>• ${ingredient}</p>`
@@ -644,7 +1062,7 @@
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-utensils"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
@@ -652,7 +1070,7 @@
                         
                         ${receta.url ? `
                         <div class="recipe-detail-section">
-                            <h3>🔗 Enlace Original</h3>
+                            <h3><i class="fas fa-link"></i> Enlace Original</h3>
                             <p><a href="${receta.url}" target="_blank" style="color: #4A69BD; text-decoration: underline;">${receta.url}</a></p>
                         </div>
                         ` : ''}
@@ -661,10 +1079,13 @@
             `;
         }
 
-        function showRecipeDetailFromMain(recipeId) {
-            const recipe = allRecipes.find(r => r.id === recipeId);
+        // Mostrar detalle desde sección principal
+        async function showRecipeDetailFromMain(recipeId) {
+            const recipe = allRecipes.find(r => r.id == recipeId);
             
             if (!recipe) return;
+            
+            const updatedLikesInfo = await getLikesInfo(recipeId);
             
             const recipeDetailContent = document.getElementById('recipeDetailContent');
             const recipeDetailSection = document.getElementById('recipeDetailSection');
@@ -672,7 +1093,7 @@
             const uploadSection = document.getElementById('uploadSection');
             
             recipesMainSection.style.display = 'none';
-            uploadSection.style.display = 'none'; 
+            uploadSection.style.display = 'none';
             recipeDetailSection.style.display = 'block';
             
             const pasosProcesados = procesarPasos(recipe.instructions);
@@ -681,27 +1102,43 @@
                 <div class="recipe-detail-card">
                     <div class="recipe-detail-header">
                         <h2>${recipe.icon} ${recipe.name}</h2>
-                        <div class="recipe-detail-meta">
-                            <span class="community-badge-large">👥 Receta de la Comunidad</span>
+                        <div class="header-actions">
+                            <span class="recipe-category-badge">${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                            ${createLikeButton(recipeId, updatedLikesInfo)}
                         </div>
                     </div>
                     
                     <div class="recipe-author-info">
-                        <strong>👤 Creado por: ${recipe.autor}</strong>
-                        <span class="recipe-date">📅 ${recipe.fecha}</span>
+                        <strong><i class="fas fa-user"></i> Creado por: ${recipe.autor}</strong>
+                        <span class="recipe-date"><i class="far fa-calendar"></i> ${recipe.fecha}</span>
                     </div>
                     
                     ${recipe.imagen ? `
                     <div class="recipe-detail-image">
                         <img src="${recipe.imagen}" alt="${recipe.name}">
                     </div>
-                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #6A89CC, #4A69BD); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
+                    ` : `<div class="recipe-detail-image" style="background: linear-gradient(135deg, #E27D60, #FFB347); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;">
                         ${recipe.icon}
                     </div>`}
                     
                     <div class="recipe-detail-content">
+                        <div class="recipe-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-clock"></i>
+                                <span>${recipe.time}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-fire"></i>
+                                <span>${recipe.difficulty}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-heart"></i>
+                                <span>${updatedLikesInfo.total_likes} likes</span>
+                            </div>
+                        </div>
+                        
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${recipe.ingredients.map(ingredient => 
                                     `<p>• ${ingredient}</p>`
@@ -710,7 +1147,7 @@
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-utensils"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
@@ -718,7 +1155,7 @@
                         
                         ${recipe.url ? `
                         <div class="recipe-detail-section">
-                            <h3>🔗 Enlace Original</h3>
+                            <h3><i class="fas fa-link"></i> Enlace Original</h3>
                             <p><a href="${recipe.url}" target="_blank" style="color: #4A69BD; text-decoration: underline;">${recipe.url}</a></p>
                         </div>
                         ` : ''}
@@ -739,54 +1176,38 @@
             const currentItems = recipesToShow.slice(startIndex, endIndex);
             
             recipesGrid.innerHTML = currentItems.map(recipe => `
-                <div class="recipe-card" onclick="showRecipeDetailFromMain(${recipe.id})">
+                <div class="recipe-card" onclick="showRecipeDetailFromMain('${recipe.id}')">
                     <div class="recipe-image">
                         ${recipe.imagen ? `<img src="${recipe.imagen}" alt="${recipe.name}" style="width:100%;height:100%;object-fit:cover;">` : recipe.icon}
-                        <div class="community-badge">👥 Comunidad</div>
+                        <div class="difficulty-badge">${recipe.difficulty}</div>
                     </div>
                     <div class="recipe-content">
                         <h3>${recipe.name}</h3>
                         <div class="recipe-meta">
-                            <span>📅 ${recipe.fecha}</span>
-                            <span>${recipe.icon} Receta de la Comunidad</span>
+                            <span><i class="far fa-clock"></i> ${recipe.time}</span>
+                            <span><i class="fas fa-utensils"></i> ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                            ${recipe.likesInfo ? `<span><i class="fas fa-heart"></i> ${recipe.likesInfo.total_likes} likes</span>` : ''}
                         </div>
                         <div class="recipe-author">
-                            <strong>👤 ${recipe.autor}</strong>
-                            <span class="recipe-date">📅 ${recipe.fecha}</span>
+                            <strong><i class="fas fa-user"></i> ${recipe.autor}</strong>
+                            <span class="recipe-date"><i class="far fa-calendar"></i> ${recipe.fecha}</span>
                         </div>
                         <p class="recipe-description">${recipe.description}</p>
                         <div class="recipe-ingredients">
-                            <h4>Ingredientes principales:</h4>
+                            <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                             <div class="ingredients-list">
                                 ${recipe.ingredients.slice(0, 3).join(', ')}...
                             </div>
                         </div>
                         <div class="recipe-actions">
-                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${recipe.id})">Ver Receta</button>
-                            <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                            <button class="btn-primary" onclick="event.stopPropagation(); showRecipeDetailFromMain('${recipe.id}')"><i class="fas fa-eye"></i> Ver Receta</button>
+                            ${createLikeButton(recipe.id, recipe.likesInfo)}
                         </div>
                     </div>
                 </div>
             `).join('');
             
             updatePagination(totalPages, totalItems);
-        }
-
-        function filterByType(type) {
-            currentTypeFilter = type;
-            document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            applyFilters();
-        }
-
-        function filterByDifficulty(difficulty) {
-            currentDifficultyFilter = difficulty;
-            const difficultyButtons = document.querySelectorAll('.filter-group')[1].querySelectorAll('.filter-btn');
-            difficultyButtons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            applyFilters();
         }
 
         function updatePagination(totalPages, totalItems) {
@@ -803,7 +1224,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    ← Anterior
+                    <i class="fas fa-arrow-left"></i> Anterior
                 </button>
             `;
             
@@ -818,7 +1239,7 @@
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    Siguiente →
+                    Siguiente <i class="fas fa-arrow-right"></i>
                 </button>
             `;
             
@@ -830,22 +1251,7 @@
             loadRecipes(filteredRecipes);
         }
 
-        function applyFilters() {
-            
-            filteredRecipes = [...allRecipes];
-            
-            currentPage = 1;
-            loadRecipes(filteredRecipes);
-            updateResultsCount();
-        }
-
-        function addToFavorites(recipeId) {
-            const recipe = allRecipes.find(r => r.id === recipeId);
-            alert(`¡${recipe.name} agregada a tus favoritos! 💖`);
-            event.stopPropagation();
-        }
-
-        
+        // Permitir búsqueda con Enter
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 searchRecipes();
@@ -858,7 +1264,7 @@
             }
         });
 
-        
+        // Cargar recetas al iniciar
         window.addEventListener('load', () => {
             loadRecipesFromDatabase();
         });

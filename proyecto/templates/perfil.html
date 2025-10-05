@@ -117,11 +117,10 @@
                             <div class="stat">
                                 <span class="stat-number">{{ total_likes }}</span>
                                 <span class="stat-label">Likes Recibidos</span>
-                                <!-- FUTURO: Mostrar likes reales cuando esté implementado -->
                             </div>
                             <div class="stat">
-                                <span class="stat-number">{{ favoritos_count }}</span>
-                                <span class="stat-label">Favoritos</span>
+                                <span class="stat-number" id="userLikesCount">{{ recetas_con_like_count }}</span>
+                                <span class="stat-label">Recetas con Like</span>
                             </div>
                         </div>
                     </div>
@@ -144,8 +143,8 @@
                     <a href="{{ url_for('mis_recetas') }}" class="view-recipes-btn">
                         <i class="fas fa-book-open"></i> Ver Mis Recetas
                     </a>
-                    <a href="#" class="share-profile-btn">
-                        <i class="fas fa-share-alt"></i> Compartir Perfil
+                    <a href="{{ url_for('recetas_favoritas') }}" class="share-profile-btn">
+                        <i class="fas fa-heart"></i> Ver Mis Likes
                     </a>
                 </div>
             </div>
@@ -169,20 +168,20 @@
                     <div class="activity-icon">
                         <i class="fas fa-heart"></i>
                     </div>
-                    <h3>Recetas Favoritas</h3>
-                    <p>{{ favoritos_count }} recetas guardadas</p>
+                    <h3>Recetas con Like</h3>
+                    <p id="activityLikesCount">{{ recetas_con_like_count }} recetas marcadas</p>
                     <a href="{{ url_for('recetas_favoritas') }}" class="activity-link">
-                        Ver favoritas <i class="fas fa-arrow-right"></i>
+                        Ver mis likes <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="activity-card">
                     <div class="activity-icon">
                         <i class="fas fa-star"></i>
                     </div>
-                    <h3>Sistema de Likes</h3>
-                    <p>Función disponible próximamente</p>
-                    <span class="activity-link coming-soon-link">
-                        Próximamente <i class="fas fa-arrow-right"></i>
+                    <h3>Likes Recibidos</h3>
+                    <p>{{ total_likes }} likes en tus recetas</p>
+                    <span class="activity-link">
+                        Tu popularidad <i class="fas fa-arrow-right"></i>
                     </span>
                 </div>
                 <div class="activity-card">
@@ -229,23 +228,36 @@
             }
         });
 
-        // Funciones de búsqueda
-        function searchRecipes() {
-            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        // Cargar estadísticas de likes del usuario
+        async function loadUserLikesStats() {
+            const currentUserId = "{{ session.usuario }}";
             
-            if (!searchTerm) {
-                alert('Por favor, ingresa un término de búsqueda');
-                return;
+            if (!currentUserId) return;
+
+            try {
+                const response = await fetch(`/recetas_con_like?user_id=${encodeURIComponent(currentUserId)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const likesCount = data.recetas ? data.recetas.length : 0;
+                    
+                    // Actualizar contador en el perfil
+                    document.getElementById('userLikesCount').textContent = likesCount;
+                    document.getElementById('activityLikesCount').textContent = `${likesCount} recetas marcadas`;
+                }
+            } catch (error) {
+                console.error('Error al cargar estadísticas de likes:', error);
             }
-            
-            window.location.href = `/buscar_recetas?q=${encodeURIComponent(searchTerm)}`;
         }
 
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchRecipes();
-            }
-        });
+        // Actualizar estadísticas en tiempo real cuando se da/quita like
+        function updateUserLikesCount(change) {
+            const currentCount = parseInt(document.getElementById('userLikesCount').textContent) || 0;
+            const newCount = Math.max(0, currentCount + change);
+            
+            document.getElementById('userLikesCount').textContent = newCount;
+            document.getElementById('activityLikesCount').textContent = `${newCount} recetas marcadas`;
+        }
 
         // Animación para las tarjetas de actividad al cargar
         document.addEventListener('DOMContentLoaded', function() {
@@ -256,17 +268,18 @@
                     card.style.transform = 'translateY(0)';
                 }, 200 * index);
             });
+
+            // Cargar estadísticas de likes
+            loadUserLikesStats();
         });
 
-        // FUTURO: Sistema de likes para perfil
-        // function actualizarLikesPerfil() {
-        //     // FUTURO: Actualizar estadísticas de likes en tiempo real
-        //     fetch('/obtener_estadisticas_usuario')
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         document.querySelector('.stat-number:nth-child(2)').textContent = data.total_likes;
-        //     });
-        // }
+        // Escuchar eventos de likes (para actualización en tiempo real)
+        document.addEventListener('likeChanged', function(event) {
+            if (event.detail && event.detail.userLiked !== undefined) {
+                const change = event.detail.userLiked ? 1 : -1;
+                updateUserLikesCount(change);
+            }
+        });
     </script>
 </body>
 </html>

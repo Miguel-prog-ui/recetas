@@ -27,6 +27,13 @@ from rutas_michelin import (
     obtener_estadisticas as func_obtener_estadisticas
 )
 
+
+from likes_controller import (
+    dar_like, quitar_like, toggle_like, verificar_usuario_likeo, 
+    obtener_likes_receta, obtener_recetas_populares,obtener_recetas_con_like
+)
+
+
 import uuid
 import os
 
@@ -146,6 +153,16 @@ verificar_tabla_recetas_usuarios()
 
 @app.route('/')
 def mostrar_presentacion():
+    # Redirigir al login si no hay sesión activa
+    if 'usuario' not in session:
+        return redirect('/login')
+    return func_presentacion()
+
+# Agregar una nueva ruta para acceso sin login
+@app.route('/acceso_publico')
+def acceso_publico():
+    # Establecer una sesión temporal para usuario público
+    session['usuario_publico'] = True
     return func_presentacion()
 
 @app.route('/bebidas')
@@ -341,31 +358,75 @@ def mis_recetas():
     if 'usuario' not in session:
         return redirect('/login')
     
-    # FUTURO: Implementar cuando exista la relación usuario-recetas
-    # conn = get_db_connection()
-    # try:
-    #     with conn.cursor() as cur:
-    #         cur.execute("SELECT id FROM usuarios WHERE usuario = %s", (session['usuario'],))
-    #         usuario_id = cur.fetchone()
-    #     
-    #     if not usuario_id:
-    #         session.pop('usuario', None)
-    #         return redirect('/login')
-    #     
-    #     usuario_id = usuario_id[0]
-    #     
-    #     # Obtener recetas creadas por el usuario
-    #     cur.execute("SELECT * FROM recetas WHERE usuario_id = %s", (usuario_id,))
-    #     mis_recetas = cur.fetchall()
-    #     
-    #     return render_template('mis_recetas.html', recetas=mis_recetas)
-    # finally:
-    #     conn.close()
+    print(f"🔍 Buscando recetas para usuario: {session['usuario']}")
     
-    # Por ahora, lista vacía para el frontend
-    mis_recetas = []
-    
-    return render_template('mis_recetas.html', recetas=mis_recetas)
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Verificar si la columna 'usuario' existe
+            cur.execute("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'recetas_usuarios' AND column_name = 'usuario'
+            """)
+            columna_existe = cur.fetchone()
+            
+            if not columna_existe:
+                print("❌ Columna 'usuario' no existe en recetas_usuarios")
+                cur.execute("ALTER TABLE recetas_usuarios ADD COLUMN usuario TEXT")
+                conn.commit()
+                print("✅ Columna 'usuario' agregada a recetas_usuarios")
+                return render_template('mis_recetas.html', recetas=[])
+            
+            # Verificar cuántas recetas tiene este usuario
+            cur.execute("SELECT COUNT(*) FROM recetas_usuarios WHERE usuario = %s", (session['usuario'],))
+            count_result = cur.fetchone()
+            print(f"📊 Recetas encontradas para {session['usuario']}: {count_result[0]}")
+            
+            # Verificar algunas recetas de ejemplo
+            cur.execute("SELECT id, title, usuario FROM recetas_usuarios WHERE usuario IS NOT NULL LIMIT 5")
+            ejemplo_recetas = cur.fetchall()
+            print(f"📋 Ejemplo de recetas en la BD: {ejemplo_recetas}")
+            
+            # Obtener recetas del usuario actual
+            cur.execute("""
+                SELECT 
+                    id,
+                    title,
+                    ingredients,
+                    steps,
+                    COALESCE(categoria, 'Comunidad') as categoria,
+                    imagen_filename,
+                    url,
+                    TO_CHAR(COALESCE(fecha_creacion, CURRENT_TIMESTAMP), 'DD/MM/YYYY') as fecha,
+                    (SELECT COUNT(*) FROM recipe_likes WHERE recipe_id = recetas_usuarios.id) as likes_count
+                FROM recetas_usuarios 
+                WHERE usuario = %s 
+                ORDER BY COALESCE(fecha_creacion, CURRENT_TIMESTAMP) DESC
+            """, (session['usuario'],))
+            
+            mis_recetas = cur.fetchall()
+            print(f"✅ Recetas procesadas: {len(mis_recetas)}")
+            
+            # Debug detallado de cada receta
+            for i, receta in enumerate(mis_recetas):
+                print(f"  📝 Receta {i+1}:")
+                print(f"     ID: {receta[0]}")
+                print(f"     Título: {receta[1]}")
+                print(f"     Categoría: {receta[4]}")
+                print(f"     Imagen: {receta[5]}")
+                print(f"     Likes: {receta[8]}")
+                print(f"     Fecha: {receta[7]}")
+            
+            return render_template('mis_recetas.html', recetas=mis_recetas)
+            
+    except Exception as e:
+        print(f"❌ Error obteniendo mis recetas: {e}")
+        import traceback
+        traceback.print_exc()
+        return render_template('mis_recetas.html', recetas=[])
+    finally:
+        conn.close()
 
 @app.route('/buscar_recetas')
 def buscar_recetas_api():
@@ -391,7 +452,7 @@ def agregar_receta_comunidad():
         print("🔍 DEBUG: INICIANDO AGREGAR_RECETA_COMUNIDAD")
         print("=" * 50)
         
-       
+        # Obtener datos del formulario
         title = request.form.get("recipeName", "").strip()
         url = request.form.get("recipeUrl", "").strip()
         ingredients = request.form.get("recipeIngredients", "").strip()
@@ -403,41 +464,58 @@ def agregar_receta_comunidad():
         print(f"   Ingredientes: {ingredients[:50]}...")
         print(f"   Instrucciones: {instructions[:50]}...")
         
-      
+        # Validar campos obligatorios
         if not title or not ingredients or not instructions:
             return jsonify({
                 "success": False,
                 "error": "Por favor completa todos los campos obligatorios (*)"
             })
         
-        
+        # Inicializar la variable con valor por defecto
         imagen_filename = None
+        
+        # Manejar la imagen
         if 'recipeImage' in request.files:
             imagen = request.files['recipeImage']
             if imagen.filename != '' and allowed_file(imagen.filename):
-               
+                # Generar nombre único para la imagen
                 file_extension = imagen.filename.rsplit('.', 1)[1].lower()
                 nuevo_filename = f"{uuid.uuid4()}.{file_extension}"
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], nuevo_filename)
                 
-               
+                # Guardar la imagen
                 imagen.save(filepath)
                 imagen_filename = nuevo_filename
                 print(f"✅ IMAGEN GUARDADA: {imagen_filename}")
         
-        
+        # Generar UUID para la receta
         nuevo_uuid = str(uuid.uuid4())
         print(f"🆔 UUID generado: {nuevo_uuid}")
         
-        
+        # Conectar a la base de datos
         conn = get_db_connection()
+        
+        # SOLUCIÓN TEMPORAL: Obtener el próximo ID manualmente
         with conn.cursor() as cur:
+            # Obtener el máximo ID actual
+            cur.execute("SELECT COALESCE(MAX(id), 0) FROM recetas_usuarios")
+            max_id = cur.fetchone()[0]
+            next_id = max_id + 1
+            print(f"🆔 Próximo ID a usar: {next_id}")
+            
+            # Insertar con ID explícito
+# En la función agregar_receta_comunidad(), modifica la consulta INSERT:
+# Cámbiala por:
             insert_query = """
-            INSERT INTO recetas_usuarios (title, url, ingredients, steps, uuid, imagen_filename)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO recetas_usuarios (id, title, url, ingredients, steps, uuid, imagen_filename, usuario)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cur.execute(insert_query, (title, url, ingredients, instructions, nuevo_uuid, imagen_filename))
+            cur.execute(insert_query, (next_id, title, url, ingredients, instructions, nuevo_uuid, imagen_filename, session['usuario']))
             conn.commit()
+
+# En la función agregar_receta_comunidad(), modifica la consulta INSERT:
+
+
             print("✅ RECETA GUARDADA EN LA BASE DE DATOS")
         
         conn.close()
@@ -462,42 +540,7 @@ def agregar_receta_comunidad():
             "error": f"Error al agregar la receta: {str(e)}"
         })
 
-@app.route('/obtener_recetas_comunidad')
-def obtener_recetas_comunidad():
-    """Obtiene las recetas de la comunidad"""
-    conn = get_db_connection()
-    recetas = []
-    
-    try:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT id, title, url, ingredients, steps, uuid, imagen_filename,
-                       'Sin fecha' as fecha
-                FROM recetas_usuarios 
-                ORDER BY id DESC
-                LIMIT 50;
-            """)
-            
-            resultados = cur.fetchall()
-            
-            for receta in resultados:
-                recetas.append({
-                    'id': receta[0],
-                    'title': receta[1],
-                    'url': receta[2],
-                    'ingredients': receta[3],
-                    'steps': receta[4],
-                    'uuid': receta[5],
-                    'imagen_filename': receta[6],
-                    'tabla_origen': receta[7]
-                })
-                
-    except Exception as e:
-        print(f"Error obteniendo recetas de comunidad: {e}")
-    finally:
-        conn.close()
-    
-    return jsonify({"recetas": recetas})
+
 
 
 @app.route('/admin/agregar_receta', methods=['POST'])
@@ -726,5 +769,217 @@ def obtener_estadisticas():
     """Obtener estadísticas de recetas Michelin"""
     return func_obtener_estadisticas()
 
+
+
+
+
+
+
+
+
+
+
+
+
+# Rutas para los likes
+@app.route('/dar_like', methods=['POST'])
+def route_dar_like():
+    return dar_like()
+
+@app.route('/quitar_like', methods=['POST'])
+def route_quitar_like():
+    return quitar_like()
+
+@app.route('/toggle_like', methods=['POST'])
+def route_toggle_like():
+    return toggle_like()
+
+@app.route('/verificar_like', methods=['GET'])
+def route_verificar_like():
+    return verificar_usuario_likeo()
+
+@app.route('/likes_receta', methods=['GET'])
+def route_likes_receta():
+    return obtener_likes_receta()
+
+@app.route('/recetas_populares', methods=['GET'])
+def route_recetas_populares():
+    return obtener_recetas_populares()
+
+@app.route('/recetas_con_like', methods=['GET'])
+def route_recetas_con_like():
+    return obtener_recetas_con_like()
+
+@app.route('/obtener_recetas_comunidad')
+def obtener_recetas_comunidad():
+    """Obtiene las recetas de la comunidad - ACTUALIZADA"""
+    conn = get_db_connection()
+    recetas = []
+    
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT 
+                    ru.id,
+                    ru.title,
+                    ru.url,
+                    ru.ingredients,
+                    ru.steps,
+                    ru.uuid,
+                    ru.imagen_filename,
+                    'Sin fecha' as fecha,
+                    COALESCE(like_counts.likes_count, 0) as likes_count
+                FROM recetas_usuarios ru
+                LEFT JOIN (
+                    SELECT recipe_id, COUNT(*) as likes_count 
+                    FROM recipe_likes 
+                    GROUP BY recipe_id
+                ) like_counts ON ru.id = like_counts.recipe_id
+                ORDER BY ru.id DESC
+                LIMIT 50;
+            """)
+            
+            resultados = cur.fetchall()
+            
+            for receta in resultados:
+                recetas.append({
+                    'id': receta[0],
+                    'title': receta[1],
+                    'url': receta[2],
+                    'ingredients': receta[3],
+                    'steps': receta[4],
+                    'uuid': receta[5],
+                    'imagen_filename': receta[6],
+                    'tabla_origen': receta[7],
+                    'likes_count': receta[8]  # Información de likes
+                })
+                
+    except Exception as e:
+        print(f"Error obteniendo recetas de comunidad: {e}")
+    finally:
+        conn.close()
+    
+    return jsonify({"recetas": recetas})
+
+@app.route('/buscar_recetas_comunidad')
+def buscar_recetas_comunidad():
+    """Búsqueda específica para recetas de la comunidad - ACTUALIZADA"""
+    try:
+        search_term = request.args.get('q', '').strip()
+        categoria = request.args.get('categoria', 'comunidad')
+        
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            if search_term:
+                # Búsqueda en recetas_usuarios
+                query = """
+                    SELECT 
+                        ru.id,
+                        ru.title,
+                        ru.url,
+                        ru.ingredients,
+                        ru.steps,
+                        ru.uuid,
+                        ru.imagen_filename,
+                        'Comunidad' as fuente,
+                        COALESCE(like_counts.likes_count, 0) as likes_count
+                    FROM recetas_usuarios ru
+                    LEFT JOIN (
+                        SELECT recipe_id, COUNT(*) as likes_count 
+                        FROM recipe_likes 
+                        GROUP BY recipe_id
+                    ) like_counts ON ru.id = like_counts.recipe_id
+                    WHERE (ru.title ILIKE %s OR ru.ingredients ILIKE %s OR ru.steps ILIKE %s)
+                    ORDER BY ru.id DESC
+                """
+                search_pattern = f'%{search_term}%'
+                cur.execute(query, (search_pattern, search_pattern, search_pattern))
+            else:
+                # Todas las recetas de la comunidad
+                cur.execute("""
+                    SELECT 
+                        ru.id,
+                        ru.title,
+                        ru.url,
+                        ru.ingredients,
+                        ru.steps,
+                        ru.uuid,
+                        ru.imagen_filename,
+                        'Comunidad' as fuente,
+                        COALESCE(like_counts.likes_count, 0) as likes_count
+                    FROM recetas_usuarios ru
+                    LEFT JOIN (
+                        SELECT recipe_id, COUNT(*) as likes_count 
+                        FROM recipe_likes 
+                        GROUP BY recipe_id
+                    ) like_counts ON ru.id = like_counts.recipe_id
+                    ORDER BY ru.id DESC
+                    LIMIT 50
+                """)
+            
+            resultados = cur.fetchall()
+            recetas = []
+            
+            for receta in resultados:
+                recetas.append({
+                    'id': receta[0],
+                    'title': receta[1],
+                    'url': receta[2],
+                    'ingredients': receta[3],
+                    'steps': receta[4],
+                    'uuid': receta[5],
+                    'imagen_filename': receta[6],
+                    'fuente': receta[7],
+                    'likes_count': receta[8]  # Información de likes
+                })
+            
+            return jsonify({"recetas": recetas})
+            
+    except Exception as e:
+        print(f"Error en búsqueda comunidad: {e}")
+        return jsonify({"recetas": []})
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+def verificar_tabla_recipe_likes():
+    """Verifica que la tabla recipe_likes existe y la crea si no"""
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'recipe_likes'
+                );
+            """)
+            tabla_existe = cur.fetchone()[0]
+            
+            if not tabla_existe:
+                print("⚠️ Tabla 'recipe_likes' no existe - creándola...")
+                cur.execute("""
+                    CREATE TABLE recipe_likes (
+                        id SERIAL PRIMARY KEY,
+                        recipe_id INTEGER NOT NULL,
+                        user_id TEXT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE(recipe_id, user_id)
+                    );
+                """)
+                conn.commit()
+                print("✅ Tabla 'recipe_likes' creada exitosamente")
+            else:
+                print("✅ Tabla 'recipe_likes' existe")
+                
+    except Exception as e:
+        print(f"❌ Error verificando tabla recipe_likes: {e}")
+    finally:
+        conn.close()
+
+# Llamar esta función después de crear las otras tablas
+crear_tabla_usuarios()
+verificar_tabla_recetas_usuarios()
+verificar_tabla_recipe_likes()  # ← AGREGAR ESTA LÍNEA
+            
 if __name__ == '__main__':
     app.run(debug=True, port=5005)

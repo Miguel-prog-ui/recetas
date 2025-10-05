@@ -97,7 +97,33 @@
                     </a>
                 </div>
                 
+                <!-- Información de debug extendida -->
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3498db;">
+                    <h4 style="margin-top: 0; color: #2c3e50;">🔍 Información de Depuración</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                        <div><strong>Usuario en sesión:</strong> {{ session.usuario }}</div>
+                        <div><strong>Total de recetas:</strong> {{ recetas|length if recetas else 0 }}</div>
+                        <div><strong>¿Recetas es None?</strong> {{ 'Sí' if recetas is none else 'No' }}</div>
+                        <div><strong>¿Recetas está vacío?</strong> {{ 'Sí' if recetas and recetas|length == 0 else 'No' }}</div>
+                    </div>
+                    {% if recetas and recetas|length > 0 %}
+                    <div style="margin-top: 10px;">
+                        <strong>Primeras 3 recetas:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            {% for receta in recetas[:3] %}
+                            <li>ID: {{ receta.0 }} - {{ receta.1 }} (Likes: {{ receta.8 }})</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                
                 {% if recetas and recetas|length > 0 %}
+                {% set total_likes = 0 %}
+                {% for receta in recetas %}
+                    {% set total_likes = total_likes + receta.8 %}
+                {% endfor %}
+                
                 <div class="stats-summary">
                     <div class="stat-card">
                         <div class="stat-icon">
@@ -113,60 +139,66 @@
                             <i class="fas fa-heart"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-number">0</span>
+                            <span class="stat-number">{{ total_likes }}</span>
                             <span class="stat-label">Likes Totales</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-eye"></i>
+                            <i class="fas fa-calendar"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-number">0</span>
-                            <span class="stat-label">Visualizaciones</span>
+                            <span class="stat-number">{{ recetas.0.7 if recetas else 'N/A' }}</span>
+                            <span class="stat-label">Última Receta</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="recipes-grid">
                     {% for receta in recetas %}
-                    <div class="recipe-card" data-recipe-id="{{ receta[0] }}">
+                    <div class="recipe-card" data-recipe-id="{{ receta.0 }}">
                         <div class="recipe-image">
-                            {% if receta[6] %}
-                            <img src="{{ receta[6] }}" alt="{{ receta[1] }}">
-                            {% else %}
-                            <div class="recipe-icon">
+                            {% if receta.5 %}
+                            <img src="{{ url_for('static', filename='imagenes_recetas/' + receta.5) }}" alt="{{ receta.1 }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            {% endif %}
+                            <div class="recipe-icon" {% if receta.5 %}style="display: none;"{% else %}style="display: flex;"{% endif %}>
                                 <i class="fas fa-utensils"></i>
                             </div>
-                            {% endif %}
                             <div class="recipe-overlay">
-                                <span class="recipe-category">{{ receta[5] or 'General' }}</span>
+                                <span class="recipe-category">{{ receta.4 }}</span>
                             </div>
                         </div>
                         <div class="recipe-content">
-                            <h4>{{ receta[1] }}</h4>
+                            <h4>{{ receta.1 }}</h4>
                             <div class="recipe-meta">
-                                <span><i class="fas fa-folder"></i> {{ receta[5] or 'General' }}</span>
-                                <span class="likes-count"><i class="fas fa-heart"></i> 0 likes</span>
+                                <span><i class="fas fa-folder"></i> {{ receta.4 }}</span>
+                                <span class="likes-count"><i class="fas fa-heart"></i> {{ receta.8 }} likes</span>
                             </div>
-                            <p class="recipe-description">{{ receta[2][:100] }}{% if receta[2]|length > 100 %}...{% endif %}</p>
+                            <p class="recipe-description">{{ receta.3[:100] }}{% if receta.3|length > 100 %}...{% endif %}</p>
                             
                             <div class="recipe-stats">
                                 <div class="stat-mini">
                                     <i class="fas fa-heart"></i>
-                                    <span>0</span>
+                                    <span>{{ receta.8 }}</span>
                                 </div>
                                 <div class="stat-mini">
-                                    <i class="fas fa-eye"></i>
-                                    <span>0</span>
-                                </div>
-                                <div class="stat-mini">
-                                    <i class="fas fa-star"></i>
-                                    <span>0</span>
+                                    <i class="fas fa-calendar"></i>
+                                    <span>{{ receta.7 }}</span>
                                 </div>
                             </div>
 
-                           
+                            <div class="recipe-actions">
+                                <button onclick="editarReceta('{{ receta.0 }}')" class="btn-action btn-edit">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button onclick="eliminarReceta('{{ receta.0 }}', '{{ receta.1 }}')" class="btn-action btn-delete">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                                <button onclick="verEstadisticas('{{ receta.0 }}', '{{ receta.1 }}')" class="btn-action btn-stats">
+                                    <i class="fas fa-chart-bar"></i> Estadísticas
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -227,28 +259,28 @@
                         <div class="stat-circle">
                             <i class="fas fa-heart"></i>
                         </div>
-                        <span class="stat-value">0</span>
+                        <span class="stat-value" id="stat-likes">0</span>
                         <span class="stat-label">Likes</span>
                     </div>
                     <div class="stat-item">
                         <div class="stat-circle">
                             <i class="fas fa-eye"></i>
                         </div>
-                        <span class="stat-value">0</span>
+                        <span class="stat-value" id="stat-views">0</span>
                         <span class="stat-label">Visualizaciones</span>
                     </div>
                     <div class="stat-item">
                         <div class="stat-circle">
                             <i class="fas fa-star"></i>
                         </div>
-                        <span class="stat-value">0</span>
+                        <span class="stat-value" id="stat-favorites">0</span>
                         <span class="stat-label">Favoritos</span>
                     </div>
                     <div class="stat-item">
                         <div class="stat-circle">
                             <i class="fas fa-share"></i>
                         </div>
-                        <span class="stat-value">0</span>
+                        <span class="stat-value" id="stat-shares">0</span>
                         <span class="stat-label">Compartidos</span>
                     </div>
                 </div>
@@ -285,7 +317,7 @@
                 return;
             }
             
-            window.location.href = '/buscar_recetas?q=' + encodeURIComponent(searchTerm);
+            window.location.href = '/buscar_recetas_comunidad?q=' + encodeURIComponent(searchTerm);
         }
 
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
@@ -301,12 +333,51 @@
 
         function eliminarReceta(recipeId, recipeName) {
             if (confirm('¿Estás seguro de que quieres eliminar la receta "' + recipeName + '"? Esta acción no se puede deshacer.')) {
-                mostrarMensajeTemporal('Función de eliminación disponible próximamente', 'info');
+                // Llamar a la API para eliminar la receta
+                fetch('/admin/eliminar_receta/' + recipeId, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarMensajeTemporal('Receta eliminada exitosamente', 'success');
+                        // Eliminar la tarjeta del DOM
+                        const recipeCard = document.querySelector('[data-recipe-id="' + recipeId + '"]');
+                        if (recipeCard) {
+                            recipeCard.remove();
+                        }
+                        // Recargar la página si no quedan recetas
+                        setTimeout(() => {
+                            if (document.querySelectorAll('.recipe-card').length === 0) {
+                                location.reload();
+                            }
+                        }, 1000);
+                    } else {
+                        mostrarMensajeTemporal('Error al eliminar la receta: ' + data.error, 'info');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarMensajeTemporal('Error al eliminar la receta', 'info');
+                });
             }
         }
 
         function verEstadisticas(recipeId, recipeName) {
             document.getElementById('modalTitle').textContent = 'Estadísticas: ' + recipeName;
+            
+            // Obtener estadísticas reales de la receta
+            fetch('/likes_receta?recipe_id=' + recipeId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.total_likes !== undefined) {
+                        document.getElementById('stat-likes').textContent = data.total_likes;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error obteniendo estadísticas:', error);
+                });
+            
             document.getElementById('statsModal').style.display = 'block';
         }
 
@@ -395,6 +466,52 @@
 
         .temp-message.success {
             background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .recipe-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-stats {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
         }
 
         @keyframes slideInRight {

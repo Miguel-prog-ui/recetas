@@ -27,10 +27,9 @@ def buscar_recetas_palabra_api():
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-          
             if categoria:
                 cur.execute("""
-                    SELECT id, title, url, ingredients, steps, categoria, imagen_filename  -- 🔥 AGREGADO
+                    SELECT id, title, url, ingredients, steps, categoria, imagen_filename
                     FROM recetas 
                     WHERE (
                         title ILIKE %s OR
@@ -50,7 +49,7 @@ def buscar_recetas_palabra_api():
                 ))
             else:
                 cur.execute("""
-                    SELECT id, title, url, ingredients, steps, categoria, imagen_filename  -- 🔥 AGREGADO
+                    SELECT id, title, url, ingredients, steps, categoria, imagen_filename
                     FROM recetas 
                     WHERE (
                         title ILIKE %s OR
@@ -72,14 +71,20 @@ def buscar_recetas_palabra_api():
             
             recetas_json = []
             for receta in recetas:
+                # CONSTRUIR LA URL CORRECTA DE LA IMAGEN
+                imagen_url = ""
+                if receta[6]:  # Si hay imagen_filename
+                    imagen_url = f"/static/imagenes_recetas/{receta[6]}"
+                
                 recetas_json.append({
                     'id': receta[0],
                     'title': receta[1],
-                    'imagen': receta[2],
+                    'imagen': imagen_url,  # ← CORREGIDO
                     'ingredients': receta[3] or '',
                     'steps': receta[4] or '',
                     'categoria': receta[5],
-                    'imagen_filename': receta[6]
+                    'imagen_filename': receta[6],
+                    'url': receta[2]
                 })
             
             return jsonify({'recetas': recetas_json})
@@ -98,7 +103,6 @@ def buscar_recetas_michelin():
     try:
         with conn.cursor() as cur:
             if termino_busqueda:
-                
                 cur.execute("""
                     SELECT id_michelin, title, ingredients, steps, chef, 
                            costo_ingredientes, precio_venta_sugerido, alergenos, url_imagen_plato
@@ -113,7 +117,6 @@ def buscar_recetas_michelin():
                     f'%{termino_busqueda}%'
                 ))
             else:
-               
                 cur.execute("""
                     SELECT id_michelin, title, ingredients, steps, chef, 
                            costo_ingredientes, precio_venta_sugerido, alergenos, url_imagen_plato
@@ -145,7 +148,6 @@ def buscar_recetas_michelin():
     finally:
         conn.close()
 
-
 @app.route('/buscar_recetas_michelin_palabra')
 def buscar_recetas_michelin_palabra():
     termino_busqueda = request.args.get('q', '').strip().lower()
@@ -156,17 +158,16 @@ def buscar_recetas_michelin_palabra():
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            
             cur.execute("""
                 SELECT id_michelin, title, ingredients, steps, chef, 
                        costo_ingredientes, precio_venta_sugerido, alergenos, url_imagen_plato
                 FROM michelin 
                 WHERE (
-                    title ILIKE %s OR      -- Al inicio de la frase
-                    title ILIKE %s OR      -- Al final de la frase  
-                    title ILIKE %s OR      -- En medio de la frase
-                    title ILIKE %s OR      -- Exactamente igual
-                    title ILIKE %s         -- Después de un guión/parentesis
+                    title ILIKE %s OR
+                    title ILIKE %s OR  
+                    title ILIKE %s OR
+                    title ILIKE %s OR
+                    title ILIKE %s
                 )
                 ORDER BY title
             """, (
@@ -178,7 +179,6 @@ def buscar_recetas_michelin_palabra():
             ))
             
             recetas = cur.fetchall()
-            
             
             recetas_json = []
             for receta in recetas:
@@ -212,10 +212,8 @@ def buscar_michelin_por_ingredientes():
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            
             lista_ingredientes = [ing.strip() for ing in ingredientes.split(',') if ing.strip()]
             total_ingredientes_busqueda = len(lista_ingredientes)
-            
             
             cur.execute("""
                 SELECT id_michelin, title, ingredients, steps, chef, 
@@ -225,16 +223,13 @@ def buscar_michelin_por_ingredientes():
             
             todas_recetas = cur.fetchall()
             
-        
             recetas_rankeadas = []
             
             for receta in todas_recetas:
                 id_michelin, title, ingredients, steps, chef, costo, precio, alergenos, url_imagen = receta
                 
                 if ingredients:
-                    
                     ingredientes_receta = [ing.strip().lower() for ing in ingredients.split('\n') if ing.strip()]
-                    
                     
                     coincidencias = calcular_coincidencias(ingredientes_receta, lista_ingredientes)
                     
@@ -257,7 +252,6 @@ def buscar_michelin_por_ingredientes():
                             'matched_count': coincidencias['total_coincidencias']
                         })
             
-           
             recetas_rankeadas.sort(key=lambda x: x['match_percentage'], reverse=True)
             
             return jsonify({'recetas': recetas_rankeadas})
@@ -268,7 +262,6 @@ def buscar_michelin_por_ingredientes():
     finally:
         conn.close()
 
-        
 @app.route('/get_recetas_michelin')
 def get_recetas_michelin():
     conn = get_db_connection()
@@ -283,7 +276,6 @@ def get_recetas_michelin():
             """)
             
             recetas = cur.fetchall()
-            
             
             recetas_json = []
             for receta in recetas:
@@ -308,7 +300,7 @@ def get_recetas_michelin():
         return jsonify({'recetas': []})
     finally:
         conn.close()
-        
+
 def buscar_recetas_api():
     termino_busqueda = request.args.get('q', '').strip().lower()
     categoria = request.args.get('categoria', '').strip().lower()
@@ -318,7 +310,7 @@ def buscar_recetas_api():
         with conn.cursor() as cur:
             if categoria and not termino_busqueda:
                 cur.execute("""
-                    SELECT id, title, url, ingredients, steps, categoria, imagen_filename  -- 🔥 AGREGADO
+                    SELECT id, title, url, ingredients, steps, categoria, imagen_filename
                     FROM recetas 
                     WHERE LOWER(categoria) = LOWER(%s)
                     ORDER BY title
@@ -326,7 +318,7 @@ def buscar_recetas_api():
             elif termino_busqueda:
                 if categoria:
                     cur.execute("""
-                        SELECT id, title, url, ingredients, steps, categoria, imagen_filename  -- 🔥 AGREGADO
+                        SELECT id, title, url, ingredients, steps, categoria, imagen_filename
                         FROM recetas 
                         WHERE (
                             title ILIKE %s OR
@@ -346,7 +338,7 @@ def buscar_recetas_api():
                     ))
                 else:
                     cur.execute("""
-                        SELECT id, title, url, ingredients, steps, categoria, imagen_filename  -- 🔥 AGREGADO
+                        SELECT id, title, url, ingredients, steps, categoria, imagen_filename
                         FROM recetas 
                         WHERE (
                             title ILIKE %s OR
@@ -364,22 +356,26 @@ def buscar_recetas_api():
                         f'%({termino_busqueda} %'
                     ))
             else:
-               
                 return jsonify({'recetas': []})
             
             recetas = cur.fetchall()
             
-            
             recetas_json = []
             for receta in recetas:
+                # CONSTRUIR LA URL CORRECTA DE LA IMAGEN
+                imagen_url = ""
+                if receta[6]:  # Si hay imagen_filename
+                    imagen_url = f"/static/imagenes_recetas/{receta[6]}"
+                
                 recetas_json.append({
                     'id': receta[0],
                     'title': receta[1],
-                    'imagen': receta[2],
+                    'imagen': imagen_url,  # ← CORREGIDO
                     'ingredients': receta[3] or '',
                     'steps': receta[4] or '',
                     'categoria': receta[5],
-                    'imagen_filename': receta[6]
+                    'imagen_filename': receta[6],
+                    'url': receta[2]
                 })
             
             return jsonify({'recetas': recetas_json})
@@ -400,7 +396,6 @@ def buscar_por_ingredientes_api():
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-           
             lista_ingredientes = [ing.strip() for ing in ingredientes.split(',') if ing.strip()]
             total_ingredientes_busqueda = len(lista_ingredientes)
             
@@ -418,28 +413,23 @@ def buscar_por_ingredientes_api():
             
             todas_recetas = cur.fetchall()
             
-            
             recetas_rankeadas = []
             
             for receta in todas_recetas:
-                
                 id_receta, title, url, ingredients, steps, cat, imagen_filename = receta
                 
                 if ingredients:
-                    
                     ingredientes_receta = [ing.strip().lower() for ing in ingredients.split('\n') if ing.strip()]
                     
-                   
                     coincidencias = calcular_coincidencias(ingredientes_receta, lista_ingredientes)
                     
                     if coincidencias['total_coincidencias'] > 0:
                         porcentaje_coincidencia = (coincidencias['total_coincidencias'] / total_ingredientes_busqueda) * 100
                         
-                        
                         recetas_rankeadas.append({
                             'id': id_receta,
                             'title': title,
-                            'imagen_filename': f"/static/imagenes_recetas/{imagen_filename}" if imagen_filename else '',  
+                            'imagen_filename': f"/static/imagenes_recetas/{imagen_filename}" if imagen_filename else '',
                             'ingredients': ingredients,
                             'steps': steps,
                             'categoria': cat,
@@ -448,7 +438,6 @@ def buscar_por_ingredientes_api():
                             'total_search_ingredients': total_ingredientes_busqueda,
                             'matched_count': coincidencias['total_coincidencias']
                         })
-            
             
             recetas_rankeadas.sort(key=lambda x: x['match_percentage'], reverse=True)
             
@@ -461,8 +450,6 @@ def buscar_por_ingredientes_api():
         return jsonify({'recetas': []})
     finally:
         conn.close()
-
-
 
 def calcular_coincidencias(ingredientes_receta, ingredientes_busqueda):
     coincidencias = 0
@@ -481,23 +468,18 @@ def calcular_coincidencias(ingredientes_receta, ingredientes_busqueda):
     }
 
 def es_coincidencia_con_plurales(ingrediente_receta, ingrediente_busqueda):
-    
     ing_receta_limpio = limpiar_ingrediente(ingrediente_receta)
     ing_busqueda_limpio = limpiar_ingrediente(ingrediente_busqueda)
     
-    
     if ing_receta_limpio == ing_busqueda_limpio:
         return True
-    
     
     palabras_receta = ing_receta_limpio.split()
     if ing_busqueda_limpio in palabras_receta:
         return True
     
-    
     if es_coincidencia_plural(ing_receta_limpio, ing_busqueda_limpio):
         return True
-    
     
     if es_coincidencia_estricta(ing_receta_limpio, ing_busqueda_limpio):
         return True
@@ -505,7 +487,6 @@ def es_coincidencia_con_plurales(ingrediente_receta, ingrediente_busqueda):
     return False
 
 def es_coincidencia_plural(ing_receta, ing_busqueda):
-    
     plurales = {
         'mango': ['mangos'],
         'fresa': ['fresas'],
@@ -526,12 +507,10 @@ def es_coincidencia_plural(ing_receta, ing_busqueda):
         'ciruela': ['ciruelas']
     }
     
-    
     if ing_busqueda in plurales:
         for plural in plurales[ing_busqueda]:
             if plural in ing_receta:
                 return True
-    
     
     for singular, plurales_lista in plurales.items():
         if ing_busqueda in plurales_lista and singular in ing_receta:
@@ -555,7 +534,6 @@ def limpiar_ingrediente(ingrediente):
     )
 
 def es_coincidencia_estricta(ing_receta, ing_busqueda):
-    
     coincidencias_estrictas = {
         'leche': ['leche'],
         'azúcar': ['azúcar', 'azucar'],

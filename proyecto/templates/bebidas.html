@@ -3,26 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bebidas - Recetario</title>
+    <title>Bebidas - Recetas Deliciosas</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bebidas.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                    
                     <a href="{{ url_for('mostrar_presentacion') }}" class="home-btn">
-                        <span class="home-icon">🏠</span>
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
                     </a>
-                    
-                    <div class="logo-text">Recetario</div>
+                    <div class="logo-text">Recetas Deliciosas</div>
                 </div>
-                <div class="user-info">
+                <div class="header-right">
                     {% if session.usuario %}
-                    <span class="user-name">👤 {{ session.usuario }}</span>
+                    <div class="user-menu-container">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                            <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info-dropdown">
+                                    <div class="avatar-circle small">
+                                        <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="welcome-text">Hola, {{ session.usuario }}! 👋</span>
+                                        <span class="user-email">{{ session.usuario }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-user"></i></span>
+                                <span class="item-text">Mi Perfil</span>
+                            </a>
+                            <a href="{{ url_for('editar_perfil') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-cog"></i></span>
+                                <span class="item-text">Editar Perfil</span>
+                            </a>
+                            <a href="{{ url_for('recetas_favoritas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-heart"></i></span>
+                                <span class="item-text">Recetas Favoritas</span>
+                            </a>
+                            <a href="{{ url_for('mis_recetas') }}" class="dropdown-item">
+                                <span class="item-icon"><i class="fas fa-book"></i></span>
+                                <span class="item-text">Mis Recetas</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                <span class="item-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="item-text">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
                     {% else %}
-                    <span class="user-name">👤 Usuario sin registrar</span>
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
                     {% endif %}
                 </div>
             </div>
@@ -31,39 +73,48 @@
 
     <main class="container">
         <section class="hero">
-            <span class="hero-icon">🥤</span>
-            <h1>Bebidas Refrescantes</h1>
-            <p>Descubre una amplia variedad de bebidas deliciosas y refrescantes. Desde smoothies nutritivos hasta aguas saborizadas, encuentra la bebida perfecta para cada momento del día.</p>
-        </section>
-
-        
-        <section class="filters">
-            <div class="filter-row">
-                <div class="filter-group">
+            <div class="hero-content">
+                <div class="hero-icon">
+                    <i class="fas fa-glass-cheers"></i>
                 </div>
-                <div class="filter-group">
-                </div>
-
-                <div class="search-section">
-                    <div class="filter-group">
-                        <label>Buscar por nombre:</label>
-                        <input type="text" placeholder="Buscar bebidas..." id="searchInput">
-                    </div>
-                    <button onclick="searchDrinks()">Buscar</button>
-                </div>
-                
-                <div class="search-section">
-                    <div class="filter-group">
-                        <label>Buscar por ingredientes:</label>
-                        <input type="text" placeholder="Ej: mango, leche de coco, miel, menta..." id="ingredientSearch">
-                        
-                    </div>
-                    <button onclick="searchByIngredients()">Buscar Ingredientes</button>
+                <h1>Bebidas Refrescantes</h1>
+                <p>Descubre una amplia variedad de bebidas deliciosas y refrescantes. Desde smoothies nutritivos hasta aguas saborizadas, encuentra la bebida perfecta para cada momento del día.</p>
+                <div class="hero-decoration">
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
+                    <div class="decoration-item"></div>
                 </div>
             </div>
         </section>
 
-        
+        <!-- Sección de Filtros y Búsqueda -->
+        <section class="filters">
+            <div class="filter-row">
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label><i class="fas fa-search"></i> Buscar por nombre:</label>
+                        <input type="text" placeholder="Buscar bebidas..." id="searchInput">
+                    </div>
+                    <button onclick="searchDrinks()"><i class="fas fa-search"></i> Buscar</button>
+                </div>
+                
+                <div class="search-section">
+                    <div class="filter-group">
+                        <label><i class="fas fa-list"></i> Buscar por ingredientes:</label>
+                        <input type="text" placeholder="Ej: mango, leche de coco, miel, menta..." id="ingredientSearch">
+                    </div>
+                    <button onclick="searchByIngredients()"><i class="fas fa-list-alt"></i> Buscar Ingredientes</button>
+                </div>
+                
+                <div class="filters-actions">
+                    <button class="clear-filters-btn" onclick="clearActiveSearch()">
+                        <i class="fas fa-undo"></i> Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE RESULTADOS DE BÚSQUEDA -->
         <section id="searchResultsSection" class="search-results-section" style="display: none;">
             <div class="container">
                 <h2 class="section-title" id="searchResultsTitle">Resultados de Búsqueda</h2>
@@ -71,15 +122,15 @@
             </div>
         </section>
 
-        
+        <!-- Sección de detalle de receta (oculta inicialmente) -->
         <section id="recipeDetailSection" class="recipe-detail-section" style="display: none;">
             <div class="container">
-                <button onclick="hideRecipeDetail()" class="back-btn">← Volver a los resultados</button>
+                <button onclick="hideRecipeDetail()" class="back-btn"><i class="fas fa-arrow-left"></i> Volver a los resultados</button>
                 <div id="recipeDetailContent"></div>
             </div>
         </section>
 
-        
+        <!-- Sección principal de bebidas -->
         <section class="recipes-section" id="recipesMainSection">
             <div class="section-header">
                 <h2 class="section-title">Nuestras Bebidas</h2>
@@ -87,12 +138,12 @@
             </div>
             
             <div class="recipes-grid" id="recipesGrid">
-                
+                <!-- Las recetas se cargarán dinámicamente desde la base de datos -->
             </div>
             
-            
+            <!-- Paginación -->
             <div class="pagination" id="pagination">
-                
+                <!-- Los controles de paginación se cargarán dinámicamente -->
             </div>
         </section>
     </main>
@@ -100,7 +151,13 @@
     <footer>
         <div class="container">
             <div class="footer-content">
-                <p>&copy; 2025 Recetas Deliciosas - Sección Bebidas. Todos los derechos reservados.</p>
+                <div class="footer-links">
+                    <a href="#about">Acerca de</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="#privacy">Privacidad</a>
+                    <a href="#terms">Términos</a>
+                </div>
+                <p>&copy; 2024 Recetas Deliciosas - Sección Bebidas. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
@@ -113,81 +170,194 @@
         let currentPage = 1;
         const itemsPerPage = 8;
         let currentSearchResults = [];
+        let currentUserId = "{{ session.usuario }}";
 
-function getImageUrl(imagenFilename) {
-    if (!imagenFilename) {
-        console.log('❌ No hay imagen_filename para esta receta');
-        return '';
-    }
-    
-    const cleanFilename = imagenFilename.trim();
-    
-    
-    if (cleanFilename.startsWith('http://') || cleanFilename.startsWith('https://')) {
-        return cleanFilename;
-    }
-    
-    
-    if (cleanFilename.startsWith('/static/') || cleanFilename.startsWith('static/')) {
-        return cleanFilename;
-    }
-    
-    
-    const finalUrl = `/static/imagenes_recetas/${cleanFilename}`;
-    console.log(`📁 Convertido: "${cleanFilename}" → "${finalUrl}"`);
-    return finalUrl;
-}
-        
-        function loadDrinksFromDatabase() {
-            fetch('/buscar_recetas?categoria=bebida')
-                .then(response => response.json())
-                .then(data => {
-                   if (data.recetas && data.recetas.length > 0) {
-    allDrinks = data.recetas.map(receta => {
-        
-        const imagenUrl = getImageUrl(receta.imagen_filename);
-        
-        console.log(`🖼️ Procesando receta: ${receta.title}`, {
-            imagen_filename: receta.imagen_filename,  
-            url_generada: imagenUrl
-        });
-        
-        return {
-            id: receta.id,
-            name: receta.title,
-            type: getDrinkType(receta.title, receta.ingredients),
-            time: "10 min",
-            difficulty: "Fácil",
-            icon: getDrinkIcon(receta.title),
-            description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
-            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
-            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
-            imagen: imagenUrl  
-        };
-    });
-    
-    filteredDrinks = [...allDrinks];
-    loadDrinks();
-    updateResultsCount();
-
-                    } else {
-                        document.getElementById('resultsCount').textContent = 'No se encontraron recetas de bebidas';
-                        document.getElementById('recipesGrid').innerHTML = `
-                            <div class="no-results-message">
-                                <div class="no-results-icon">🥤</div>
-                                <h3>No hay bebidas disponibles</h3>
-                                <p>No se encontraron recetas de bebidas en la base de datos.</p>
-                            </div>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('resultsCount').textContent = 'Error cargando recetas';
-                });
+        // Función mejorada para obtener URL de imagen
+        function getImageUrl(imagenFilename) {
+            if (!imagenFilename) {
+                console.log('❌ No hay imagen_filename para esta receta');
+                return '';
+            }
+            
+            const cleanFilename = imagenFilename.trim();
+            
+            if (cleanFilename.startsWith('http://') || cleanFilename.startsWith('https://')) {
+                return cleanFilename;
+            }
+            
+            if (cleanFilename.startsWith('/static/') || cleanFilename.startsWith('static/')) {
+                return cleanFilename;
+            }
+            
+            const finalUrl = `/static/imagenes_recetas/${cleanFilename}`;
+            return finalUrl;
         }
 
-        
+        // Funciones del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu-container');
+            const menu = document.getElementById('userDropdownMenu');
+            
+            if (userMenu && !userMenu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // 🔥 FUNCIONES DE LIKES
+
+        async function toggleLike(recipeId, likeButton) {
+            if (!currentUserId) {
+                alert('Debes iniciar sesión para dar like');
+                return;
+            }
+
+            try {
+                const response = await fetch('/toggle_like', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        recipe_id: recipeId,
+                        user_id: currentUserId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const likeIcon = likeButton.querySelector('i');
+                    const likeCountSpan = likeButton.querySelector('.like-count');
+                    
+                    if (data.user_liked) {
+                        likeIcon.className = 'fas fa-heart';
+                        likeButton.classList.add('liked');
+                    } else {
+                        likeIcon.className = 'far fa-heart';
+                        likeButton.classList.remove('liked');
+                    }
+                    
+                    if (likeCountSpan) {
+                        likeCountSpan.textContent = data.total_likes;
+                    }
+                    
+                    updateAllLikeButtons(recipeId, data.user_liked, data.total_likes);
+                }
+            } catch (error) {
+                console.error('Error al dar like:', error);
+                alert('Error al procesar el like');
+            }
+        }
+
+        function updateAllLikeButtons(recipeId, userLiked, totalLikes) {
+            const allLikeButtons = document.querySelectorAll(`.like-btn[data-recipe-id="${recipeId}"]`);
+            
+            allLikeButtons.forEach(button => {
+                const likeIcon = button.querySelector('i');
+                const likeCountSpan = button.querySelector('.like-count');
+                
+                if (userLiked) {
+                    likeIcon.className = 'fas fa-heart';
+                    button.classList.add('liked');
+                } else {
+                    likeIcon.className = 'far fa-heart';
+                    button.classList.remove('liked');
+                }
+                
+                if (likeCountSpan) {
+                    likeCountSpan.textContent = totalLikes;
+                }
+            });
+        }
+
+        async function getLikesInfo(recipeId) {
+            try {
+                const response = await fetch(`/likes_receta?recipe_id=${recipeId}&user_id=${currentUserId}`);
+                const data = await response.json();
+                
+                if (!data.error) {
+                    return data;
+                }
+            } catch (error) {
+                console.error('Error al obtener info de likes:', error);
+            }
+            
+            return { total_likes: 0, user_liked: false };
+        }
+
+        function createLikeButton(recipeId, likesInfo = null) {
+            const userLiked = likesInfo ? likesInfo.user_liked : false;
+            const totalLikes = likesInfo ? likesInfo.total_likes : 0;
+            
+            return `
+                <button class="like-btn ${userLiked ? 'liked' : ''}" 
+                        data-recipe-id="${recipeId}"
+                        onclick="toggleLike('${recipeId}', this)"
+                        title="${userLiked ? 'Quitar like' : 'Dar like'}">
+                    <i class="${userLiked ? 'fas' : 'far'} fa-heart"></i>
+                    <span class="like-count">${totalLikes}</span>
+                </button>
+            `;
+        }
+
+        // Cargar bebidas desde la base de datos
+        async function loadDrinksFromDatabase() {
+            try {
+                const response = await fetch('/buscar_recetas?categoria=bebida');
+                const data = await response.json();
+                
+                if (data.recetas && data.recetas.length > 0) {
+                    const drinksWithLikes = await Promise.all(
+                        data.recetas.map(async (receta) => {
+                            const likesInfo = await getLikesInfo(receta.id);
+                            const imagenUrl = getImageUrl(receta.imagen_filename);
+                            
+                            return {
+                                id: receta.id,
+                                name: receta.title,
+                                type: getDrinkType(receta.title, receta.ingredients),
+                                time: "10 min",
+                                difficulty: "Fácil",
+                                icon: getDrinkIcon(receta.title),
+                                description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                                ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                                instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                                imagen: imagenUrl,
+                                likesInfo: likesInfo,
+                                categoria: receta.categoria,
+                                url: receta.url
+                            };
+                        })
+                    );
+                    
+                    allDrinks = drinksWithLikes;
+                    filteredDrinks = [...allDrinks];
+                    loadDrinks();
+                    updateResultsCount();
+                } else {
+                    document.getElementById('resultsCount').textContent = 'No se encontraron recetas de bebidas';
+                    document.getElementById('recipesGrid').innerHTML = `
+                        <div class="no-results-message">
+                            <div class="no-results-icon">
+                                <i class="fas fa-glass-cheers"></i>
+                            </div>
+                            <h3>No hay bebidas disponibles</h3>
+                            <p>No se encontraron recetas de bebidas en la base de datos.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('resultsCount').textContent = 'Error cargando recetas';
+            }
+        }
+
+        // Determinar tipo de bebida basado en título e ingredientes
         function getDrinkType(title, ingredients) {
             const titleLower = title.toLowerCase();
             const ingredientsLower = ingredients ? ingredients.toLowerCase() : '';
@@ -205,38 +375,38 @@ function getImageUrl(imagenFilename) {
             }
         }
 
-        
+        // Obtener icono basado en el título
         function getDrinkIcon(title) {
             const titleLower = title.toLowerCase();
             
-            if (titleLower.includes('mango')) return '🥭';
-            if (titleLower.includes('limón') || titleLower.includes('limon')) return '🍋';
-            if (titleLower.includes('fresa') || titleLower.includes('frutilla')) return '🍓';
-            if (titleLower.includes('naranja')) return '🍊';
-            if (titleLower.includes('manzana')) return '🍎';
-            if (titleLower.includes('plátano') || titleLower.includes('banana')) return '🍌';
-            if (titleLower.includes('piña')) return '🍍';
-            if (titleLower.includes('uva')) return '🍇';
-            if (titleLower.includes('sandía') || titleLower.includes('sandia')) return '🍉';
-            if (titleLower.includes('melón') || titleLower.includes('melon')) return '🍈';
-            if (titleLower.includes('coco')) return '🥥';
-            if (titleLower.includes('aguacate') || titleLower.includes('palta')) return '🥑';
-            if (titleLower.includes('zanahoria')) return '🥕';
-            if (titleLower.includes('pepino')) return '🥒';
-            if (titleLower.includes('té') || titleLower.includes('te')) return '🍵';
-            if (titleLower.includes('café') || titleLower.includes('cafe')) return '☕';
-            if (titleLower.includes('chocolate')) return '🍫';
+            if (titleLower.includes('mango')) return '<i class="fas fa-blender"></i>';
+            if (titleLower.includes('limón') || titleLower.includes('limon')) return '<i class="fas fa-lemon"></i>';
+            if (titleLower.includes('fresa') || titleLower.includes('frutilla')) return '<i class="fas fa-strawberry"></i>';
+            if (titleLower.includes('naranja')) return '<i class="fas fa-orange"></i>';
+            if (titleLower.includes('manzana')) return '<i class="fas fa-apple-alt"></i>';
+            if (titleLower.includes('plátano') || titleLower.includes('banana')) return '<i class="fas fa-banana"></i>';
+            if (titleLower.includes('piña')) return '<i class="fas fa-pineapple"></i>';
+            if (titleLower.includes('uva')) return '<i class="fas fa-grapes"></i>';
+            if (titleLower.includes('sandía') || titleLower.includes('sandia')) return '<i class="fas fa-watermelon"></i>';
+            if (titleLower.includes('melón') || titleLower.includes('melon')) return '<i class="fas fa-melon"></i>';
+            if (titleLower.includes('coco')) return '<i class="fas fa-coconut"></i>';
+            if (titleLower.includes('aguacate') || titleLower.includes('palta')) return '<i class="fas fa-avocado"></i>';
+            if (titleLower.includes('zanahoria')) return '<i class="fas fa-carrot"></i>';
+            if (titleLower.includes('pepino')) return '<i class="fas fa-cucumber"></i>';
+            if (titleLower.includes('té') || titleLower.includes('te')) return '<i class="fas fa-mug-hot"></i>';
+            if (titleLower.includes('café') || titleLower.includes('cafe')) return '<i class="fas fa-coffee"></i>';
+            if (titleLower.includes('chocolate')) return '<i class="fas fa-mug-marshmallows"></i>';
             
-            return '🥤';
+            return '<i class="fas fa-glass-cheers"></i>';
         }
 
-       
+        // Actualizar contador de resultados
         function updateResultsCount() {
             const resultsCount = document.getElementById('resultsCount');
             resultsCount.textContent = `${filteredDrinks.length} recetas encontradas`;
         }
 
-        
+        // Limpiar búsqueda activa
         function clearActiveSearch() {
             hideSearchResults();
             hideRecipeDetail();
@@ -249,14 +419,14 @@ function getImageUrl(imagenFilename) {
             updateResultsCount();
         }
 
-        
+        // Ocultar resultados de búsqueda
         function hideSearchResults() {
             const searchResultsSection = document.getElementById('searchResultsSection');
             searchResultsSection.style.display = 'none';
             currentSearchResults = [];
         }
 
-        
+        // Ocultar detalle de receta
         function hideRecipeDetail() {
             const recipeDetailSection = document.getElementById('recipeDetailSection');
             const searchResultsSection = document.getElementById('searchResultsSection');
@@ -271,7 +441,7 @@ function getImageUrl(imagenFilename) {
             }
         }
 
-       
+        // Procesar los pasos para manejar diferentes formatos
         function procesarPasos(instructions) {
             if (!instructions || instructions.length === 0) return '<p>No hay instrucciones disponibles.</p>';
             
@@ -289,8 +459,8 @@ function getImageUrl(imagenFilename) {
             return pasosHTML || '<p>No hay instrucciones disponibles.</p>';
         }
 
-        
-        function searchDrinks() {
+        // Búsqueda por nombre
+        async function searchDrinks() {
             const searchTerm = document.getElementById('searchInput').value.trim();
             
             if (!searchTerm) {
@@ -298,112 +468,131 @@ function getImageUrl(imagenFilename) {
                 return;
             }
             
-            fetch(`/buscar_recetas_palabra?q=${encodeURIComponent(searchTerm)}&categoria=bebida`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.recetas && data.recetas.length > 0) {
-                        currentSearchResults = data.recetas.map(receta => ({
-                            id: receta.id,
-                            name: receta.title,
-                            type: getDrinkType(receta.title, receta.ingredients),
-                            time: "10 min",
-                            difficulty: "Fácil",
-                            icon: getDrinkIcon(receta.title),
-                            description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
-                            ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
-                            instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
-                            imagen: getImageUrl(receta.imagen_filename)
-                        }));
+            try {
+                const response = await fetch(`/buscar_recetas_palabra?q=${encodeURIComponent(searchTerm)}&categoria=bebida`);
+                const data = await response.json();
+                
+                if (data.recetas && data.recetas.length > 0) {
+                    const resultsWithLikes = await Promise.all(
+                        data.recetas.map(async (receta) => {
+                            const likesInfo = await getLikesInfo(receta.id);
+                            const imagenUrl = getImageUrl(receta.imagen_filename);
+                            
+                            return {
+                                id: receta.id,
+                                name: receta.title,
+                                type: getDrinkType(receta.title, receta.ingredients),
+                                time: "10 min",
+                                difficulty: "Fácil",
+                                icon: getDrinkIcon(receta.title),
+                                description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                                ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                                instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                                imagen: imagenUrl,
+                                likesInfo: likesInfo,
+                                categoria: receta.categoria,
+                                url: receta.url
+                            };
+                        })
+                    );
+                    
+                    currentSearchResults = resultsWithLikes;
+                    displaySearchResults(currentSearchResults, searchTerm);
+                } else {
+                    const fallbackResponse = await fetch(`/buscar_recetas?q=${encodeURIComponent(searchTerm)}&categoria=bebida`);
+                    const fallbackData = await fallbackResponse.json();
+                    
+                    if (fallbackData.recetas && fallbackData.recetas.length > 0) {
+                        const resultsWithLikes = await Promise.all(
+                            fallbackData.recetas.map(async (receta) => {
+                                const likesInfo = await getLikesInfo(receta.id);
+                                const imagenUrl = getImageUrl(receta.imagen_filename);
+                                
+                                return {
+                                    id: receta.id,
+                                    name: receta.title,
+                                    type: getDrinkType(receta.title, receta.ingredients),
+                                    time: "10 min",
+                                    difficulty: "Fácil",
+                                    icon: getDrinkIcon(receta.title),
+                                    description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                                    ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                                    instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                                    imagen: imagenUrl,
+                                    likesInfo: likesInfo,
+                                    categoria: receta.categoria,
+                                    url: receta.url
+                                };
+                            })
+                        );
+                        
+                        currentSearchResults = resultsWithLikes;
                         displaySearchResults(currentSearchResults, searchTerm);
                     } else {
-                        fetch(`/buscar_recetas?q=${encodeURIComponent(searchTerm)}&categoria=bebida`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.recetas && data.recetas.length > 0) {
-                                    currentSearchResults = data.recetas.map(receta => ({
-                                        id: receta.id,
-                                        name: receta.title,
-                                        type: getDrinkType(receta.title, receta.ingredients),
-                                        time: "10 min",
-                                        difficulty: "Fácil",
-                                        icon: getDrinkIcon(receta.title),
-                                        description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
-                                        ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
-                                        instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
-                                        imagen: getImageUrl(receta.imagen_filename) 
-                                    }));
-                                    displaySearchResults(currentSearchResults, searchTerm);
-                                } else {
-                                    displaySearchResults([], searchTerm);
-                                }
-                            })
-                            .catch(error2 => {
-                                console.error('Error en búsqueda fallback:', error2);
-                                displaySearchResults([], searchTerm);
-                            });
+                        displaySearchResults([], searchTerm);
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    displaySearchResults([], searchTerm);
-                });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                displaySearchResults([], searchTerm);
+            }
         }
 
-        
-function searchByIngredients() {
-    const ingredientSearch = document.getElementById('ingredientSearch').value.trim();
-    
-    if (!ingredientSearch) {
-        alert('Por favor, ingresa al menos un ingrediente');
-        return;
-    }
-    
-    document.getElementById('resultsCount').textContent = 'Buscando recetas...';
-    
-    
-    fetch(`/buscar_por_ingredientes?ingredientes=${encodeURIComponent(ingredientSearch)}&categoria=bebida`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.recetas && data.recetas.length > 0) {
-                currentSearchResults = data.recetas.map(receta => {
-                  
-                    const imagenUrl = getImageUrl(receta.imagen_filename);
+        // 🔥 BÚSQUEDA POR INGREDIENTES
+        async function searchByIngredients() {
+            const ingredientSearch = document.getElementById('ingredientSearch').value.trim();
+            
+            if (!ingredientSearch) {
+                alert('Por favor, ingresa al menos un ingrediente');
+                return;
+            }
+            
+            document.getElementById('resultsCount').textContent = 'Buscando recetas...';
+            
+            try {
+                const response = await fetch(`/buscar_por_ingredientes?ingredientes=${encodeURIComponent(ingredientSearch)}&categoria=bebida`);
+                const data = await response.json();
+                
+                if (data.recetas && data.recetas.length > 0) {
+                    const resultsWithLikes = await Promise.all(
+                        data.recetas.map(async (receta) => {
+                            const likesInfo = await getLikesInfo(receta.id);
+                            const imagenUrl = getImageUrl(receta.imagen_filename);
+                            
+                            return {
+                                id: receta.id,
+                                name: receta.title,
+                                type: getDrinkType(receta.title, receta.ingredients),
+                                time: "10 min",
+                                difficulty: "Fácil",
+                                icon: getDrinkIcon(receta.title),
+                                description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
+                                ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
+                                instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
+                                imagen: imagenUrl,
+                                likesInfo: likesInfo,
+                                categoria: receta.categoria,
+                                url: receta.url,
+                                matchPercentage: receta.match_percentage || 0,
+                                matchedIngredients: receta.matched_ingredients || [],
+                                totalSearchIngredients: receta.total_search_ingredients || 0,
+                                matchedCount: receta.matched_count || 0
+                            };
+                        })
+                    );
                     
-                    console.log(`🖼️ Búsqueda por ingredientes - Receta: ${receta.title}`, {
-                        imagen_filename: receta.imagen_filename,
-                        url_generada: imagenUrl
-                    });
-                    
-                    return {
-                        id: receta.id,
-                        name: receta.title,
-                        type: getDrinkType(receta.title, receta.ingredients),
-                        time: "10 min",
-                        difficulty: "Fácil",
-                        icon: getDrinkIcon(receta.title),
-                        description: receta.ingredients ? receta.ingredients.substring(0, 100) + '...' : 'Sin descripción disponible',
-                        ingredients: receta.ingredients ? receta.ingredients.split('\n').filter(ing => ing.trim()) : [],
-                        instructions: receta.steps ? receta.steps.split('\n').filter(step => step.trim()) : [],
-                        imagen: imagenUrl,  
-                        tieneImagen: !!imagenUrl,
-                        matchPercentage: receta.match_percentage || 0,
-                        matchedIngredients: receta.matched_ingredients || [],
-                        totalSearchIngredients: receta.total_search_ingredients || 0,
-                        matchedCount: receta.matched_count || 0
-                    };
-                });
-                displayIngredientSearchResults(currentSearchResults, ingredientSearch.split(',').map(i => i.trim()));
-            } else {
+                    currentSearchResults = resultsWithLikes;
+                    displayIngredientSearchResults(currentSearchResults, ingredientSearch.split(',').map(i => i.trim()));
+                } else {
+                    displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
+                }
+            } catch (error) {
+                console.error('Error en búsqueda por ingredientes:', error);
                 displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
             }
-        })
-        .catch(error => {
-            console.error('Error en búsqueda por ingredientes:', error);
-            displayIngredientSearchResults([], ingredientSearch.split(',').map(i => i.trim()));
-        });
-}
+        }
 
-        
+        // Mostrar resultados de búsqueda por nombre
         function displaySearchResults(recetas, searchTerm) {
             const searchResultsGrid = document.getElementById('searchResultsGrid');
             const searchResultsTitle = document.getElementById('searchResultsTitle');
@@ -421,19 +610,19 @@ function searchByIngredients() {
                         <div class="recipe-content">
                             <h3>${receta.name}</h3>
                             <div class="recipe-meta">
-                                <span>⏱️ ${receta.time}</span>
-                                <span>🥤 ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                                <span><i class="far fa-clock"></i> ${receta.time}</span>
+                                <span><i class="fas fa-glass-cheers"></i> ${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
                             </div>
                             <p class="recipe-description">${receta.description}</p>
                             <div class="recipe-ingredients">
-                                <h4>Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${receta.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${receta.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${receta.id})">❤️</button>
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch('${receta.id}')"><i class="fas fa-eye"></i> Ver Receta</button>
+                                ${createLikeButton(receta.id, receta.likesInfo)}
                             </div>
                         </div>
                     </div>
@@ -444,7 +633,9 @@ function searchByIngredients() {
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
                         <h3>No se encontraron bebidas</h3>
                         <p>No hay bebidas que coincidan con "${searchTerm}"</p>
                     </div>
@@ -455,7 +646,7 @@ function searchByIngredients() {
             document.getElementById('recipesMainSection').style.display = 'none';
         }
 
-        
+        // 🔥 MOSTRAR RESULTADOS DE BÚSQUEDA POR INGREDIENTES
         function displayIngredientSearchResults(recipes, searchIngredients) {
             const searchResultsGrid = document.getElementById('searchResultsGrid');
             const searchResultsTitle = document.getElementById('searchResultsTitle');
@@ -474,32 +665,32 @@ function searchByIngredients() {
                         <div class="recipe-content">
                             <h3>${recipe.name}</h3>
                             <div class="recipe-meta">
-                                <span>⏱️ ${recipe.time}</span>
-                                <span>🥤 ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
+                                <span><i class="far fa-clock"></i> ${recipe.time}</span>
+                                <span><i class="fas fa-glass-cheers"></i> ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}</span>
                                 ${recipe.matchedCount && recipe.totalSearchIngredients ? 
-                                    `<span>✅ ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
-                                    (recipe.matchPercentage ? `<span>✅ ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
+                                    `<span><i class="fas fa-check-circle"></i> ${recipe.matchedCount}/${recipe.totalSearchIngredients} ingredientes</span>` : 
+                                    (recipe.matchPercentage ? `<span><i class="fas fa-check-circle"></i> ${Math.round(recipe.matchPercentage)}% coincidencia</span>` : '')
                                 }
                             </div>
                             <p class="recipe-description">${recipe.description}</p>
                             
                             ${recipe.matchedIngredients && recipe.matchedIngredients.length > 0 ? `
                             <div class="recipe-ingredients">
-                                <h4>🎯 Ingredientes encontrados:</h4>
+                                <h4><i class="fas fa-bullseye"></i> Ingredientes encontrados:</h4>
                                 <div class="matched-ingredients">
                                     ${recipe.matchedIngredients.slice(0, 3).map(ing => 
                                         `<span>${ing}</span>`
                                     ).join('')}
                                     ${recipe.matchedIngredients.length > 3 ? '...' : ''}
                                 </div>
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
                             </div>
                             ` : `
                             <div class="recipe-ingredients">
-                                <h4>📋 Ingredientes principales:</h4>
+                                <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                                 <div class="ingredients-list">
                                     ${recipe.ingredients.slice(0, 3).join(', ')}...
                                 </div>
@@ -507,18 +698,16 @@ function searchByIngredients() {
                             `}
                             
                             <div class="recipe-actions">
-                                <button class="btn-primary" onclick="showRecipeDetailFromSearch(${recipe.id})">Ver Receta</button>
-                                <button class="btn-secondary" onclick="addToFavorites(${recipe.id})">❤️</button>
+                                <button class="btn-primary" onclick="showRecipeDetailFromSearch('${recipe.id}')"><i class="fas fa-eye"></i> Ver Receta</button>
+                                ${createLikeButton(recipe.id, recipe.likesInfo)}
                             </div>
                         </div>
                     </div>
                 `).join('');
                 
-                
                 const totalSearchIngredients = searchIngredients.length;
                 const avgMatch = recipes.reduce((sum, recipe) => sum + (recipe.matchedCount || 0), 0) / recipes.length;
-
-
+                
                 searchResultsTitle.innerHTML = `
                     Resultados por ingredientes: "${searchIngredients.join(', ')}"
                     <small style="display: block; font-size: 1rem; color: #666; margin-top: 5px;">
@@ -529,7 +718,9 @@ function searchByIngredients() {
             } else {
                 searchResultsGrid.innerHTML = `
                     <div class="no-results-message">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
                         <h3>No se encontraron recetas</h3>
                         <p>No hay bebidas que contengan los ingredientes: "${searchIngredients.join(', ')}"</p>
                         <div style="margin-top: 20px;">
@@ -548,11 +739,13 @@ function searchByIngredients() {
             document.getElementById('recipesMainSection').style.display = 'none';
         }
 
-        
-        function showRecipeDetailFromSearch(recipeId) {
-            const receta = currentSearchResults.find(r => r.id === recipeId);
+        // Mostrar detalle desde búsqueda - CORREGIDO
+        async function showRecipeDetailFromSearch(recipeId) {
+            const receta = currentSearchResults.find(r => r.id == recipeId);
             
             if (!receta) return;
+            
+            const updatedLikesInfo = await getLikesInfo(recipeId);
             
             const recipeDetailContent = document.getElementById('recipeDetailContent');
             const recipeDetailSection = document.getElementById('recipeDetailSection');
@@ -567,7 +760,8 @@ function searchByIngredients() {
                 <div class="recipe-detail-card">
                     <div class="recipe-detail-header">
                         <h2>${receta.icon} ${receta.name}</h2>
-                        <span class="recipe-category-badge">${receta.type.charAt(0).toUpperCase() + receta.type.slice(1)}</span>
+                        <span class="recipe-category-badge">${receta.categoria || 'Bebida'}</span>
+                        ${createLikeButton(recipeId, updatedLikesInfo)}
                     </div>
                     
                     ${receta.imagen ? `
@@ -580,67 +774,32 @@ function searchByIngredients() {
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${receta.ingredients.map(ingredient => 
-                        `<p>• ${ingredient}</p>`
-                    ).join('')}  <!-- ⭐⭐ FALTABA ESTE .join('') ⭐⭐ -->
+                                    `<p>• ${ingredient}</p>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="recipe-detail-section">
+                            <h3><i class="fas fa-utensils"></i> Preparación</h3>
+                            <div class="steps-list">
+                                ${pasosProcesados}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="recipe-detail-section">
-                <h3>👨‍🍳 Preparación</h3>
-                <div class="steps-list">
-                    ${pasosProcesados}
-                </div>
-            </div>
-        </div>
-        
-        <!-- SECCIÓN DE COMENTARIOS -->
-        <section class="seccion-comentarios" id="seccion-comentarios">
-            <h3>💬 Comentarios</h3>
-            
-            {% if session.usuario %}
-            <div class="formulario-comentario">
-                <textarea 
-                    id="input-comentario" 
-                    class="input-comentario" 
-                    placeholder="Comparte tu experiencia con esta receta..."
-                    maxlength="1000"
-                ></textarea>
-                <div class="contador-caracteres">
-                    <span id="contador">0</span>/1000 caracteres
-                </div>
-                <button id="btn-enviar-comentario" class="btn-enviar-comentario">
-                    📤 Enviar Comentario
-                </button>
-            </div>
-            {% else %}
-            <div class="login-requerido">
-                <p>💡 Inicia sesión para comentar en esta receta</p>
-                <a href="{{ url_for('mostrar_login') }}" class="btn-login">Iniciar Sesión</a>
-            </div>
-            {% endif %}
-            
-            <div class="contenedor-comentarios" id="contenedor-comentarios">
-                <!-- Los comentarios se cargarán aquí dinámicamente -->
-            </div>
-        </section>
-    </div>
-`;
+            `;
+        }
 
-// ⭐⭐ NO OLVIDES AGREGAR ESTO AL FINAL ⭐⭐
-setTimeout(() => {
-    sistemaComentarios.inicializar(recipeId, 'recetas');
-}, 100);
- }
-        
-        function showRecipeDetailFromMain(drinkId) {
-            const drink = allDrinks.find(d => d.id === drinkId);
+        // Mostrar detalle desde sección principal - CORREGIDO
+        async function showRecipeDetailFromMain(drinkId) {
+            const drink = allDrinks.find(d => d.id == drinkId);
             
-
-           
             if (!drink) return;
+            
+            const updatedLikesInfo = await getLikesInfo(drinkId);
             
             const recipeDetailContent = document.getElementById('recipeDetailContent');
             const recipeDetailSection = document.getElementById('recipeDetailSection');
@@ -655,7 +814,8 @@ setTimeout(() => {
                 <div class="recipe-detail-card">
                     <div class="recipe-detail-header">
                         <h2>${drink.icon} ${drink.name}</h2>
-                        <span class="recipe-category-badge">${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
+                        <span class="recipe-category-badge">${drink.categoria || 'Bebida'}</span>
+                        ${createLikeButton(drinkId, updatedLikesInfo)}
                     </div>
                     
                     ${drink.imagen ? `
@@ -668,7 +828,7 @@ setTimeout(() => {
                     
                     <div class="recipe-detail-content">
                         <div class="recipe-detail-section">
-                            <h3>📋 Ingredientes</h3>
+                            <h3><i class="fas fa-list"></i> Ingredientes</h3>
                             <div class="ingredients-list">
                                 ${drink.ingredients.map(ingredient => 
                                     `<p>• ${ingredient}</p>`
@@ -677,15 +837,13 @@ setTimeout(() => {
                         </div>
                         
                         <div class="recipe-detail-section">
-                            <h3>👨‍🍳 Preparación</h3>
+                            <h3><i class="fas fa-utensils"></i> Preparación</h3>
                             <div class="steps-list">
                                 ${pasosProcesados}
                             </div>
                         </div>
                     </div>
                 </div>
-
-                
             `;
             
             event.stopPropagation();
@@ -701,7 +859,7 @@ setTimeout(() => {
             const currentItems = drinksToShow.slice(startIndex, endIndex);
             
             recipesGrid.innerHTML = currentItems.map(drink => `
-                <div class="recipe-card" onclick="showRecipeDetailFromMain(${drink.id})">
+                <div class="recipe-card" onclick="showRecipeDetailFromMain('${drink.id}')">
                     <div class="recipe-image">
                         ${drink.imagen ? `<img src="${drink.imagen}" alt="${drink.name}" style="width:100%;height:100%;object-fit:cover;">` : drink.icon}
                         <div class="difficulty-badge">${drink.difficulty}</div>
@@ -709,42 +867,25 @@ setTimeout(() => {
                     <div class="recipe-content">
                         <h3>${drink.name}</h3>
                         <div class="recipe-meta">
-                            <span>⏱️ ${drink.time}</span>
-                            <span>🥤 ${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
+                            <span><i class="far fa-clock"></i> ${drink.time}</span>
+                            <span><i class="fas fa-glass-cheers"></i> ${drink.type.charAt(0).toUpperCase() + drink.type.slice(1)}</span>
                         </div>
                         <p class="recipe-description">${drink.description}</p>
                         <div class="recipe-ingredients">
-                            <h4>Ingredientes principales:</h4>
+                            <h4><i class="fas fa-list"></i> Ingredientes principales:</h4>
                             <div class="ingredients-list">
                                 ${drink.ingredients.slice(0, 3).join(', ')}...
                             </div>
                         </div>
                         <div class="recipe-actions">
-                            <button class="btn-primary" onclick="showRecipeDetailFromMain(${drink.id})">Ver Receta</button>
-                            <button class="btn-secondary" onclick="addToFavorites(${drink.id})">❤️</button>
+                            <button class="btn-primary" onclick="showRecipeDetailFromMain('${drink.id}')"><i class="fas fa-eye"></i> Ver Receta</button>
+                            ${createLikeButton(drink.id, drink.likesInfo)}
                         </div>
                     </div>
                 </div>
             `).join('');
             
             updatePagination(totalPages, totalItems);
-        }
-
-        function filterByType(type) {
-            currentTypeFilter = type;
-            document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            applyFilters();
-        }
-
-        function filterByDifficulty(difficulty) {
-            currentDifficultyFilter = difficulty;
-            const difficultyButtons = document.querySelectorAll('.filter-group')[1].querySelectorAll('.filter-btn');
-            difficultyButtons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            applyFilters();
         }
 
         function updatePagination(totalPages, totalItems) {
@@ -761,7 +902,7 @@ setTimeout(() => {
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    ← Anterior
+                    <i class="fas fa-arrow-left"></i> Anterior
                 </button>
             `;
             
@@ -776,7 +917,7 @@ setTimeout(() => {
             
             paginationHTML += `
                 <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    Siguiente →
+                    Siguiente <i class="fas fa-arrow-right"></i>
                 </button>
             `;
             
@@ -788,25 +929,7 @@ setTimeout(() => {
             loadDrinks(filteredDrinks);
         }
 
-        function applyFilters() {
-            filteredDrinks = allDrinks.filter(drink => {
-                const typeMatch = currentTypeFilter === 'todos' || drink.type === currentTypeFilter;
-                const difficultyMatch = currentDifficultyFilter === 'todas' || drink.difficulty === currentDifficultyFilter;
-                return typeMatch && difficultyMatch;
-            });
-            
-            currentPage = 1;
-            loadDrinks(filteredDrinks);
-            updateResultsCount();
-        }
-
-        function addToFavorites(drinkId) {
-            const drink = allDrinks.find(d => d.id === drinkId);
-            alert(`¡${drink.name} agregada a tus favoritos! 💖`);
-            event.stopPropagation();
-        }
-
-        
+        // Permitir búsqueda con Enter
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 searchDrinks();
@@ -819,7 +942,7 @@ setTimeout(() => {
             }
         });
 
-        
+        // Cargar bebidas desde la base de datos al iniciar
         window.addEventListener('load', () => {
             loadDrinksFromDatabase();
         });

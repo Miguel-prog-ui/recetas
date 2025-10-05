@@ -42,9 +42,9 @@ def crear_cuenta():
                 mensaje_malo='El nombre de usuario solo puede contener letras, números, guiones y guiones bajos')
         
         
-        if len(correo) > 20:
+        if len(correo) > 30:
             return render_template('login.html', 
-                mensaje_malo='El correo no puede exceder los 20 caracteres')
+                mensaje_malo='El correo no puede exceder los 30 caracteres')
         
        
         if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', correo):
@@ -91,12 +91,18 @@ def crear_cuenta():
             password_hash = generate_password_hash(password)
             
            
+        with conn.cursor() as cur:
+            # ... verificaciones de duplicados ...
+            
+            # Generar un ID numérico simple (temporal)
+            cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM usuarios")
+            next_id = cur.fetchone()[0]
+            
             cur.execute(
-                "INSERT INTO usuarios (usuario, correo, password, tipo, user_uuid) VALUES (%s, %s, %s, %s, %s)", 
-                (usuario, correo, password_hash, 'usuario', user_uuid)  # AGREGADO user_uuid
+                "INSERT INTO usuarios (id, usuario, correo, password, tipo, user_uuid) VALUES (%s, %s, %s, %s, %s, %s)", 
+                (next_id, usuario, correo, password_hash, 'usuario', user_uuid)
             )
             conn.commit()
-            
             print(f"✅ Cuenta creada exitosamente: {usuario}")
         
         conn.close()
