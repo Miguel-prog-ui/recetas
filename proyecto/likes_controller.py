@@ -457,3 +457,81 @@ def quitar_like():
     finally:
         if 'conn' in locals():
             conn.close()
+
+def obtener_recetas_usuario(usuario=None, orden="fecha_desc"):
+    """Obtiene todas las recetas de recetas_usuarios, opcionalmente filtradas por usuario y orden"""
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            
+            # Definir el ordenamiento
+            if orden == "fecha_desc":
+                orden_sql = "ORDER BY fecha_creacion DESC"
+            elif orden == "fecha_asc":
+                orden_sql = "ORDER BY fecha_creacion ASC"
+            elif orden == "titulo_asc":
+                orden_sql = "ORDER BY title ASC"
+            elif orden == "titulo_desc":
+                orden_sql = "ORDER BY title DESC"
+            elif orden == "likes_desc":
+                orden_sql = "ORDER BY likes_count DESC, fecha_creacion DESC"
+            elif orden == "likes_asc":
+                orden_sql = "ORDER BY likes_count ASC, fecha_creacion DESC"
+            else:
+                orden_sql = "ORDER BY fecha_creacion DESC"
+            
+            if usuario:
+                # Obtener recetas de un usuario específico con conteo de likes
+                query = f"""
+                    SELECT 
+                        ru.id,
+                        ru.title,
+                        ru.ingredients,
+                        ru.steps,
+                        ru.uuid,
+                        ru.fecha_creacion,
+                        ru.imagen_filename,
+                        ru.usuario,
+                        COALESCE(like_counts.likes_count, 0) as likes_count
+                    FROM recetas_usuarios ru
+                    LEFT JOIN (
+                        SELECT recipe_id, COUNT(*) as likes_count 
+                        FROM recipe_likes 
+                        GROUP BY recipe_id
+                    ) like_counts ON ru.id = like_counts.recipe_id
+                    WHERE usuario = %s
+                    {orden_sql}
+                """
+                cur.execute(query, (usuario,))
+            else:
+                # Obtener todas las recetas con conteo de likes
+                query = f"""
+                    SELECT 
+                        ru.id,
+                        ru.title,
+                        ru.ingredients,
+                        ru.steps,
+                        ru.uuid,
+                        ru.fecha_creacion,
+                        ru.imagen_filename,
+                        ru.usuario,
+                        COALESCE(like_counts.likes_count, 0) as likes_count
+                    FROM recetas_usuarios ru
+                    LEFT JOIN (
+                        SELECT recipe_id, COUNT(*) as likes_count 
+                        FROM recipe_likes 
+                        GROUP BY recipe_id
+                    ) like_counts ON ru.id = like_counts.recipe_id
+                    {orden_sql}
+                """
+                cur.execute(query)
+            
+            recetas = cur.fetchall()
+            return recetas
+            
+    except Exception as e:
+        print(f"Error al obtener recetas: {e}")
+        return []
+    finally:
+        if 'conn' in locals():
+            conn.close()

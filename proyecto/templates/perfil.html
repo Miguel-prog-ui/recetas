@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Elemento oculto para almacenar datos del usuario -->
+    <div id="userStatsData" 
+         data-total-recetas="{{ total_recetas }}"
+         data-total-likes="{{ total_likes }}"
+         data-recetas-con-like="{{ recetas_con_like_count }}"
+         style="display: none;"></div>
+
     <header>
         <div class="container">
             <div class="header-content">
@@ -103,7 +110,7 @@
                         <p class="profile-email">{{ usuario[2] if usuario else 'Email no disponible' }}</p>
                         <div class="profile-badges">
                             <span class="profile-badge type-badge">
-                                <i class="fas fa-user-tag"></i> {{ usuario[3] if usuario else 'Usuario' }}
+                                <i class="fas fa-user-tag"></i> {{ usuario[3] if usuario and usuario|length > 3 else 'Usuario' }}
                             </span>
                             <span class="profile-badge member-badge">
                                 <i class="fas fa-calendar-alt"></i> Miembro desde 2024
@@ -111,11 +118,11 @@
                         </div>
                         <div class="profile-stats">
                             <div class="stat">
-                                <span class="stat-number">{{ total_recetas }}</span>
+                                <span class="stat-number" id="totalRecetasCount">{{ total_recetas }}</span>
                                 <span class="stat-label">Recetas</span>
                             </div>
                             <div class="stat">
-                                <span class="stat-number">{{ total_likes }}</span>
+                                <span class="stat-number" id="totalLikesCount">{{ total_likes }}</span>
                                 <span class="stat-label">Likes Recibidos</span>
                             </div>
                             <div class="stat">
@@ -159,7 +166,7 @@
                         <i class="fas fa-book"></i>
                     </div>
                     <h3>Recetas Creadas</h3>
-                    <p>{{ total_recetas }} recetas publicadas</p>
+                    <p id="activityRecetasCount">{{ total_recetas }} recetas publicadas</p>
                     <a href="{{ url_for('mis_recetas') }}" class="activity-link">
                         Ver todas <i class="fas fa-arrow-right"></i>
                     </a>
@@ -179,7 +186,7 @@
                         <i class="fas fa-star"></i>
                     </div>
                     <h3>Likes Recibidos</h3>
-                    <p>{{ total_likes }} likes en tus recetas</p>
+                    <p id="activityReceivedLikes">{{ total_likes }} likes en tus recetas</p>
                     <span class="activity-link">
                         Tu popularidad <i class="fas fa-arrow-right"></i>
                     </span>
@@ -213,6 +220,13 @@
     </footer>
 
     <script>
+        // Variables globales para las estadísticas
+        let userStats = {
+            total_recetas: 0,
+            total_likes: 0,
+            recetas_con_like: 0
+        };
+
         // Funciones del menú de usuario
         function toggleUserMenu() {
             const menu = document.getElementById('userDropdownMenu');
@@ -228,58 +242,170 @@
             }
         });
 
-        // Cargar estadísticas de likes del usuario
-        async function loadUserLikesStats() {
+        // Inicializar estadísticas del usuario
+        function inicializarEstadisticasUsuario() {
+            const statsData = document.getElementById('userStatsData');
+            if (statsData) {
+                userStats = {
+                    total_recetas: parseInt(statsData.dataset.totalRecetas) || 0,
+                    total_likes: parseInt(statsData.dataset.totalLikes) || 0,
+                    recetas_con_like: parseInt(statsData.dataset.recetasConLike) || 0
+                };
+                
+                console.log("Estadísticas del usuario:", userStats);
+                actualizarInterfazEstadisticas();
+            }
+        }
+
+        // Actualizar la interfaz con las estadísticas
+        function actualizarInterfazEstadisticas() {
+            // Actualizar estadísticas principales
+            document.getElementById('totalRecetasCount').textContent = userStats.total_recetas;
+            document.getElementById('totalLikesCount').textContent = userStats.total_likes;
+            document.getElementById('userLikesCount').textContent = userStats.recetas_con_like;
+            
+            // Actualizar sección de actividad
+            document.getElementById('activityRecetasCount').textContent = `${userStats.total_recetas} recetas publicadas`;
+            document.getElementById('activityLikesCount').textContent = `${userStats.recetas_con_like} recetas marcadas`;
+            document.getElementById('activityReceivedLikes').textContent = `${userStats.total_likes} likes en tus recetas`;
+        }
+
+        // Cargar estadísticas de likes del usuario desde la API
+        async function cargarEstadisticasUsuario() {
             const currentUserId = "{{ session.usuario }}";
             
             if (!currentUserId) return;
 
             try {
-                const response = await fetch(`/recetas_con_like?user_id=${encodeURIComponent(currentUserId)}`);
-                const data = await response.json();
+                console.log("Cargando estadísticas para usuario:", currentUserId);
                 
-                if (data.success) {
-                    const likesCount = data.recetas ? data.recetas.length : 0;
-                    
-                    // Actualizar contador en el perfil
-                    document.getElementById('userLikesCount').textContent = likesCount;
-                    document.getElementById('activityLikesCount').textContent = `${likesCount} recetas marcadas`;
+                // Cargar recetas con like del usuario
+                const likesResponse = await fetch(`/recetas_con_like?user_id=${encodeURIComponent(currentUserId)}`);
+                const likesData = await likesResponse.json();
+                
+                if (likesData.success) {
+                    userStats.recetas_con_like = likesData.recetas ? likesData.recetas.length : 0;
+                    console.log("Recetas con like:", userStats.recetas_con_like);
                 }
+
+                // Cargar recetas del usuario y calcular likes totales
+                const recetasResponse = await fetch(`/api/recetas_filtradas?usuario=${encodeURIComponent(currentUserId)}`);
+                const recetasData = await recetasResponse.json();
+                
+                if (recetasData.success) {
+                    userStats.total_recetas = recetasData.recetas ? recetasData.recetas.length : 0;
+                    
+                    // Calcular total de likes recibidos
+                    userStats.total_likes = 0;
+                    if (recetasData.recetas) {
+                        recetasData.recetas.forEach(receta => {
+                            userStats.total_likes += receta.likes_count || 0;
+                        });
+                    }
+                    console.log("Total recetas:", userStats.total_recetas, "Total likes:", userStats.total_likes);
+                }
+
+                // Actualizar la interfaz
+                actualizarInterfazEstadisticas();
+                
             } catch (error) {
-                console.error('Error al cargar estadísticas de likes:', error);
+                console.error('Error al cargar estadísticas del usuario:', error);
             }
         }
 
         // Actualizar estadísticas en tiempo real cuando se da/quita like
-        function updateUserLikesCount(change) {
+        function actualizarContadorLikes(change) {
             const currentCount = parseInt(document.getElementById('userLikesCount').textContent) || 0;
             const newCount = Math.max(0, currentCount + change);
             
             document.getElementById('userLikesCount').textContent = newCount;
             document.getElementById('activityLikesCount').textContent = `${newCount} recetas marcadas`;
+            userStats.recetas_con_like = newCount;
+        }
+
+        // Actualizar contador de likes recibidos
+        function actualizarLikesRecibidos(recipeId, change) {
+            const currentLikes = parseInt(document.getElementById('totalLikesCount').textContent) || 0;
+            const newLikes = Math.max(0, currentLikes + change);
+            
+            document.getElementById('totalLikesCount').textContent = newLikes;
+            document.getElementById('activityReceivedLikes').textContent = `${newLikes} likes en tus recetas`;
+            userStats.total_likes = newLikes;
+        }
+
+        // Función para actualizar todas las estadísticas
+        async function actualizarTodasEstadisticas() {
+            await cargarEstadisticasUsuario();
         }
 
         // Animación para las tarjetas de actividad al cargar
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar estadísticas desde datos incrustados
+            inicializarEstadisticasUsuario();
+            
+            // Cargar estadísticas actualizadas desde la API
+            cargarEstadisticasUsuario();
+
+            // Aplicar animaciones a las tarjetas de actividad
             const activityCards = document.querySelectorAll('.activity-card');
             activityCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
                 setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
                     card.style.opacity = '1';
                     card.style.transform = 'translateY(0)';
                 }, 200 * index);
             });
 
-            // Cargar estadísticas de likes
-            loadUserLikesStats();
+            // Efectos hover para las tarjetas de actividad
+            activityCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
         });
 
-        // Escuchar eventos de likes (para actualización en tiempo real)
+        // Escuchar eventos personalizados para actualización en tiempo real
         document.addEventListener('likeChanged', function(event) {
-            if (event.detail && event.detail.userLiked !== undefined) {
-                const change = event.detail.userLiked ? 1 : -1;
-                updateUserLikesCount(change);
+            if (event.detail) {
+                // Actualizar recetas con like
+                if (event.detail.userLiked !== undefined) {
+                    const change = event.detail.userLiked ? 1 : -1;
+                    actualizarContadorLikes(change);
+                }
+                
+                // Actualizar likes recibidos (si es una receta del usuario)
+                if (event.detail.recipeOwner === "{{ session.usuario }}" && event.detail.totalLikes !== undefined) {
+                    // Para una actualización más precisa, recargar todas las estadísticas
+                    actualizarTodasEstadisticas();
+                }
             }
         });
+
+        // También escuchar cambios en las recetas (creación/eliminación)
+        document.addEventListener('recipeChanged', function(event) {
+            if (event.detail && event.detail.action) {
+                console.log("Cambio en recetas detectado:", event.detail.action);
+                actualizarTodasEstadisticas();
+            }
+        });
+
+        // Simular evento de cambio de receta (para testing)
+        function simularCambioReceta() {
+            document.dispatchEvent(new CustomEvent('recipeChanged', {
+                detail: { action: 'created' }
+            }));
+        }
+
+        // Función para forzar actualización de estadísticas
+        window.actualizarEstadisticasPerfil = function() {
+            actualizarTodasEstadisticas();
+        };
     </script>
 </body>
 </html>

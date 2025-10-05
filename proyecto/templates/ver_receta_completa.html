@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ receta[1] }} - Recetas Deliciosas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mis_recetas.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .recipe-detail {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .recipe-detail-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .recipe-detail-header h1 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .recipe-meta-detail {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            color: #666;
+        }
+        
+        .recipe-detail-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .ingredients-section, .instructions-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .ingredients-section h3, .instructions-section h3 {
+            color: #e67e22;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f39c12;
+            padding-bottom: 8px;
+        }
+        
+        .ingredients-content, .instructions-content {
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .recipe-detail-actions {
+            text-align: center;
+        }
+        
+        .btn-back {
+            background: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-back:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .recipe-detail-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Mismo header que en mis_recetas.html -->
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                     <a href="/" class="home-btn">
+                        <span class="home-icon"><i class="fas fa-home"></i></span>
+                    </a>
+                    <div class="logo-text">Recetas Deliciosas</div>
+                </div>
+                <div class="header-right">
+                    {% if session.usuario %}
+                    <div class="user-menu-container">
+                        <div class="user-avatar">
+                            <div class="avatar-circle">
+                                <span class="avatar-initial">{{ session.usuario[0] | upper }}</span>
+                            </div>
+                            <span class="user-name">{{ session.usuario }}</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('mostrar_login') }}" class="login-btn">Iniciar sesión</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="recipe-detail">
+            <div class="recipe-detail-header">
+                <h1>{{ receta[1] }}</h1>
+                <div class="recipe-meta-detail">
+                    <span><i class="fas fa-user"></i> {{ receta[6] }}</span>
+                    <span><i class="fas fa-folder"></i> {{ receta[4] }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ receta[7].strftime('%d/%m/%Y') if receta[7] else 'Fecha no disponible' }}</span>
+                    <span><i class="fas fa-heart"></i> {{ receta[8] }} likes</span>
+                </div>
+            </div>
+
+            <div class="recipe-detail-content">
+                <div class="ingredients-section">
+                    <h3>Ingredientes</h3>
+                    <div class="ingredients-content">
+                        {{ receta[2] | replace('\n', '<br>') | safe }}
+                    </div>
+                </div>
+
+                <div class="instructions-section">
+                    <h3>Instrucciones</h3>
+                    <div class="instructions-content">
+                        {{ receta[3] | replace('\n', '<br>') | safe }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-detail-actions">
+                <button onclick="window.history.back()" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Volver a Todas las Recetas
+                </button>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
